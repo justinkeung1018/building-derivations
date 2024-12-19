@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "npm-run-all --parallel dev:tsc dev:bundle",
+    "dev": "npm-run-all --parallel dev:*",
     "dev:tsc": "tsc -w",
-    "dev:bundle": "esbuild src/index.tsx src/index.html --bundle --loader:.html=copy --outdir=dist --serve --watch",
-    "build": "tsc && esbuild src/index.tsx --bundle --loader:.html=copy --outdir=dist",
+    "dev:esbuild": "esbuild src/index.tsx src/index.html --bundle --loader:.html=copy --outdir=dist --servedir=dist --watch",
+    "dev:css": "tailwindcss -i src/index.css -o dist/index.css --watch",
+    "build": "npm-run-all --parallel build:*",
+    "build:tsc": "tsc",
+    "build:esbuild": "esbuild src/index.tsx --bundle --loader:.html=copy --outdir=dist --minify",
+    "build:css": "tailwindcss -i src/index.css -o dist/index.css --minify",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install"
   },
