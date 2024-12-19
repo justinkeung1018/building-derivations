@@ -1,15 +1,7 @@
 import { Token } from "typescript-parsec";
 import { buildLexer, expectEOF, expectSingleResult, rule } from "typescript-parsec";
 import { alt, apply, seq, tok } from "typescript-parsec";
-
-enum TokenKind {
-  Variable,
-  Lambda,
-  Dot,
-  LParen,
-  RParen,
-  Space,
-}
+import { TokenKind } from "./tokens";
 
 class Abstraction {
   variable: Variable;
@@ -88,8 +80,18 @@ ABSTRACTION.setPattern(
 APPLICATION.setPattern(apply(seq(tok(TokenKind.LParen), TERM, TERM, tok(TokenKind.RParen)), applyApplication));
 TERM.setPattern(alt(VARIABLE, ABSTRACTION, APPLICATION));
 
+function lex(term: string): Token<TokenKind>[] {
+  const tokens: Token<TokenKind>[] = [];
+  let token = lexer.parse(term);
+  while (token) {
+    tokens.push(token);
+    token = token.next;
+  }
+  return tokens;
+}
+
 function parse(term: string): Term {
   return expectSingleResult(expectEOF(TERM.parse(lexer.parse(term))));
 }
 
-export { Variable, Application, Abstraction, parse };
+export { Variable, Application, Abstraction, parse, lex };

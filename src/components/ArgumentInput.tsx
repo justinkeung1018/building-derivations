@@ -2,13 +2,15 @@ import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/shadcn/Input";
 import { useState } from "react";
 import { MathJax } from "better-react-mathjax";
+import { lex } from "@/lib/lexer";
+import { latexify } from "@/lib/latexify";
 
-interface FocusingInputProps {
+interface FocusingInputProps extends React.ComponentProps<"input"> {
   edited: boolean;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-export default function FocusingInput({ edited, onBlur }: FocusingInputProps) {
+function FocusingInput({ edited, onBlur, ...props }: FocusingInputProps) {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -17,24 +19,31 @@ export default function FocusingInput({ edited, onBlur }: FocusingInputProps) {
     }
   }, []);
 
-  return <Input ref={ref} onBlur={onBlur} />;
+  return <Input ref={ref} onBlur={onBlur} {...props} />;
 }
 
 export function ArgumentInput() {
   const [value, setValue] = useState("");
+  const [latex, setLatex] = useState("");
   const [isEditing, setIsEditing] = useState(true);
 
   // Focus input when we try to edit from the second time onwards
   const [edited, setEdited] = useState(false);
 
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    setLatex(`\\(${latexify(lex(e.target.value))}\\)`); // Inline LaTeX
     setIsEditing(false);
-    console.log(value);
   };
 
   return isEditing || value.length == 0 ? (
-    <FocusingInput edited={edited} onBlur={onBlur} />
+    <FocusingInput
+      value={value}
+      edited={edited}
+      onBlur={onBlur}
+      onChange={(e) => {
+        setValue(e.target.value);
+      }}
+    />
   ) : (
     <MathJax
       onClick={() => {
@@ -42,7 +51,7 @@ export function ArgumentInput() {
         setIsEditing(true);
       }}
     >
-      {value}
+      {latex}
     </MathJax>
   );
 }
