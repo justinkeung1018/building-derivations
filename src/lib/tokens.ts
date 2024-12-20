@@ -5,6 +5,8 @@ enum TokenKind {
   LParen,
   RParen,
   Space,
+  Number,
+  Arrow,
 }
 
 export { TokenKind };
