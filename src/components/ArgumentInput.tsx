@@ -89,7 +89,7 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
               variant="secondary"
               onClick={() => {
                 setState((state) => {
-                  const premiseIndex = state.index + 1;
+                  const premiseIndex = Object.keys(states).length;
                   setStates({ ...states, [premiseIndex]: getDefaultState(premiseIndex) });
                   return { ...state, premises: [...state.premises, premiseIndex] };
                 });
