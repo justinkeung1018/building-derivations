@@ -1,6 +1,6 @@
 enum TokenKind {
   Variable,
-  Lambda,
+  Slash,
   Dot,
   LParen,
   RParen,
@@ -8,6 +8,8 @@ enum TokenKind {
   Number,
   Arrow,
   Colon,
+  Comma,
+  Emptyset,
 }
 
 export { TokenKind };

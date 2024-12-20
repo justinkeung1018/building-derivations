@@ -43,7 +43,7 @@ function applyVariable(name: Token<TokenKind.Variable>) {
 function applyAbstraction(
   value: [
     Token<TokenKind.LParen>,
-    Token<TokenKind.Lambda>,
+    Token<TokenKind.Slash>,
     Variable,
     Token<TokenKind.Dot>,
     Term,
@@ -65,7 +65,7 @@ VARIABLE.setPattern(apply(tok(TokenKind.Variable), applyVariable));
 // Abstraction = (\x. Term)
 ABSTRACTION.setPattern(
   apply(
-    seq(tok(TokenKind.LParen), tok(TokenKind.Lambda), VARIABLE, tok(TokenKind.Dot), TERM, tok(TokenKind.RParen)),
+    seq(tok(TokenKind.LParen), tok(TokenKind.Slash), VARIABLE, tok(TokenKind.Dot), TERM, tok(TokenKind.RParen)),
     applyAbstraction,
   ),
 );

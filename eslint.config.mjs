@@ -19,5 +19,15 @@ export default tseslint.config(
       },
     },
   },
+  {
+    rules: {
+        "@typescript-eslint/no-extraneous-class": [
+            "error",
+            {
+                allowEmpty: true
+            }
+        ]
+    }
+  },
   eslintConfigPrettier,
 );

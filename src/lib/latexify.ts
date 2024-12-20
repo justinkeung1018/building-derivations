@@ -13,7 +13,7 @@ function latexify(tokens: Token<TokenKind>[]): string {
           return "(";
         case TokenKind.RParen:
           return ")";
-        case TokenKind.Lambda:
+        case TokenKind.Slash:
           return "\\lambda";
         default:
           return "";
