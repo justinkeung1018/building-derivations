@@ -56,24 +56,22 @@ interface ArgumentInputProps {
 function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
   const [state, setState] = useState(states[index]);
 
-  const updateConclusion = (arg: Argument | null) => {
-    setState((state) => {
-      const newState = { ...state, conclusion: arg };
-      setStates({ ...states, [state.index]: newState });
-      return newState;
-    });
-  };
-
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    let conclusion = null;
     try {
       const arg = parseArgument(e.target.value);
-      updateConclusion(arg);
+      conclusion = arg;
     } catch {
-      updateConclusion(null);
       // TODO: display input error
     }
     setState((state) => {
-      const newState = { ...state, edited: true, isEditing: false, latex: `\\(${latexify(lex(e.target.value))}\\)` };
+      const newState = {
+        ...state,
+        edited: true,
+        isEditing: false,
+        latex: `\\(${latexify(lex(e.target.value))}\\)`,
+        conclusion,
+      };
       setStates({ ...states, [state.index]: newState });
       return newState;
     });
