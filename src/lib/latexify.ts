@@ -1,20 +1,6 @@
 import { Token } from "typescript-parsec";
 import { TokenKind } from "./tokens";
 
-/*
-  Variable,
-  Slash,
-  Dot,
-  LParen,
-  RParen,
-  Space,
-  Number,
-  Arrow,
-  Colon,
-  Comma,
-  Emptyset,
-  Turnstile,
-  */
 function latexify(tokens: Token<TokenKind>[]): string {
   return tokens
     .map((token) => {
