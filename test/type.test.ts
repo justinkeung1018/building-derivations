@@ -18,6 +18,7 @@ test("Parses type variables", () => {
 
 test("Parses arrow types", () => {
   expect(parseType("(1 -> 1)")).toEqual(new Arrow(one, one));
+  expect(parseType("(1 → 1)")).toEqual(new Arrow(one, one));
   expect(parseType("(1 -> 2)")).toEqual(new Arrow(one, two));
   expect(parseType("(10 -> 10)")).toEqual(new Arrow(ten, ten));
 });

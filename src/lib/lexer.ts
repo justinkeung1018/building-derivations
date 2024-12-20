@@ -4,10 +4,10 @@ import { TokenKind } from "./tokens";
 
 const lexer = buildLexer([
   [true, /^[a-z]/g, TokenKind.Variable],
-  [true, /^emptyset/g, TokenKind.Emptyset],
+  [true, /^\\emptyset/g, TokenKind.Emptyset],
   [true, /^\|-/g, TokenKind.Turnstile],
   [true, /^\d+/g, TokenKind.Number],
-  [true, /^->/g, TokenKind.Arrow],
+  [true, /^(->|\u{2192})/gu, TokenKind.Arrow],
   [true, /^:/g, TokenKind.Colon],
   [true, /^,/g, TokenKind.Comma],
   [true, /^\(/g, TokenKind.LParen],

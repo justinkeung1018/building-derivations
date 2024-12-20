@@ -21,7 +21,7 @@ function applyVarAssignments(value: [VarAssignment, [Token<TokenKind.Comma>, Var
 }
 
 // Empty = \emptyset
-const EMPTY = apply(seq(tok(TokenKind.Slash), tok(TokenKind.Emptyset)), () => new Empty());
+const EMPTY = apply(tok(TokenKind.Emptyset), () => new Empty());
 
 // VarAssignments = VarAssignment {, VarAssignment}
 const VARASSIGNMENTS = apply(
