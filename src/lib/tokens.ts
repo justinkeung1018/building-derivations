@@ -10,6 +10,7 @@ enum TokenKind {
   Colon,
   Comma,
   Emptyset,
+  Turnstile,
 }
 
 export { TokenKind };
