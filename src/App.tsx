@@ -3,7 +3,7 @@ import { ArgumentInput, ArgumentInputState, getDefaultState } from "./components
 import { MathJaxContext } from "better-react-mathjax";
 
 export function App() {
-  const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0) });
+  const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null, null) });
 
   return (
     <MathJaxContext>

@@ -25,6 +25,11 @@ function FocusingInput({ edited, onBlur, ...props }: FocusingInputProps) {
   return <Input ref={ref} onBlur={onBlur} {...props} />;
 }
 
+interface ConclusionState {
+  index: number;
+  setState: (state: ArgumentInputState) => void;
+}
+
 interface ArgumentInputState {
   index: number;
   isEditing: boolean;
@@ -32,10 +37,19 @@ interface ArgumentInputState {
   value: string;
   latex: string;
   conclusion: Argument | null;
-  premises: number[];
+  conclusionState: ConclusionState | null;
+  premiseIndices: number[];
 }
 
-function getDefaultState(index: number): ArgumentInputState {
+function getDefaultState(
+  index: number,
+  conclusionIndex: number | null,
+  setConclusionState: ((state: ArgumentInputState) => void) | null,
+): ArgumentInputState {
+  const conclusionState =
+    conclusionIndex === null || setConclusionState === null
+      ? null
+      : { index: conclusionIndex, setState: setConclusionState };
   return {
     index,
     isEditing: true,
@@ -43,7 +57,8 @@ function getDefaultState(index: number): ArgumentInputState {
     value: "",
     latex: "",
     conclusion: null,
-    premises: [],
+    conclusionState,
+    premiseIndices: [],
   };
 }
 
@@ -57,9 +72,25 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
   const [state, setState] = useState(states[index]);
 
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+
+    if (!value && state.conclusionState !== null && state.premiseIndices.length === 0) {
+      // Delete newly added input (i.e. no premises) if it is empty
+      const rest: Record<number, ArgumentInputState> = {};
+      for (const key in states) {
+        if (+key !== index) {
+          rest[key] = states[key];
+        }
+      }
+      const conclusionIndex = state.conclusionState.index;
+      rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
+      state.conclusionState.setState(rest[conclusionIndex]);
+      setStates(rest);
+      return;
+    }
     let conclusion = null;
     try {
-      const arg = parseArgument(e.target.value);
+      const arg = parseArgument(value);
       conclusion = arg;
     } catch {
       // TODO: display input error
@@ -69,7 +100,7 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
         ...state,
         edited: true,
         isEditing: false,
-        latex: `\\(${latexify(lex(e.target.value))}\\)`,
+        latex: `\\(${latexify(lex(value))}\\)`,
         conclusion,
       };
       setStates({ ...states, [state.index]: newState });
@@ -79,10 +110,10 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
 
   return (
     <div className="flex flex-col items-center">
-      {state.edited && (state.value.length > 0 || state.premises.length > 0) && (
+      {state.edited && (state.value.length > 0 || state.premiseIndices.length > 0) && (
         <div className="w-full">
           <div className="flex space-x-4 items-end justify-center">
-            {state.premises.map((index) => (
+            {state.premiseIndices.map((index) => (
               <ArgumentInput index={index} states={states} setStates={setStates} />
             ))}
             <Button
@@ -90,8 +121,8 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
               onClick={() => {
                 setState((state) => {
                   const premiseIndex = Object.keys(states).length;
-                  setStates({ ...states, [premiseIndex]: getDefaultState(premiseIndex) });
-                  return { ...state, premises: [...state.premises, premiseIndex] };
+                  setStates({ ...states, [premiseIndex]: getDefaultState(premiseIndex, state.index, setState) });
+                  return { ...state, premiseIndices: [...state.premiseIndices, premiseIndex] };
                 });
               }}
             >
