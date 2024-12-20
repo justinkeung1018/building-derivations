@@ -2,21 +2,14 @@ import { alt, apply, rule, seq, tok, Token } from "typescript-parsec";
 import { TokenKind } from "../tokens";
 
 class TypeVar {
-  index: number;
-
-  constructor(index: number) {
-    this.index = index;
-  }
+  constructor(readonly index: number) {}
 }
 
 class Arrow {
-  left: Type;
-  right: Type;
-
-  constructor(left: Type, right: Type) {
-    this.left = left;
-    this.right = right;
-  }
+  constructor(
+    readonly left: Type,
+    readonly right: Type,
+  ) {}
 }
 
 type Type = TypeVar | Arrow;

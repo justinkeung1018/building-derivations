@@ -2,31 +2,21 @@ import { alt, apply, rule, seq, tok, Token } from "typescript-parsec";
 import { TokenKind } from "../tokens";
 
 class Variable {
-  name: string;
-
-  constructor(name: string) {
-    this.name = name;
-  }
+  constructor(readonly name: string) {}
 }
 
 class Abstraction {
-  variable: Variable;
-  body: Term;
-
-  constructor(variable: Variable, body: Term) {
-    this.variable = variable;
-    this.body = body;
-  }
+  constructor(
+    readonly variable: Variable,
+    readonly body: Term,
+  ) {}
 }
 
 class Application {
-  left: Term;
-  right: Term;
-
-  constructor(left: Term, right: Term) {
-    this.left = left;
-    this.right = right;
-  }
+  constructor(
+    readonly left: Term,
+    readonly right: Term,
+  ) {}
 }
 
 type Term = Variable | Abstraction | Application;

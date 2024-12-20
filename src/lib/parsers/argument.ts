@@ -4,13 +4,10 @@ import { CONTEXT, Context } from "./context";
 import { TokenKind } from "../tokens";
 
 class Argument {
-  context: Context;
-  assignment: Assignment;
-
-  constructor(context: Context, assignment: Assignment) {
-    this.context = context;
-    this.assignment = assignment;
-  }
+  constructor(
+    readonly context: Context,
+    readonly assignment: Assignment,
+  ) {}
 }
 
 function applyArgument(value: [Context, Token<TokenKind.Turnstile>, Assignment]): Argument {

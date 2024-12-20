@@ -5,23 +5,17 @@ import { TokenKind } from "../tokens";
 
 // For contexts
 class VarAssignment {
-  variable: Variable;
-  type: Type;
-
-  constructor(variable: Variable, type: Type) {
-    this.variable = variable;
-    this.type = type;
-  }
+  constructor(
+    readonly variable: Variable,
+    readonly type: Type,
+  ) {}
 }
 
 class Assignment {
-  term: Term;
-  type: Type;
-
-  constructor(term: Term, type: Type) {
-    this.term = term;
-    this.type = type;
-  }
+  constructor(
+    readonly term: Term,
+    readonly type: Type,
+  ) {}
 }
 
 function applyVarAssignment(value: [Variable, Token<TokenKind.Colon>, Type]): VarAssignment {
