@@ -20,11 +20,16 @@ function applyVarAssignments(value: [VarAssignment, [Token<TokenKind.Comma>, Var
   return new VarAssignments([first, ...rest.map((pair) => pair[1])]);
 }
 
+// Empty = \emptyset
 const EMPTY = apply(seq(tok(TokenKind.Slash), tok(TokenKind.Emptyset)), () => new Empty());
+
+// VarAssignments = VarAssignment {, VarAssignment}
 const VARASSIGNMENTS = apply(
   seq(VARASSIGNMENT, rep_sc(seq(tok<TokenKind.Comma>(TokenKind.Comma), VARASSIGNMENT))),
   applyVarAssignments,
 );
+
+// Context = Empty | VarAssignments
 const CONTEXT = alt(EMPTY, VARASSIGNMENTS);
 
 export { Empty, VarAssignments, CONTEXT };
