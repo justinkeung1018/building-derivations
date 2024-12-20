@@ -25,28 +25,46 @@ function FocusingInput({ edited, onBlur, ...props }: FocusingInputProps) {
   return <Input ref={ref} onBlur={onBlur} {...props} />;
 }
 
-interface ArgumentInputProps {
-  propagate?: (conclusion: Argument | null) => void;
+interface ArgumentInputState {
+  index: number;
+  isEditing: boolean;
+  edited: boolean; // Focus input when we try to edit from the second time onwards
+  value: string;
+  latex: string;
+  conclusion: Argument | null;
+  premises: number[];
 }
 
-export function ArgumentInput({ propagate }: ArgumentInputProps) {
-  const [value, setValue] = useState("");
-  const [latex, setLatex] = useState("");
-  const [isEditing, setIsEditing] = useState(true);
-  const [conclusion, setConclusion] = useState<Argument | null>(null);
-  const [premises, setPremises] = useState<(Argument | null)[]>([]); // eslint-disable-line
-  const [premiseInputs, setPremiseInputs] = useState<React.JSX.Element[]>([]);
+function getDefaultState(index: number): ArgumentInputState {
+  return {
+    index,
+    isEditing: true,
+    edited: false,
+    value: "",
+    latex: "",
+    conclusion: null,
+    premises: [],
+  };
+}
 
-  // Focus input when we try to edit from the second time onwards
-  const [edited, setEdited] = useState(false);
+interface ArgumentInputProps {
+  index: number;
+  states: Record<number, ArgumentInputState>;
+  setStates: (states: Record<number, ArgumentInputState>) => void;
+}
+
+function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
+  const [state, setState] = useState(states[index]);
 
   const updateConclusion = (arg: Argument | null) => {
-    if (propagate) propagate(arg);
-    setConclusion(arg);
+    setState((state) => {
+      const newState = { ...state, conclusion: arg };
+      setStates({ ...states, [state.index]: newState });
+      return newState;
+    });
   };
 
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setLatex(`\\(${latexify(lex(e.target.value))}\\)`); // Inline LaTeX
     try {
       const arg = parseArgument(e.target.value);
       updateConclusion(arg);
@@ -54,39 +72,29 @@ export function ArgumentInput({ propagate }: ArgumentInputProps) {
       updateConclusion(null);
       // TODO: display input error
     }
-    setIsEditing(false);
+    setState((state) => {
+      const newState = { ...state, edited: true, isEditing: false, latex: `\\(${latexify(lex(e.target.value))}\\)` };
+      setStates({ ...states, [state.index]: newState });
+      return newState;
+    });
   };
 
-  return isEditing || value.length == 0 ? (
-    <FocusingInput
-      value={value}
-      edited={edited}
-      onBlur={onBlur}
-      onChange={(e) => {
-        setValue(e.target.value);
-        console.log(e.target.value);
-      }}
-    />
-  ) : (
+  return (
     <div className="flex flex-col items-center">
-      {conclusion && (
+      {state.edited && (state.value.length > 0 || state.premises.length > 0) && (
         <div className="w-full">
           <div className="flex space-x-4 items-end justify-center">
-            {premiseInputs}
+            {state.premises.map((index) => (
+              <ArgumentInput index={index} states={states} setStates={setStates} />
+            ))}
             <Button
               variant="secondary"
               onClick={() => {
-                setPremiseInputs((inputs) => [
-                  ...inputs,
-                  <ArgumentInput
-                    propagate={(conclusion) => {
-                      setPremises((premises) => {
-                        premises[inputs.length] = conclusion;
-                        return premises;
-                      });
-                    }}
-                  />,
-                ]);
+                setState((state) => {
+                  const premiseIndex = state.index + 1;
+                  setStates({ ...states, [premiseIndex]: getDefaultState(premiseIndex) });
+                  return { ...state, premises: [...state.premises, premiseIndex] };
+                });
               }}
             >
               <Plus />
@@ -95,16 +103,32 @@ export function ArgumentInput({ propagate }: ArgumentInputProps) {
           <hr className="my-2 h-px border-black text-black bg-black" />
         </div>
       )}
-      <div className="px-4">
-        <MathJax
-          onClick={() => {
-            setEdited(true);
-            setIsEditing(true);
+      {state.isEditing || state.value.length == 0 ? (
+        <FocusingInput
+          value={state.value}
+          edited={state.edited}
+          onBlur={onBlur}
+          onFocus={() => {
+            setState((state) => ({ ...state, isEditing: true }));
           }}
-        >
-          {latex}
-        </MathJax>
-      </div>
+          onChange={(e) => {
+            setState((state) => ({ ...state, value: e.target.value }));
+          }}
+        />
+      ) : (
+        <div className="px-4">
+          <MathJax
+            onClick={() => {
+              setState((state) => ({ ...state, edited: true, isEditing: true }));
+            }}
+          >
+            {state.latex}
+          </MathJax>
+        </div>
+      )}
     </div>
   );
 }
+
+export { getDefaultState, ArgumentInput };
+export type { ArgumentInputState };
