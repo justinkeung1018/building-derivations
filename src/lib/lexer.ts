@@ -3,6 +3,14 @@ import { buildLexer, expectEOF, expectSingleResult, rule } from "typescript-pars
 import { alt, apply, seq, tok } from "typescript-parsec";
 import { TokenKind } from "./tokens";
 
+class Variable {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
 class Abstraction {
   variable: Variable;
   body: Term;
@@ -20,14 +28,6 @@ class Application {
   constructor(left: Term, right: Term) {
     this.left = left;
     this.right = right;
-  }
-}
-
-class Variable {
-  name: string;
-
-  constructor(name: string) {
-    this.name = name;
   }
 }
 
