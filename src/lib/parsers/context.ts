@@ -2,35 +2,30 @@ import { alt, apply, rep_sc, seq, tok, Token } from "typescript-parsec";
 import { VARASSIGNMENT, VarAssignment } from "./assignment";
 import { TokenKind } from "../tokens";
 
-class Empty {}
+class Context {
+  readonly varAssignments: Set<VarAssignment>;
 
-class VarAssignments {
-  varAssignments: VarAssignment[];
-
-  constructor(varAssignments: VarAssignment[]) {
-    this.varAssignments = varAssignments;
+  constructor(varAssignments?: Iterable<VarAssignment>) {
+    this.varAssignments = new Set(varAssignments);
   }
 }
 
-type Context = Empty | VarAssignments;
-
-function applyVarAssignments(value: [VarAssignment, [Token<TokenKind.Comma>, VarAssignment][]]): VarAssignments {
+function applyContext(value: [VarAssignment, [Token<TokenKind.Comma>, VarAssignment][]]): Context {
   const first = value[0];
   const rest = value[1];
-  return new VarAssignments([first, ...rest.map((pair) => pair[1])]);
+  return new Context(new Set([first, ...rest.map((pair) => pair[1])]));
 }
 
 // Empty = \emptyset
-const EMPTY = apply(tok(TokenKind.Emptyset), () => new Empty());
+const EMPTY = apply(tok(TokenKind.Emptyset), () => new Context());
 
 // VarAssignments = VarAssignment {, VarAssignment}
 const VARASSIGNMENTS = apply(
   seq(VARASSIGNMENT, rep_sc(seq(tok<TokenKind.Comma>(TokenKind.Comma), VARASSIGNMENT))),
-  applyVarAssignments,
+  applyContext,
 );
 
 // Context = Empty | VarAssignments
 const CONTEXT = alt(EMPTY, VARASSIGNMENTS);
 
-export { Empty, VarAssignments, CONTEXT };
-export type { Context };
+export { Context, CONTEXT };
