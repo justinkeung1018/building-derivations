@@ -76,5 +76,5 @@ APPLICATION.setPattern(apply(seq(tok(TokenKind.LParen), TERM, TERM, tok(TokenKin
 // Term = Variable | Abstraction | Application
 TERM.setPattern(alt(VARIABLE, ABSTRACTION, APPLICATION));
 
-export { Variable, Abstraction, Application, TERM };
+export { Variable, Abstraction, Application, VARIABLE, TERM };
 export type { Term };

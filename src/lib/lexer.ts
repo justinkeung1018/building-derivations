@@ -6,6 +6,7 @@ const lexer = buildLexer([
   [true, /^[a-z]/g, TokenKind.Variable],
   [true, /^\d+/g, TokenKind.Number],
   [true, /^->/g, TokenKind.Arrow],
+  [true, /^:/g, TokenKind.Colon],
   [true, /^\(/g, TokenKind.LParen],
   [true, /^\)/g, TokenKind.RParen],
   [true, /^\\/g, TokenKind.Lambda],

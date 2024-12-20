@@ -7,6 +7,7 @@ enum TokenKind {
   Space,
   Number,
   Arrow,
+  Colon,
 }
 
 export { TokenKind };
