@@ -31,7 +31,6 @@ describe("Action rule", () => {
     expect(action(xOneXOne, [xOneXOne])).toBe(false);
   });
 
-  //
   test("x: 1 -> 2 |- x: 1 -> 2 is true", () => {
     expect(
       action(
