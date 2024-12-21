@@ -46,7 +46,8 @@ describe("Action rule", () => {
 });
 
 describe("Arrow introduction", () => {
-  it("passes in basic case (\\emptyset |- \\x. x: 1 -> 1 given x: 1 |- x : 1)", () => {
+  it("passes in basic case", () => {
+    // \emptyset |- \x. x: 1 -> 1 given x: 1 |- x : 1 is true
     expect(
       arrowIntroduction(
         new Argument(
@@ -88,8 +89,8 @@ describe("Arrow introduction", () => {
     ).toBe(true);
   });
 
-  // x: 1 |- \x. x: 1 -> 1 given x: 1 |- x : 1 is false ()
   it("fails when bound variable is in context", () => {
+    // x: 1 |- \x. x: 1 -> 1 given x: 1 |- x : 1 is false
     expect(
       arrowIntroduction(
         new Argument(
