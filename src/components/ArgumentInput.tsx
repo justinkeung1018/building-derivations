@@ -52,11 +52,12 @@ function getDefaultState(index: number, conclusionIndex: number | null): Argumen
 
 interface ArgumentInputProps {
   index: number;
+  valid: boolean;
   states: Record<number, ArgumentInputState>;
   setStates: (states: Record<number, ArgumentInputState>) => void;
 }
 
-function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
+function ArgumentInput({ index, valid, states, setStates }: ArgumentInputProps) {
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const value = e.target.value.trim();
 
@@ -101,20 +102,25 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
         <div className="w-full">
           <div className="flex space-x-4 items-end justify-center">
             {states[index].premiseIndices.map((index) => (
-              <ArgumentInput index={index} states={states} setStates={setStates} />
+              <ArgumentInput index={index} valid={valid} states={states} setStates={setStates} />
             ))}
-            <Button
-              variant="secondary"
-              onClick={() => {
-                // Generate new state for the premise subtree and update current state
-                const premiseIndex = Object.keys(states).length;
-                const newState = { ...states[index], premiseIndices: [...states[index].premiseIndices, premiseIndex] };
-                setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
-                return newState;
-              }}
-            >
-              <Plus />
-            </Button>
+            {!valid && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  // Generate new state for the premise subtree and update current state
+                  const premiseIndex = Object.keys(states).length;
+                  const newState = {
+                    ...states[index],
+                    premiseIndices: [...states[index].premiseIndices, premiseIndex],
+                  };
+                  setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
+                  return newState;
+                }}
+              >
+                <Plus />
+              </Button>
+            )}
           </div>
           <hr className="my-2 h-px border-black text-black bg-black" />
         </div>

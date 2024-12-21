@@ -4,6 +4,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { action, arrowElimination, arrowIntroduction } from "./lib/verifiers/lambda";
 
 export function App() {
+  const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
 
   function verify(index: number): boolean {
@@ -25,13 +26,13 @@ export function App() {
   }
 
   useEffect(() => {
-    console.log(verify(0));
+    setValid(verify(0));
   }, [states]);
 
   return (
     <MathJaxContext>
-      <div className="px-20 w-screen h-screen flex items-center justify-center">
-        <ArgumentInput index={0} states={states} setStates={setStates} />
+      <div className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}>
+        <ArgumentInput index={0} valid={valid} states={states} setStates={setStates} />
       </div>
     </MathJaxContext>
   );
