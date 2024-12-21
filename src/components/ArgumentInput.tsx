@@ -39,7 +39,7 @@ interface ArgumentInputState {
 function getDefaultState(index: number, conclusionIndex: number | null): ArgumentInputState {
   return {
     index,
-    autofocus: index !== 0,
+    autofocus: index !== 0, // Autofocus for newly generated inputs
     isEditing: true,
     edited: false,
     value: "",
@@ -68,11 +68,15 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
           rest[key] = states[key];
         }
       }
+
+      // Remove premise from conclusion input
       const conclusionIndex = states[index].conclusionIndex;
       rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
       setStates(rest);
       return;
     }
+
+    // If input nonempty, try to parse it
     let conclusion = null;
     try {
       const arg = parseArgument(value);
@@ -80,6 +84,7 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
     } catch {
       // TODO: display input error
     }
+
     const newState = {
       ...states[index],
       edited: true,
@@ -101,6 +106,7 @@ function ArgumentInput({ index, states, setStates }: ArgumentInputProps) {
             <Button
               variant="secondary"
               onClick={() => {
+                // Generate new state for the premise subtree and update current state
                 const premiseIndex = Object.keys(states).length;
                 const newState = { ...states[index], premiseIndices: [...states[index].premiseIndices, premiseIndex] };
                 setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
