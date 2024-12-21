@@ -21,6 +21,7 @@
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/jest": "^29.5.14",
+    "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^22.10.2",
     "@types/react-dom": "^19.0.2",
     "esbuild": "0.24.0",
@@ -41,6 +42,7 @@
     "better-react-mathjax": "^2.0.4-beta1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lodash.isequal": "^4.5.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
