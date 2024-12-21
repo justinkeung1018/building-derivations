@@ -59,4 +59,12 @@ function arrowIntroduction(conclusion: Argument, premises: Argument[]): boolean 
   return false;
 }
 
-export { action, arrowIntroduction };
+function arrowElimination(conclusion: Argument, premises: Argument[]): boolean {
+  if (premises.length !== 2) {
+    return false;
+  }
+
+  return false;
+}
+
+export { action, arrowIntroduction, arrowElimination };
