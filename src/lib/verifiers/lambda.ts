@@ -1,6 +1,6 @@
 import isEqual from "lodash.isequal";
 import { Argument } from "../parsers/argument";
-import { Abstraction, Variable } from "../parsers/lambda";
+import { Abstraction, Application, Variable } from "../parsers/lambda";
 import { Arrow } from "../parsers/type";
 
 function action(conclusion: Argument, premises: Argument[]): boolean {
@@ -64,7 +64,36 @@ function arrowElimination(conclusion: Argument, premises: Argument[]): boolean {
     return false;
   }
 
-  return false;
+  const term = conclusion.assignment.term;
+  if (!(term instanceof Application)) {
+    return false;
+  }
+
+  // For simplicity, assume left premise shows left term in application
+  if (!isEqual(term.left, premises[0].assignment.term) || !isEqual(term.right, premises[1].assignment.term)) {
+    return false;
+  }
+
+  const context = conclusion.context;
+  if (!isEqual(context, premises[0].context) || !isEqual(context, premises[1].context)) {
+    return false;
+  }
+
+  const leftType = premises[0].assignment.type;
+  if (!(leftType instanceof Arrow)) {
+    return false;
+  }
+
+  const rightType = premises[1].assignment.type;
+  if (!isEqual(rightType, leftType.left)) {
+    return false;
+  }
+
+  if (!isEqual(term.left, premises[0].assignment.term) || !isEqual(term.right, premises[1].assignment.term)) {
+    return false;
+  }
+
+  return isEqual(conclusion.assignment.type, leftType.right);
 }
 
 export { action, arrowIntroduction, arrowElimination };

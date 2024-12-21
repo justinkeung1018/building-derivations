@@ -1,9 +1,9 @@
 import { Argument } from "@/lib/parsers/argument";
 import { Assignment, VarAssignment } from "@/lib/parsers/assignment";
 import { Context } from "@/lib/parsers/context";
-import { Abstraction, Variable } from "@/lib/parsers/lambda";
+import { Abstraction, Application, Variable } from "@/lib/parsers/lambda";
 import { Arrow, TypeVar } from "@/lib/parsers/type";
-import { action, arrowIntroduction } from "@/lib/verifiers/lambda";
+import { action, arrowElimination, arrowIntroduction } from "@/lib/verifiers/lambda";
 
 describe("Action rule", () => {
   const xOneXOne = new Argument(
@@ -217,6 +217,62 @@ describe("Arrow introduction", () => {
           ),
         ],
       ),
+    ).toBe(false);
+  });
+
+  it("fails when there are too few premises", () => {
+    // \emptyset |- x: 1 -> 1 given no premises is false
+    expect(
+      arrowIntroduction(
+        new Argument(new Context(), new Assignment(new Variable("x"), new Arrow(new TypeVar(1), new TypeVar(1)))),
+        [],
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("Arrow elimination", () => {
+  const x = new Variable("x");
+  const y = new Variable("y");
+  const one = new TypeVar(1);
+  const two = new TypeVar(2);
+
+  it("passes in basic case", () => {
+    // Context = (x: 1 -> 2, y: 1)
+    const context = new Context([new VarAssignment(x, new Arrow(one, two)), new VarAssignment(y, one)]);
+
+    // Context |- xy: 1 given Context |- x: 1 -> 2 and Context |- y: 1 is true
+    expect(
+      arrowElimination(new Argument(context, new Assignment(new Application(x, y), two)), [
+        new Argument(context, new Assignment(x, new Arrow(one, two))),
+        new Argument(context, new Assignment(y, one)),
+      ]),
+    ).toBe(true);
+  });
+
+  it("fails when there are too many premises", () => {
+    // Context = (x: 1 -> 2, y: 1)
+    const context = new Context([new VarAssignment(x, new Arrow(one, two)), new VarAssignment(y, one)]);
+
+    // Context |- xy: 1 given too many premises is true
+    expect(
+      arrowElimination(new Argument(context, new Assignment(new Application(x, y), two)), [
+        new Argument(context, new Assignment(x, new Arrow(one, two))),
+        new Argument(context, new Assignment(y, one)),
+        new Argument(context, new Assignment(y, one)),
+      ]),
+    ).toBe(false);
+  });
+
+  it("fails when there are too few premises", () => {
+    // Context = (x: 1 -> 2, y: 1)
+    const context = new Context([new VarAssignment(x, new Arrow(one, two)), new VarAssignment(y, one)]);
+
+    // Context |- xy: 1 given too few premises is true
+    expect(
+      arrowElimination(new Argument(context, new Assignment(new Application(x, y), two)), [
+        new Argument(context, new Assignment(x, new Arrow(one, two))),
+      ]),
     ).toBe(false);
   });
 });
