@@ -10,19 +10,28 @@ const one = new TypeVar(1);
 const two = new TypeVar(2);
 const ten = new TypeVar(10);
 
-test("Parses type variables", () => {
+it("parses type variables", () => {
   expect(parseType("1")).toEqual(one);
   expect(parseType("2")).toEqual(two);
   expect(parseType("10")).toEqual(ten);
 });
 
-test("Parses arrow types", () => {
+it("parses arrow types", () => {
   expect(parseType("(1 -> 1)")).toEqual(new Arrow(one, one));
   expect(parseType("(1 → 1)")).toEqual(new Arrow(one, one));
   expect(parseType("(1 -> 2)")).toEqual(new Arrow(one, two));
   expect(parseType("(10 -> 10)")).toEqual(new Arrow(ten, ten));
 });
 
-test("Parses nested arrow types", () => {
+it("parses unbracketed arrow types in right associative manner", () => {
+  expect(parseType("1 -> 1")).toEqual(new Arrow(one, one));
+  expect(parseType("1 -> 1 -> 2")).toEqual(new Arrow(one, new Arrow(one, two)));
+});
+
+it("parses nested arrow types", () => {
   expect(parseType("((1 -> 1) -> 10)")).toEqual(new Arrow(new Arrow(one, one), ten));
+});
+
+it("parses unbracketed nested arrow types", () => {
+  expect(parseType("(1 -> 1) -> 2")).toEqual(new Arrow(new Arrow(one, one), two));
 });
