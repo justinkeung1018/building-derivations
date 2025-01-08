@@ -9,8 +9,9 @@
     "dev:css": "tailwindcss -i src/index.css -o dist/index.css --watch",
     "build": "npm-run-all --parallel build:*",
     "build:tsc": "tsc",
-    "build:esbuild": "esbuild src/index.tsx --bundle --loader:.html=copy --outdir=dist --minify",
+    "build:esbuild": "esbuild src/index.tsx src/index.html --bundle --loader:.html=copy --outdir=dist --minify",
     "build:css": "tailwindcss -i src/index.css -o dist/index.css --minify",
+    "start": "http-server dist/",
     "test": "jest",
     "prepare": "husky install"
   },
@@ -42,6 +43,7 @@
     "better-react-mathjax": "^2.0.4-beta1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "http-server": "^14.1.1",
     "lodash.isequal": "^4.5.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
