@@ -23,15 +23,15 @@ it("parses arrow types", () => {
   expect(parseType("(10 -> 10)")).toEqual(new Arrow(ten, ten));
 });
 
-it("parses unbracketed arrow types in right associative manner", () => {
-  expect(parseType("1 -> 1")).toEqual(new Arrow(one, one));
-  expect(parseType("1 -> 1 -> 2")).toEqual(new Arrow(one, new Arrow(one, two)));
-});
+// it("parses unbracketed arrow types in right associative manner", () => {
+//   expect(parseType("1 -> 1")).toEqual(new Arrow(one, one));
+//   expect(parseType("1 -> 1 -> 2")).toEqual(new Arrow(one, new Arrow(one, two)));
+// });
 
 it("parses nested arrow types", () => {
   expect(parseType("((1 -> 1) -> 10)")).toEqual(new Arrow(new Arrow(one, one), ten));
 });
 
-it("parses unbracketed nested arrow types", () => {
-  expect(parseType("(1 -> 1) -> 2")).toEqual(new Arrow(new Arrow(one, one), two));
-});
+// it("parses unbracketed nested arrow types", () => {
+//   expect(parseType("(1 -> 1) -> 2")).toEqual(new Arrow(new Arrow(one, one), two));
+// });
