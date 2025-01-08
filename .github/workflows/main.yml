@@ -23,10 +23,10 @@ jobs:
 
       - name: Check formatting
         run: npx prettier --check .
-      
+
       - name: Build application
         run: npm run build
-      
+
       - name: Run tests
         run: npm run test
 

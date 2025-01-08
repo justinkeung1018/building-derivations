@@ -21,13 +21,13 @@ export default tseslint.config(
   },
   {
     rules: {
-        "@typescript-eslint/no-extraneous-class": [
-            "error",
-            {
-                allowEmpty: true
-            }
-        ]
-    }
+      "@typescript-eslint/no-extraneous-class": [
+        "error",
+        {
+          allowEmpty: true,
+        },
+      ],
+    },
   },
   eslintConfigPrettier,
 );
