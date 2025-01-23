@@ -10,8 +10,11 @@ class Sequent {
 }
 
 const turnstile = string("|-");
+const arrow = string("->");
+
 const sequent = turnstile.pipe(
   or(letter),
+  or(arrow),
   or(anyChar()),
   between(whitespace()),
   many(),
