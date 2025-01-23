@@ -1,4 +1,4 @@
-import { letter, LowerASCII, UpperASCII, UpperGreek } from "@/lib/parsers/parjs/parse";
+import { letter, LowerASCII, UpperASCII, UpperGreek } from "@/lib/parsers/parjs/letter";
 
 it("parses uppercase Greek letters", () => {
   expect(letter.parse("\\Gamma").value).toEqual(new UpperGreek("Gamma"));
