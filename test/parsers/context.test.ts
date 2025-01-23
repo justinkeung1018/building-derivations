@@ -1,8 +1,8 @@
 import { lexer } from "@/lib/lexer";
-import { VarAssignment } from "@/lib/parsers/assignment";
-import { CONTEXT, Context } from "@/lib/parsers/context";
-import { Variable } from "@/lib/parsers/lambda";
-import { TypeVar } from "@/lib/parsers/type";
+import { VarAssignment } from "@/lib/parsers/ts-parsec/assignment";
+import { CONTEXT, Context } from "@/lib/parsers/ts-parsec/context";
+import { Variable } from "@/lib/parsers/ts-parsec/lambda";
+import { TypeVar } from "@/lib/parsers/ts-parsec/type";
 import { expectEOF, expectSingleResult } from "typescript-parsec";
 
 function parseContext(context: string): Context {

@@ -1,5 +1,5 @@
 import { alt, apply, rule, seq, tok, Token } from "typescript-parsec";
-import { TokenKind } from "../tokens";
+import { TokenKind } from "../../tokens";
 
 class TypeVar {
   constructor(readonly index: number) {}

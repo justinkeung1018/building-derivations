@@ -1,8 +1,8 @@
-import { Argument } from "@/lib/parsers/argument";
-import { Assignment, VarAssignment } from "@/lib/parsers/assignment";
-import { Context } from "@/lib/parsers/context";
-import { Abstraction, Application, Variable } from "@/lib/parsers/lambda";
-import { Arrow, TypeVar } from "@/lib/parsers/type";
+import { Argument } from "@/lib/parsers/ts-parsec/argument";
+import { Assignment, VarAssignment } from "@/lib/parsers/ts-parsec/assignment";
+import { Context } from "@/lib/parsers/ts-parsec/context";
+import { Abstraction, Application, Variable } from "@/lib/parsers/ts-parsec/lambda";
+import { Arrow, TypeVar } from "@/lib/parsers/ts-parsec/type";
 import { action, arrowElimination, arrowIntroduction } from "@/lib/verifiers/lambda";
 
 describe("Action rule", () => {

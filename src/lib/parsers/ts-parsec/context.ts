@@ -1,6 +1,6 @@
 import { alt, apply, rep_sc, seq, tok, Token } from "typescript-parsec";
 import { VARASSIGNMENT, VarAssignment } from "./assignment";
-import { TokenKind } from "../tokens";
+import { TokenKind } from "../../tokens";
 
 class Context {
   readonly varAssignments: Set<VarAssignment>;
