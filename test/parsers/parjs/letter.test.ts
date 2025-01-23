@@ -15,3 +15,7 @@ it("parses uppercase Roman letters", () => {
 it("fails when the string has multiple letters", () => {
   expect(letter.parse("aFDSOJK").isOk).toBe(false);
 });
+
+it("fails when a backslash is not followed by any valid uppercase Greek letter", () => {
+  expect(letter.parse("\\Gammaa").isOk).toBe(false);
+});

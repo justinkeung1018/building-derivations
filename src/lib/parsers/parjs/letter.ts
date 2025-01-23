@@ -13,6 +13,9 @@ class UpperASCII {
   constructor(readonly letter: string) {}
 }
 
+type Letter = UpperGreek | LowerASCII | UpperASCII;
+
+// TODO: ensure there is space after the command unless it is the end of the input, or not?
 const upperGreek = string("\\").pipe(
   then(anyStringOf("Gamma", "Sigma", "Delta", "Pi")),
   map(([_slash, letter]) => new UpperGreek(letter)),
@@ -23,3 +26,4 @@ const upperASCII = upper().pipe(map((letter) => new UpperASCII(letter)));
 const letter = upperGreek.pipe(or(lowerASCII), or(upperASCII));
 
 export { letter, UpperGreek, LowerASCII, UpperASCII };
+export type { Letter };
