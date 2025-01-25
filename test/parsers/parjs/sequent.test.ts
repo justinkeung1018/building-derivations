@@ -1,7 +1,7 @@
 import { LowerASCII, UpperASCII, UpperGreek } from "@/lib/parsers/parjs/letter";
 import { Sequent, sequent } from "@/lib/parsers/parjs/sequent";
 
-describe("lambda calculus", () => {
+describe("Lambda Calculus", () => {
   it("parses the action rule", () => {
     expect(sequent.parse("\\Gamma, x:A |- x:A").value).toEqual(
       new Sequent(
