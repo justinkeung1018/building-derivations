@@ -110,4 +110,42 @@ describe("Builds parser based on syntax rules", () => {
   it("parses empty multisets", () => {
     expect(parser.parse("\\varnothing").value).toEqual([new NonTerminalAST("", [])]);
   });
+
+  it("parses statements in logic", () => {
+    const statement = {
+      ...defaultRule,
+      definition: [[new NonTerminal(1, "\\Gamma"), new Terminal("|-"), new NonTerminal(2, "A")]],
+    };
+    const context = {
+      ...defaultRule,
+      placeholders: ["\\Gamma"],
+      definition: [[new Multiset(new NonTerminal(2, "A"))]],
+    };
+    const type = {
+      ...defaultRule,
+      placeholders: ["A", "B"],
+      definition: [
+        [new NonTerminal(3, "\\varphi")],
+        [new Terminal("("), new NonTerminal(2, "A"), new Terminal("->"), new NonTerminal(2, "B"), new Terminal(")")],
+      ],
+    };
+    const typevar = {
+      ...defaultRule,
+      placeholders: ["\\varphi"],
+      definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")]],
+    };
+
+    const parser = buildSyntaxParser([statement, context, type, typevar]);
+    expect(parser.parse("\\varnothing |- (1 -> 2)").value).toEqual([
+      new NonTerminalAST("\\Gamma", [new NonTerminalAST("", [])]),
+      new Terminal("|-"),
+      new NonTerminalAST("A", [
+        new TerminalAST("("),
+        new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
+        new TerminalAST("->"),
+        new NonTerminalAST("B", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+        new TerminalAST(")"),
+      ]),
+    ]);
+  });
 });
