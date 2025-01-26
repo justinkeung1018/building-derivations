@@ -72,9 +72,7 @@ describe("Builds parser based on syntax rules", () => {
   it("parses terminals", () => {
     const statement = { ...defaultRule, definition: [[new Terminal("x"), new Terminal("|-"), new Terminal("y")]] };
     const parser = buildSyntaxParser([statement]);
-    expect(parser.parse("x |- y").value).toEqual(
-      new NonTerminalAST("", [new TerminalAST("x"), new TerminalAST("|-"), new TerminalAST("y")]),
-    );
+    expect(parser.parse("x |- y").value).toEqual([new TerminalAST("x"), new TerminalAST("|-"), new TerminalAST("y")]);
   });
 
   it("parses non-terminals", () => {
@@ -88,16 +86,28 @@ describe("Builds parser based on syntax rules", () => {
       ],
     };
     const parser = buildSyntaxParser([statement, type]);
-    expect(parser.parse("(x -> x)").value).toEqual(
-      new NonTerminalAST("", [
-        new NonTerminalAST("A", [
-          new TerminalAST("("),
-          new NonTerminalAST("A", [new TerminalAST("x")]),
-          new TerminalAST("->"),
-          new NonTerminalAST("A", [new TerminalAST("x")]),
-          new TerminalAST(")"),
-        ]),
+    expect(parser.parse("(x -> x)").value).toEqual([
+      new NonTerminalAST("A", [
+        new TerminalAST("("),
+        new NonTerminalAST("A", [new TerminalAST("x")]),
+        new TerminalAST("->"),
+        new NonTerminalAST("A", [new TerminalAST("x")]),
+        new TerminalAST(")"),
       ]),
-    );
+    ]);
+  });
+
+  const statement = { ...defaultRule, definition: [[new Multiset(new NonTerminal(1, "A"))]] };
+  const type = { ...defaultRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const parser = buildSyntaxParser([statement, type]);
+
+  it("parses non-empty multisets", () => {
+    expect(parser.parse("a, b,a").value).toEqual([
+      new NonTerminalAST("", [new TerminalAST("a"), new TerminalAST("b"), new TerminalAST("a")]),
+    ]);
+  });
+
+  it("parses empty multisets", () => {
+    expect(parser.parse("\\varnothing").value).toEqual([new NonTerminalAST("", [])]);
   });
 });

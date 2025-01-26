@@ -86,14 +86,16 @@ function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser
     return parsers[token.index].pipe(map((x) => new NonTerminalAST(token.name, x)));
   } else {
     // Multiset
-    return parsers[token.nonTerminal.index].pipe(
+    const nonempty = parsers[token.nonTerminal.index].pipe(
       manySepBy(string(",").pipe(between(whitespace()))),
       map((x) => new NonTerminalAST("", x.flat())),
     );
+    const empty = string("\\varnothing").pipe(map(() => new NonTerminalAST("", [])));
+    return empty.pipe(or(nonempty));
   }
 }
 
-function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST> {
+function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST[]> {
   const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
   for (let i = 0; i < syntax.length; i++) {
     const alternativeParsers = [];
@@ -115,7 +117,7 @@ function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST> {
 
     parsers[i].init(parser);
   }
-  return parsers[0].pipe(map((x) => new NonTerminalAST("", x)));
+  return parsers[0];
 }
 
 export { parseSyntax, buildSyntaxParser };
