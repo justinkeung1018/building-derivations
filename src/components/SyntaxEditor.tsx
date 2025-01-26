@@ -3,7 +3,7 @@ import { MathJax } from "better-react-mathjax";
 import { Button } from "./shadcn/Button";
 import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
-import { SyntaxRule } from "@/lib/types";
+import { SyntaxRule } from "@/lib/types/types";
 import { parseSyntax } from "@/lib/parsers/parjs/syntax";
 
 interface SyntaxEditorProps {

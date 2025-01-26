@@ -1,6 +1,7 @@
-import { Multiset, NonTerminal, SyntaxRule, Terminal } from "@/lib/types";
-import { anyChar, letter, string, whitespace } from "parjs";
-import { between, many, many1, map, or, qthen, then, thenq } from "parjs/combinators";
+import { AST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { Multiset, NonTerminal, SyntaxRule, Terminal, Token } from "@/lib/types/types";
+import { anyChar, letter, Parjser, string, whitespace } from "parjs";
+import { between, DelayedParjser, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -75,4 +76,46 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
   return syntax;
 }
 
-export { parseSyntax };
+function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser<AST> {
+  if (token instanceof Terminal) {
+    return string(token.value).pipe(
+      between(whitespace()),
+      map((x) => new TerminalAST(x)),
+    );
+  } else if (token instanceof NonTerminal) {
+    return parsers[token.index].pipe(map((x) => new NonTerminalAST(token.name, x)));
+  } else {
+    // Multiset
+    return parsers[token.nonTerminal.index].pipe(
+      manySepBy(string(",").pipe(between(whitespace()))),
+      map((x) => new NonTerminalAST("", x.flat())),
+    );
+  }
+}
+
+function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST> {
+  const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
+  for (let i = 0; i < syntax.length; i++) {
+    const alternativeParsers = [];
+    for (const alternative of syntax[i].definition) {
+      let parser = getTokenParser(alternative[0], parsers).pipe(map((x) => [x]));
+      for (const token of alternative.slice(1)) {
+        parser = parser.pipe(
+          then(getTokenParser(token, parsers)),
+          map(([x, y]) => [...x, y]),
+        );
+      }
+      alternativeParsers.push(parser);
+    }
+
+    let parser = alternativeParsers[0];
+    for (const alternativeParser of alternativeParsers.slice(1)) {
+      parser = parser.pipe(or(alternativeParser));
+    }
+
+    parsers[i].init(parser);
+  }
+  return parsers[0].pipe(map((x) => new NonTerminalAST("", x)));
+}
+
+export { parseSyntax, buildSyntaxParser };

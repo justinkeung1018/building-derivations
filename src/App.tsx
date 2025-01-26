@@ -4,7 +4,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { action, arrowElimination, arrowIntroduction } from "./lib/verifiers/lambda";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
 import { Button } from "./components/shadcn/Button";
-import { SyntaxRule } from "./lib/types";
+import { SyntaxRule } from "./lib/types/types";
 import { SyntaxEditor } from "./components/SyntaxEditor";
 
 export function App() {
