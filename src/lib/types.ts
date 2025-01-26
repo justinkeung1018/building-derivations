@@ -17,7 +17,11 @@ class NonTerminal {
   ) {}
 }
 
-type Token = Terminal | NonTerminal;
+class Multiset {
+  constructor(readonly nonTerminal: NonTerminal) {}
+}
 
-export { Terminal, NonTerminal };
+type Token = Terminal | NonTerminal | Multiset;
+
+export { Terminal, NonTerminal, Multiset };
 export type { SyntaxRule, Token };

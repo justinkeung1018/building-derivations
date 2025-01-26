@@ -1,6 +1,6 @@
-import { NonTerminal, SyntaxRule, Terminal } from "@/lib/types";
+import { Multiset, NonTerminal, SyntaxRule, Terminal } from "@/lib/types";
 import { anyChar, letter, string, whitespace } from "parjs";
-import { between, many, many1, map, or, then } from "parjs/combinators";
+import { between, many, many1, map, or, qthen, then, thenq } from "parjs/combinators";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -10,7 +10,8 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
 }
 
 function sanitiseDefinition(definitionUnsanitised: string): string[] {
-  return definitionUnsanitised.split("|").map((alternative) => alternative.trim());
+  const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash");
+  return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
 }
 
 function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
@@ -55,7 +56,12 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
       nonTerminalStr = nonTerminalStr.pipe(or(string(placeholder)));
     }
     const nonTerminal = nonTerminalStr.pipe(map((x) => new NonTerminal(placeholderToRuleIndex[x], x)));
-    parser = nonTerminal.pipe(or(terminal), between(whitespace()), many());
+    const multiset = string("{").pipe(
+      qthen(nonTerminal),
+      thenq(string("}")),
+      map((x) => new Multiset(x)),
+    );
+    parser = nonTerminal.pipe(or(multiset), or(terminal), between(whitespace()), many());
   } else {
     // Treat everything as a terminal
     parser = terminal.pipe(between(whitespace()), many());
