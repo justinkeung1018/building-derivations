@@ -29,6 +29,8 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
   const placeholders = Object.keys(placeholderToRuleIndex).sort((a, b) => b.length - a.length);
 
   let parser;
+
+  // Match a backslash followed by one or more letters
   const command = string("\\").pipe(
     then(
       letter().pipe(
@@ -41,11 +43,13 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
   const terminal = command.pipe(
     or(string("|-")),
     or(string("->")),
+    or(string("→")),
     or(anyChar()),
     map((x) => new Terminal(x)),
   );
 
   if (placeholders.length > 0) {
+    // We try to match nonterminals against the set of placeholders
     let nonTerminalStr = string(placeholders[0]);
     for (const placeholder of placeholders.slice(1)) {
       nonTerminalStr = nonTerminalStr.pipe(or(string(placeholder)));
@@ -53,6 +57,7 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
     const nonTerminal = nonTerminalStr.pipe(map((x) => new NonTerminal(placeholderToRuleIndex[x], x)));
     parser = nonTerminal.pipe(or(terminal), between(whitespace()), many());
   } else {
+    // Treat everything as a terminal
     parser = terminal.pipe(between(whitespace()), many());
   }
 

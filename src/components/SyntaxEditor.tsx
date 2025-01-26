@@ -66,7 +66,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     }}
                   />
                 ) : (
-                  <MathJax>{`\\(${rule.definitionSanitised.join("\\ | \\ ")}\\)`}</MathJax>
+                  <MathJax>{`\\(${rule.definitionSanitised.join("\\ |\\ ")}\\)`}</MathJax>
                 )}
               </TableCell>
             </TableRow>
