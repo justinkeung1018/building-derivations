@@ -39,6 +39,7 @@
     "typescript-eslint": "^8.18.1"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-slot": "^1.1.1",
     "better-react-mathjax": "^2.0.4-beta1",
     "class-variance-authority": "^0.7.1",
