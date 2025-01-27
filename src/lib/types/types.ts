@@ -6,6 +6,12 @@ interface SyntaxRule {
   definitionUnsanitised: string;
 }
 
+interface InferenceRule {
+  name: string;
+  premises: SyntaxRule[];
+  conclusion: SyntaxRule;
+}
+
 class Terminal {
   constructor(readonly value: string) {}
 }
@@ -24,4 +30,4 @@ class Multiset {
 type Token = Terminal | NonTerminal | Multiset;
 
 export { Terminal, NonTerminal, Multiset };
-export type { SyntaxRule, Token };
+export type { SyntaxRule, InferenceRule, Token };

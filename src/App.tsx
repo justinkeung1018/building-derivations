@@ -4,8 +4,9 @@ import { MathJaxContext } from "better-react-mathjax";
 import { action, arrowElimination, arrowIntroduction } from "./lib/verifiers/lambda";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
 import { Button } from "./components/shadcn/Button";
-import { SyntaxRule } from "./lib/types/types";
+import { InferenceRule, SyntaxRule } from "./lib/types/types";
 import { SyntaxEditor } from "./components/SyntaxEditor";
+import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
 
 export function App() {
   const [valid, setValid] = useState(false);
@@ -19,6 +20,7 @@ export function App() {
       definitionUnsanitised: "",
     },
   ]);
+  const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
   function verify(index: number): boolean {
     const conclusion = states[index].conclusion;
@@ -55,9 +57,13 @@ export function App() {
             <SheetHeader>
               <SheetTitle>Edit syntax and inference rules</SheetTitle>
             </SheetHeader>
-            <div className="flex items-start mt-4">
+            <div className="flex items-start mt-4 space-x-6">
               <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
-              <div></div>
+              <InferenceRulesEditor
+                syntax={syntax}
+                inferenceRules={inferenceRules}
+                setInferenceRules={setInferenceRules}
+              />
             </div>
           </SheetContent>
         </Sheet>
