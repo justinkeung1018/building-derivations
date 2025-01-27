@@ -1,4 +1,4 @@
-import { buildSyntaxParser, parseSyntax } from "@/lib/parsers/parjs/syntax";
+import { Parser, parseSyntax } from "@/lib/parsers/parjs/syntax";
 import { NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/types";
 import { ParjsParsingFailure } from "parjs";
@@ -68,25 +68,29 @@ describe("Parsing syntax rules", () => {
   });
 });
 
-describe("Builds parser based on syntax rules", () => {
+describe("Building parser based on syntax rules", () => {
   it("parses terminals", () => {
     const statement = { ...defaultRule, definition: [[new Terminal("x"), new Terminal("|-"), new Terminal("y")]] };
-    const parser = buildSyntaxParser([statement]);
-    expect(parser.parse("x |- y").value).toEqual([new TerminalAST("x"), new TerminalAST("|-"), new TerminalAST("y")]);
+    const parser = new Parser([]);
+    expect(parser.parse("x |- y", statement).value).toEqual([
+      new TerminalAST("x"),
+      new TerminalAST("|-"),
+      new TerminalAST("y"),
+    ]);
   });
 
   it("parses non-terminals", () => {
-    const statement = { ...defaultRule, definition: [[new NonTerminal(1, "A")]] };
+    const statement = { ...defaultRule, definition: [[new NonTerminal(0, "A")]] };
     const type = {
       ...defaultRule,
       placeholders: ["A"],
       definition: [
         [new Terminal("x")],
-        [new Terminal("("), new NonTerminal(1, "A"), new Terminal("->"), new NonTerminal(1, "A"), new Terminal(")")],
+        [new Terminal("("), new NonTerminal(0, "A"), new Terminal("->"), new NonTerminal(0, "A"), new Terminal(")")],
       ],
     };
-    const parser = buildSyntaxParser([statement, type]);
-    expect(parser.parse("(x -> x)").value).toEqual([
+    const parser = new Parser([type]);
+    expect(parser.parse("(x -> x)", statement).value).toEqual([
       new NonTerminalAST("A", [
         new TerminalAST("("),
         new NonTerminalAST("A", [new TerminalAST("x")]),
@@ -97,36 +101,32 @@ describe("Builds parser based on syntax rules", () => {
     ]);
   });
 
-  const statement = { ...defaultRule, definition: [[new Multiset(new NonTerminal(1, "A"))]] };
+  const statement = { ...defaultRule, definition: [[new Multiset(new NonTerminal(0, "A"))]] };
   const type = { ...defaultRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildSyntaxParser([statement, type]);
+  const parser = new Parser([type]);
 
   it("parses non-empty multisets", () => {
-    expect(parser.parse("a, b,a").value).toEqual([
+    expect(parser.parse("a, b,a", statement).value).toEqual([
       new NonTerminalAST("", [new TerminalAST("a"), new TerminalAST("b"), new TerminalAST("a")]),
     ]);
   });
 
   it("parses empty multisets", () => {
-    expect(parser.parse("\\varnothing").value).toEqual([new NonTerminalAST("", [])]);
+    expect(parser.parse("\\varnothing", statement).value).toEqual([new NonTerminalAST("", [])]);
   });
 
-  it("parses statements in logic", () => {
-    const statement = {
-      ...defaultRule,
-      definition: [[new NonTerminal(1, "\\Gamma"), new Terminal("|-"), new NonTerminal(2, "A")]],
-    };
+  describe("Parsing statements in logic", () => {
     const context = {
       ...defaultRule,
       placeholders: ["\\Gamma"],
-      definition: [[new Multiset(new NonTerminal(2, "A"))]],
+      definition: [[new Multiset(new NonTerminal(1, "A"))]],
     };
     const type = {
       ...defaultRule,
       placeholders: ["A", "B"],
       definition: [
-        [new NonTerminal(3, "\\varphi")],
-        [new Terminal("("), new NonTerminal(2, "A"), new Terminal("->"), new NonTerminal(2, "B"), new Terminal(")")],
+        [new NonTerminal(2, "\\varphi")],
+        [new Terminal("("), new NonTerminal(1, "A"), new Terminal("->"), new NonTerminal(1, "B"), new Terminal(")")],
       ],
     };
     const typevar = {
@@ -135,8 +135,14 @@ describe("Builds parser based on syntax rules", () => {
       definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")]],
     };
 
-    const parser = buildSyntaxParser([statement, context, type, typevar]);
-    expect(parser.parse("\\varnothing |- (1 -> 2)").value).toEqual([
+    const parser = new Parser([context, type, typevar]);
+
+    const statement = {
+      ...defaultRule,
+      definition: [[new NonTerminal(0, "\\Gamma"), new Terminal("|-"), new NonTerminal(1, "A")]],
+    };
+
+    expect(parser.parse("\\varnothing |- (1 -> 2)", statement).value).toEqual([
       new NonTerminalAST("\\Gamma", [new NonTerminalAST("", [])]),
       new Terminal("|-"),
       new NonTerminalAST("A", [
