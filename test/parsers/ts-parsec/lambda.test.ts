@@ -1,5 +1,5 @@
 import { lexer } from "@/lib/ts-parsec/lexer";
-import { Variable, Abstraction, Application, Term, TERM } from "@/lib/parsers/ts-parsec/lambda";
+import { Variable, Abstraction, Application, Term, TERM } from "@/lib/ts-parsec/parsers/lambda";
 import { expectEOF, expectSingleResult } from "typescript-parsec";
 
 function parseLambda(term: string): Term {

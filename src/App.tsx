@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ArgumentInput, ArgumentInputState, getDefaultState } from "./components/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
-import { action, arrowElimination, arrowIntroduction } from "./lib/verifiers/lambda";
+import { action, arrowElimination, arrowIntroduction } from "./lib/ts-parsec/verifiers/lambda";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
 import { Button } from "./components/shadcn/Button";
 import { InferenceRule, SyntaxRule } from "./lib/types/types";

@@ -1,5 +1,5 @@
 import { lexer } from "@/lib/ts-parsec/lexer";
-import { Arrow, Type, TYPE, TypeVar } from "@/lib/parsers/ts-parsec/type";
+import { Arrow, Type, TYPE, TypeVar } from "@/lib/ts-parsec/parsers/type";
 import { expectEOF, expectSingleResult } from "typescript-parsec";
 
 function parseType(type: string): Type {

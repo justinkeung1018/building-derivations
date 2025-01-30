@@ -1,8 +1,8 @@
 import { apply, expectEOF, expectSingleResult, seq, tok, Token } from "typescript-parsec";
 import { ASSIGNMENT, Assignment } from "./assignment";
 import { CONTEXT, Context } from "./context";
-import { TokenKind } from "../../ts-parsec/tokens";
-import { lexer } from "../../ts-parsec/lexer";
+import { TokenKind } from "../tokens";
+import { lexer } from "../lexer";
 
 class Argument {
   constructor(

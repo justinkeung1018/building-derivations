@@ -1,7 +1,7 @@
 import { lexer } from "@/lib/ts-parsec/lexer";
-import { Assignment, ASSIGNMENT, VarAssignment, VARASSIGNMENT } from "@/lib/parsers/ts-parsec/assignment";
-import { Abstraction, Variable } from "@/lib/parsers/ts-parsec/lambda";
-import { Arrow, TypeVar } from "@/lib/parsers/ts-parsec/type";
+import { Assignment, ASSIGNMENT, VarAssignment, VARASSIGNMENT } from "@/lib/ts-parsec/parsers/assignment";
+import { Abstraction, Variable } from "@/lib/ts-parsec/parsers/lambda";
+import { Arrow, TypeVar } from "@/lib/ts-parsec/parsers/type";
 import { expectEOF, expectSingleResult } from "typescript-parsec";
 
 function parseVarAssignment(varAssignment: string): VarAssignment {

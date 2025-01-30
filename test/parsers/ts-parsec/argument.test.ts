@@ -1,8 +1,8 @@
-import { Argument, parseArgument } from "@/lib/parsers/ts-parsec/argument";
-import { Assignment, VarAssignment } from "@/lib/parsers/ts-parsec/assignment";
-import { Context } from "@/lib/parsers/ts-parsec/context";
-import { Variable } from "@/lib/parsers/ts-parsec/lambda";
-import { TypeVar } from "@/lib/parsers/ts-parsec/type";
+import { Argument, parseArgument } from "@/lib/ts-parsec/parsers/argument";
+import { Assignment, VarAssignment } from "@/lib/ts-parsec/parsers/assignment";
+import { Context } from "@/lib/ts-parsec/parsers/context";
+import { Variable } from "@/lib/ts-parsec/parsers/lambda";
+import { TypeVar } from "@/lib/ts-parsec/parsers/type";
 
 const xOneVar = new VarAssignment(new Variable("x"), new TypeVar(1));
 const xOne = new Assignment(new Variable("x"), new TypeVar(1));

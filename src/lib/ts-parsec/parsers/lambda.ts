@@ -1,5 +1,5 @@
 import { alt, apply, rule, seq, tok, Token } from "typescript-parsec";
-import { TokenKind } from "../../ts-parsec/tokens";
+import { TokenKind } from "../tokens";
 
 class Variable {
   constructor(readonly name: string) {}

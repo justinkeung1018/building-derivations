@@ -4,7 +4,7 @@ import { Button } from "./shadcn/Button";
 import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
 import { SyntaxRule } from "@/lib/types/types";
-import { parseSyntax } from "@/lib/parsers/parjs/syntax";
+import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 
 interface SyntaxEditorProps {

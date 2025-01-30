@@ -4,7 +4,7 @@ import { Button } from "./shadcn/Button";
 import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
 import { InferenceRule, SyntaxRule } from "@/lib/types/types";
-import { parseInferenceRules } from "@/lib/parsers/parjs/syntax";
+import { parseInferenceRules } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {

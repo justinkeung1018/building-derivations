@@ -1,4 +1,4 @@
-import { buildStatementParser, parseSyntax } from "@/lib/parsers/parjs/syntax";
+import { buildStatementParser, parseSyntax } from "@/lib/parsers/syntax";
 import { NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/types";
 import { ParjsParsingFailure } from "parjs";

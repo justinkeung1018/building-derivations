@@ -1,7 +1,7 @@
 import isEqual from "lodash.isequal";
-import { Argument } from "../parsers/ts-parsec/argument";
-import { Abstraction, Application, Variable } from "../parsers/ts-parsec/lambda";
-import { Arrow } from "../parsers/ts-parsec/type";
+import { Argument } from "../parsers/argument";
+import { Abstraction, Application, Variable } from "../parsers/lambda";
+import { Arrow } from "../parsers/type";
 
 function action(conclusion: Argument, premises: Argument[]): boolean {
   if (premises.length !== 0) {
