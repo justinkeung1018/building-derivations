@@ -7,15 +7,7 @@ import { InferenceRule, SyntaxRule } from "@/lib/types/types";
 import { parseInferenceRules } from "@/lib/parsers/parjs/syntax";
 import { latexify } from "@/lib/latexify";
 
-function PremisesEditor({ editing, rule, index, setInferenceRules }: DefinitionEditorProps) {
-  if (!editing) {
-    return (
-      <div className="flex justify-center">
-        <MathJax>{`\\(${rule.premises.map((premise) => premise.definitionSanitised.map(latexify).join(" ")).join(" \\quad ")}\\)`}</MathJax>
-      </div>
-    );
-  }
-
+function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
     return (
       <div className="flex justify-center">
@@ -64,15 +56,7 @@ function PremisesEditor({ editing, rule, index, setInferenceRules }: DefinitionE
   );
 }
 
-function ConclusionEditor({ editing, rule, index, setInferenceRules }: DefinitionEditorProps) {
-  if (!editing) {
-    return (
-      <div className="flex justify-center">
-        <MathJax>{`\\(${rule.conclusion.definitionSanitised.map(latexify).join(" ")}\\)`}</MathJax>
-      </div>
-    );
-  }
-
+function ConclusionEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   return (
     <div className="flex justify-center">
       <Input
@@ -101,6 +85,16 @@ interface DefinitionEditorProps extends InferenceRulesEditorProps {
 }
 
 function DefinitionEditor(props: DefinitionEditorProps) {
+  const { editing, rule } = props;
+
+  if (!editing) {
+    const premisesLaTeX = rule.premises
+      .map((premise) => premise.definitionSanitised.map(latexify).join(" "))
+      .join(" \\quad ");
+    const conclusionLaTeX = rule.conclusion.definitionSanitised.map(latexify).join(" ");
+    return <MathJax>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>;
+  }
+
   return (
     <div className="space-y-2">
       <PremisesEditor {...props} />
