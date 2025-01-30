@@ -1,4 +1,4 @@
-import { lexer } from "@/lib/lexer";
+import { lexer } from "@/lib/ts-parsec/lexer";
 import { Arrow, Type, TYPE, TypeVar } from "@/lib/parsers/ts-parsec/type";
 import { expectEOF, expectSingleResult } from "typescript-parsec";
 

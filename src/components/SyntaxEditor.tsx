@@ -5,6 +5,7 @@ import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
 import { SyntaxRule } from "@/lib/types/types";
 import { parseSyntax } from "@/lib/parsers/parjs/syntax";
+import { latexify } from "@/lib/latexify";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -66,7 +67,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     }}
                   />
                 ) : (
-                  <MathJax>{`\\(${rule.definitionSanitised.join("\\ |\\ ")}\\)`}</MathJax>
+                  <MathJax>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
                 )}
               </TableCell>
             </TableRow>

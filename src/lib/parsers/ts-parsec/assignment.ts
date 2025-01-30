@@ -1,7 +1,7 @@
 import { apply, seq, tok, Token } from "typescript-parsec";
 import { TERM, Term, VARIABLE, Variable } from "./lambda";
 import { TYPE, Type } from "./type";
-import { TokenKind } from "../../tokens";
+import { TokenKind } from "../../ts-parsec/tokens";
 
 // For contexts
 class VarAssignment {

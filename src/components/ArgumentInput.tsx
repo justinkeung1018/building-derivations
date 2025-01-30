@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/shadcn/Input";
 import { MathJax } from "better-react-mathjax";
-import { lex } from "@/lib/lexer";
-import { latexify } from "@/lib/latexify";
+import { lex } from "@/lib/ts-parsec/lexer";
+import { latexify } from "@/lib/ts-parsec/latexify";
 import { Argument, parseArgument } from "@/lib/parsers/ts-parsec/argument";
 import { Button } from "./shadcn/Button";
 import { Plus } from "lucide-react";

@@ -1,5 +1,5 @@
 import { AST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
-import { Multiset, NonTerminal, SyntaxRule, Terminal, Token } from "@/lib/types/types";
+import { InferenceRule, Multiset, NonTerminal, SyntaxRule, Terminal, Token } from "@/lib/types/types";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, DelayedParjser, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
 
@@ -11,11 +11,11 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
 }
 
 function sanitiseDefinition(definitionUnsanitised: string): string[] {
-  const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash");
+  const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
   return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
 }
 
-function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
+function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   const placeholderToRuleIndex: Record<string, number> = {};
   for (let i = 0; i < syntax.length; i++) {
     syntax[i].placeholders = sanitisePlaceholders(syntax[i].placeholdersUnsanitised);
@@ -68,12 +68,36 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
     parser = terminal.pipe(between(whitespace()), many());
   }
 
+  return parser;
+}
+
+function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
+  const parser = buildSyntaxRuleParser(syntax);
+
   for (const rule of syntax) {
     rule.definitionSanitised = sanitiseDefinition(rule.definitionUnsanitised);
     rule.definition = rule.definitionSanitised.map((alternative) => parser.parse(alternative).value);
   }
 
   return syntax;
+}
+
+function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]) {
+  // Assume the syntax is well-formed and already parsed
+  const parser = buildSyntaxRuleParser(syntax);
+
+  for (const rule of rules) {
+    for (const premise of rule.premises) {
+      premise.definitionSanitised = sanitiseDefinition(premise.definitionUnsanitised);
+      premise.definition = premise.definitionSanitised.map((alternative) => parser.parse(alternative).value);
+    }
+    rule.conclusion.definitionSanitised = sanitiseDefinition(rule.conclusion.definitionUnsanitised);
+    rule.conclusion.definition = rule.conclusion.definitionSanitised.map(
+      (alternative) => parser.parse(alternative).value,
+    );
+  }
+
+  return rules;
 }
 
 function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser<AST> {
@@ -95,7 +119,7 @@ function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser
   }
 }
 
-function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST[]> {
+function buildStatementParser(syntax: SyntaxRule[]): Parjser<AST[]> {
   const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
   for (let i = 0; i < syntax.length; i++) {
     const alternativeParsers = [];
@@ -120,4 +144,4 @@ function buildSyntaxParser(syntax: SyntaxRule[]): Parjser<AST[]> {
   return parsers[0];
 }
 
-export { parseSyntax, buildSyntaxParser };
+export { parseSyntax, parseInferenceRules, buildStatementParser };

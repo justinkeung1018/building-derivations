@@ -1,4 +1,4 @@
-import { lexer } from "@/lib/lexer";
+import { lexer } from "@/lib/ts-parsec/lexer";
 import { VarAssignment } from "@/lib/parsers/ts-parsec/assignment";
 import { CONTEXT, Context } from "@/lib/parsers/ts-parsec/context";
 import { Variable } from "@/lib/parsers/ts-parsec/lambda";

@@ -1,4 +1,4 @@
-import { buildSyntaxParser, parseSyntax } from "@/lib/parsers/parjs/syntax";
+import { buildStatementParser, parseSyntax } from "@/lib/parsers/parjs/syntax";
 import { NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/types";
 import { ParjsParsingFailure } from "parjs";
@@ -71,7 +71,7 @@ describe("Parsing syntax rules", () => {
 describe("Builds parser based on syntax rules", () => {
   it("parses terminals", () => {
     const statement = { ...defaultRule, definition: [[new Terminal("x"), new Terminal("|-"), new Terminal("y")]] };
-    const parser = buildSyntaxParser([statement]);
+    const parser = buildStatementParser([statement]);
     expect(parser.parse("x |- y").value).toEqual([new TerminalAST("x"), new TerminalAST("|-"), new TerminalAST("y")]);
   });
 
@@ -85,7 +85,7 @@ describe("Builds parser based on syntax rules", () => {
         [new Terminal("("), new NonTerminal(1, "A"), new Terminal("->"), new NonTerminal(1, "A"), new Terminal(")")],
       ],
     };
-    const parser = buildSyntaxParser([statement, type]);
+    const parser = buildStatementParser([statement, type]);
     expect(parser.parse("(x -> x)").value).toEqual([
       new NonTerminalAST("A", [
         new TerminalAST("("),
@@ -99,7 +99,7 @@ describe("Builds parser based on syntax rules", () => {
 
   const statement = { ...defaultRule, definition: [[new Multiset(new NonTerminal(1, "A"))]] };
   const type = { ...defaultRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildSyntaxParser([statement, type]);
+  const parser = buildStatementParser([statement, type]);
 
   it("parses non-empty multisets", () => {
     expect(parser.parse("a, b,a").value).toEqual([
@@ -135,7 +135,7 @@ describe("Builds parser based on syntax rules", () => {
       definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")]],
     };
 
-    const parser = buildSyntaxParser([statement, context, type, typevar]);
+    const parser = buildStatementParser([statement, context, type, typevar]);
     expect(parser.parse("\\varnothing |- (1 -> 2)").value).toEqual([
       new NonTerminalAST("\\Gamma", [new NonTerminalAST("", [])]),
       new Terminal("|-"),
