@@ -1,7 +1,8 @@
 import { AST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
-import { InferenceRule, Multiset, NonTerminal, SyntaxRule, Terminal, Token } from "@/lib/types/types";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
-import { between, DelayedParjser, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
+import { between, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
+import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
+import { SyntaxRule, InferenceRule } from "../types/types";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -15,7 +16,7 @@ function sanitiseDefinition(definitionUnsanitised: string): string[] {
   return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
 }
 
-function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
+function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
   const placeholderToRuleIndex: Record<string, number> = {};
   for (let i = 0; i < syntax.length; i++) {
     syntax[i].placeholders = sanitisePlaceholders(syntax[i].placeholdersUnsanitised);
@@ -26,6 +27,11 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
       placeholderToRuleIndex[placeholder] = i;
     }
   }
+  return placeholderToRuleIndex;
+}
+
+function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
+  const placeholderToRuleIndex = getPlaceholderToRuleIndex(syntax);
 
   // Sort in descending order of length
   const placeholders = Object.keys(placeholderToRuleIndex).sort((a, b) => b.length - a.length);
@@ -82,7 +88,7 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
   return syntax;
 }
 
-function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]) {
+function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): InferenceRule[] {
   // Assume the syntax is well-formed and already parsed
   const parser = buildSyntaxRuleParser(syntax);
 
@@ -100,7 +106,7 @@ function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]) {
   return rules;
 }
 
-function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser<AST> {
+function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST> {
   if (token instanceof Terminal) {
     return string(token.value).pipe(
       between(whitespace()),
@@ -119,7 +125,7 @@ function getTokenParser(token: Token, parsers: DelayedParjser<AST[]>[]): Parjser
   }
 }
 
-function buildStatementParser(syntax: SyntaxRule[]): Parjser<AST[]> {
+function buildParsers(syntax: SyntaxRule[]): Parjser<AST[]>[] {
   const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
   for (let i = 0; i < syntax.length; i++) {
     const alternativeParsers = [];
@@ -141,7 +147,7 @@ function buildStatementParser(syntax: SyntaxRule[]): Parjser<AST[]> {
 
     parsers[i].init(parser);
   }
-  return parsers[0];
+  return parsers;
 }
 
-export { parseSyntax, parseInferenceRules, buildStatementParser };
+export { parseSyntax, parseInferenceRules, getPlaceholderToRuleIndex, getTokenParser, buildParsers };

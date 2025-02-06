@@ -1,43 +1,129 @@
-// import { Sequent } from "./parsers/parjs/sequent";
+import { buildParsers, getTokenParser } from "./parsers/syntax";
+import { AST, NonTerminalAST, TerminalAST } from "./types/ast";
+import { map, then } from "parjs/combinators";
+import { Terminal, Token } from "./types/token";
+import { SyntaxRule } from "./types/types";
+import _ from "lodash";
 
-// class Rule {
-//   constructor(
-//     readonly premises: Sequent[],
-//     readonly conclusion: Sequent,
-//   ) {}
-// }
+function astToString(ast: AST): string {
+  if (ast instanceof TerminalAST) {
+    return ast.value;
+  }
+  return ast.children.map(astToString).join(" ");
+}
 
-// // function verify(rule: Rule, premises: Sequent[], conclusion: Sequent): boolean {
-// //   const mapping: Record<string, (string | Letter)[]> = {};
-// //   let j = 0;
+function union(namesMaps: Record<string, AST>[]): Record<string, AST> {
+  let union: Record<string, AST> = {};
+  const duplicates: string[] = [];
+  for (const names of namesMaps) {
+    for (const name of Object.keys(names)) {
+      if (Object.hasOwn(union, name) && !_.isEqual(union[name], names[name])) {
+        duplicates.push(name);
+      }
+    }
+    union = { ...union, ...names };
+  }
+  if (duplicates.length !== 0) {
+    throw new Error(`Duplicate names: ${duplicates.join(", ")}`);
+  }
+  return union;
+}
 
-// //   for (let i = 0; i < rule.conclusion.right.length; i++) {
-// //     const token = rule.conclusion.right[i];
-// //     if (typeof token === "string") {
-// //       if (conclusion.right[j] !== token) {
-// //         return false;
-// //       }
-// //       j++;
-// //     } else if (i === rule.conclusion.right.length - 1) {
-// //       if (token instanceof UpperGreek) {
-// //         // idk
-// //       } else if (token instanceof LowerASCII) {
-// //         if (j !== conclusion.right.length - 1) {
-// //           // A variable can only be one letter long
-// //           return false;
-// //         }
-// //         mapping[token.letter] = [conclusion.right[j]];
-// //       } else if (token instanceof UpperASCII) {
-// //         mapping[token.letter] = conclusion.right.slice(j);
-// //       }
-// //     } else {
-// //       while (conclusion.right)
-// //     }
-// //   }
+function matchOneSide(inputAST: AST, sideStructure: Token[], syntax: SyntaxRule[]): Record<string, AST> {
+  const input = astToString(inputAST);
+  const parsers = buildParsers(syntax);
 
-// //   console.log(mapping);
+  let matcher = getTokenParser(sideStructure[0], parsers).pipe(map((x) => [x]));
+  for (const token of sideStructure.slice(1)) {
+    matcher = matcher.pipe(
+      then(getTokenParser(token, parsers)),
+      map(([x, y]) => [...x, y]),
+    );
+  }
 
-// //   return true;
-// // }
+  const matchResult = matcher.parse(input).value;
+  const names: Record<string, AST> = {};
+  for (const ast of matchResult) {
+    if (ast instanceof NonTerminalAST) {
+      if (Object.hasOwn(names, ast.value)) {
+        throw new Error("Duplicate name");
+      }
+      names[ast.value] = ast;
+    }
+  }
 
-// export { Rule };
+  return names;
+}
+
+function isMultiset(ast: AST): boolean {
+  return ast instanceof NonTerminalAST && ast.children.every((child) => child.value === "");
+}
+
+function splitInputASTByTurnstile(input: AST[]): [AST[], AST[]] {
+  const left = [];
+  const right = [];
+  let addToLeft = true;
+
+  for (const node of input) {
+    if (node instanceof TerminalAST && node.value === "|-") {
+      addToLeft = false;
+    } else if (addToLeft) {
+      left.push(node);
+    } else {
+      right.push(node);
+    }
+  }
+
+  if (addToLeft) {
+    throw new Error("Input has no turnstile");
+  }
+
+  return [left, right];
+}
+
+function splitTokensByTurnstile(tokens: Token[]): [Token[], Token[]] {
+  const left = [];
+  const right = [];
+  let addToLeft = true;
+
+  for (const token of tokens) {
+    if (token instanceof Terminal && token.value === "|-") {
+      addToLeft = false;
+    } else if (addToLeft) {
+      left.push(token);
+    } else {
+      right.push(token);
+    }
+  }
+
+  return [left, right];
+}
+
+function match(input: string, structure: Token[], syntax: SyntaxRule[]): Record<string, AST> {
+  const parser = buildParsers(syntax)[0];
+  const parseResult = parser.parse(input);
+
+  if (!parseResult.isOk) {
+    throw new Error("Malformed input");
+  }
+
+  const [leftInput, rightInput] = splitInputASTByTurnstile(parseResult.value);
+  const [leftStructure, rightStructure] = splitTokensByTurnstile(structure);
+
+  let names: Record<string, AST> = {};
+
+  // Assume there's only one node on both the left and the right, for now
+  if (!isMultiset(rightInput[0])) {
+    const rightNames = matchOneSide(rightInput[0], rightStructure, syntax);
+    names = union([names, rightNames]);
+  }
+
+  if (!isMultiset(leftInput[0])) {
+    const leftNames = matchOneSide(leftInput[0], leftStructure, syntax);
+    names = union([names, leftNames]);
+  }
+
+  return names;
+}
+
+export { match };

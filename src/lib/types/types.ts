@@ -1,3 +1,5 @@
+import { Token } from "./token";
+
 interface SyntaxRule {
   definition: Token[][];
   placeholders: string[];
@@ -12,22 +14,4 @@ interface InferenceRule {
   conclusion: SyntaxRule;
 }
 
-class Terminal {
-  constructor(readonly value: string) {}
-}
-
-class NonTerminal {
-  constructor(
-    readonly index: number,
-    readonly name: string,
-  ) {}
-}
-
-class Multiset {
-  constructor(readonly nonTerminal: NonTerminal) {}
-}
-
-type Token = Terminal | NonTerminal | Multiset;
-
-export { Terminal, NonTerminal, Multiset };
-export type { SyntaxRule, InferenceRule, Token };
+export type { SyntaxRule, InferenceRule };
