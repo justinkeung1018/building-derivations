@@ -167,50 +167,111 @@ describe("Verifies logic inference rules are applied correctly", () => {
 
   const syntax = [statement, type, context];
 
-  const action: InferenceRule = {
-    name: "Ax",
-    premises: [],
-    conclusion: {
-      structure: [
-        new NonTerminal(2, "\\Gamma"),
-        new Terminal(","),
-        new NonTerminal(1, "A"),
-        new Terminal("|-"),
-        new NonTerminal(1, "A"),
-      ],
-      sanitised: "",
-      unsanitised: "",
-    },
-  };
+  describe("Action rule", () => {
+    const action: InferenceRule = {
+      name: "Ax",
+      premises: [],
+      conclusion: {
+        structure: [
+          new NonTerminal(2, "\\Gamma"),
+          new Terminal(","),
+          new NonTerminal(1, "A"),
+          new Terminal("|-"),
+          new NonTerminal(1, "A"),
+        ],
+        sanitised: "",
+        unsanitised: "",
+      },
+    };
 
-  describe("Verifies correct applications of the action rule", () => {
-    function check(conclusion: string) {
-      expect(verify(conclusion, [], action, syntax)).toBe(true);
-    }
+    describe("Correct applications", () => {
+      function check(conclusion: string) {
+        expect(verify(conclusion, [], action, syntax)).toBe(true);
+      }
 
-    it("verifies context with variables only", () => {
-      check("x, y, z |- y");
+      it("verifies context with variables only", () => {
+        check("x, y, z |- y");
+      });
+
+      it("verifies context with arrow terms", () => {
+        check("(x -> y), x |- (x -> y)");
+      });
+
+      it("verifies context with duplicate elements", () => {
+        check("y, y, y, x, y, x |- x");
+      });
     });
 
-    it("verifies context with arrow terms", () => {
-      check("(x -> y), x |- (x -> y)");
-    });
+    describe("Incorrect applications", () => {
+      it("rejects when conclusion does not appear in context", () => {
+        const conclusion = "x, y |- z";
+        expect(verify(conclusion, [], action, syntax)).toBe(false);
+      });
 
-    it("verifies context with duplicate elements", () => {
-      check("y, y, y, x, y, x |- x");
+      it("rejects non-empty premises", () => {
+        const conclusion = "x |- x";
+        const premises = ["x |- x"];
+        expect(verify(conclusion, premises, action, syntax)).toBe(false);
+      });
+
+      it("rejects malformed conclusion", () => {
+        const conclusion = "x|x";
+        expect(verify(conclusion, [], action, syntax)).toBe(false);
+      });
     });
   });
 
-  describe("Verifies incorrect application of action rule", () => {
-    it("rejects when conclusion does not appear in context", () => {
-      const conclusion = "x, y |- z";
-      expect(verify(conclusion, [], action, syntax)).toBe(false);
+  describe("Arrow introduction", () => {
+    const arrow: InferenceRule = {
+      name: "->I",
+      premises: [
+        {
+          structure: [
+            new NonTerminal(2, "\\Gamma"),
+            new Terminal(","),
+            new NonTerminal(1, "A"),
+            new Terminal("|-"),
+            new NonTerminal(1, "B"),
+          ],
+          sanitised: "",
+          unsanitised: "",
+        },
+      ],
+      conclusion: {
+        structure: [
+          new NonTerminal(2, "\\Gamma"),
+          new Terminal("|-"),
+          new Terminal("("),
+          new NonTerminal(1, "A"),
+          new Terminal("->"),
+          new NonTerminal(1, "B"),
+          new Terminal(")"),
+        ],
+        sanitised: "",
+        unsanitised: "",
+      },
+    };
+
+    describe("Correct applications", () => {
+      it("verifies empty contexts", () => {
+        const conclusion = "\\varnothing |- (x -> y)";
+        const premises = ["x |- y"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
+
+      it("verifies non-empty contexts", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises = ["y, x |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
     });
 
-    it("rejects non-empty premises", () => {
-      const conclusion = "x |- x";
-      const premises = ["x |- x"];
-      expect(verify(conclusion, premises, action, syntax)).toBe(false);
+    describe("Incorrect applications", () => {
+      it("rejects inconsistent contexts", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises = ["y |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
     });
   });
 });
