@@ -1,8 +1,8 @@
-import { AST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
-import { SyntaxRule, InferenceRule } from "../types/types";
+import { SyntaxRule, InferenceRule } from "../types/rules";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -117,10 +117,11 @@ function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST> {
   } else {
     // Multiset
     const nonempty = parsers[token.nonTerminal.index].pipe(
+      map((x) => new NonTerminalAST(token.nonTerminal.name, x)),
       manySepBy(string(",").pipe(between(whitespace()))),
-      map((x) => new NonTerminalAST("", x.flat())),
+      map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
     );
-    const empty = string("\\varnothing").pipe(map(() => new NonTerminalAST("", [])));
+    const empty = string("\\varnothing").pipe(map(() => new MultisetAST([])));
     return empty.pipe(or(nonempty));
   }
 }

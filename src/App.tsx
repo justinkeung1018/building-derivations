@@ -4,7 +4,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { action, arrowElimination, arrowIntroduction } from "./lib/ts-parsec/verifiers/lambda";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
 import { Button } from "./components/shadcn/Button";
-import { InferenceRule, SyntaxRule } from "./lib/types/types";
+import { InferenceRule, SyntaxRule } from "./lib/types/rules";
 import { SyntaxEditor } from "./components/SyntaxEditor";
 import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
 

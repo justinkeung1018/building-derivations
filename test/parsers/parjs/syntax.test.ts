@@ -1,5 +1,5 @@
 import { buildParsers, parseSyntax } from "@/lib/parsers/syntax";
-import { NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
 import { ParjsParsingFailure } from "parjs";
 
@@ -103,12 +103,16 @@ describe("Builds parser based on syntax rules", () => {
 
   it("parses non-empty multisets", () => {
     expect(parser.parse("a, b,a").value).toEqual([
-      new NonTerminalAST("", [new TerminalAST("a"), new TerminalAST("b"), new TerminalAST("a")]),
+      new MultisetAST([
+        new NonTerminalAST("A", [new TerminalAST("a")]),
+        new NonTerminalAST("A", [new TerminalAST("b")]),
+        new NonTerminalAST("A", [new TerminalAST("a")]),
+      ]),
     ]);
   });
 
   it("parses empty multisets", () => {
-    expect(parser.parse("\\varnothing").value).toEqual([new NonTerminalAST("", [])]);
+    expect(parser.parse("\\varnothing").value).toEqual([new MultisetAST([])]);
   });
 
   it("parses statements in logic", () => {
@@ -137,8 +141,25 @@ describe("Builds parser based on syntax rules", () => {
 
     const parser = buildParsers([statement, context, type, typevar])[0];
     expect(parser.parse("\\varnothing |- (1 -> 2)").value).toEqual([
-      new NonTerminalAST("\\Gamma", [new NonTerminalAST("", [])]),
+      new NonTerminalAST("\\Gamma", [new MultisetAST([])]),
       new Terminal("|-"),
+      new NonTerminalAST("A", [
+        new TerminalAST("("),
+        new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
+        new TerminalAST("->"),
+        new NonTerminalAST("B", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+        new TerminalAST(")"),
+      ]),
+    ]);
+
+    expect(parser.parse("1, 2 |- (1 -> 2)").value).toEqual([
+      new NonTerminalAST("\\Gamma", [
+        new MultisetAST([
+          new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
+          new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+        ]),
+      ]),
+      new TerminalAST("|-"),
       new NonTerminalAST("A", [
         new TerminalAST("("),
         new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),

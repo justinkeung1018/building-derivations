@@ -4,12 +4,16 @@ class TerminalAST {
 
 class NonTerminalAST {
   constructor(
-    readonly value: string,
+    readonly name: string,
     readonly children: AST[],
   ) {}
 }
 
-type AST = TerminalAST | NonTerminalAST;
+class MultisetAST {
+  constructor(readonly elements: NonTerminalAST[]) {}
+}
 
-export { TerminalAST, NonTerminalAST };
+type AST = TerminalAST | NonTerminalAST | MultisetAST;
+
+export { TerminalAST, NonTerminalAST, MultisetAST };
 export type { AST };
