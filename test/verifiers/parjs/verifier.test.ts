@@ -1,6 +1,7 @@
 import { MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { InferenceRule } from "@/lib/types/rules";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
-import { match } from "@/lib/verifier";
+import { match, verify } from "@/lib/verifier";
 
 const defaultRule = {
   placeholders: [],
@@ -22,7 +23,9 @@ describe("Matches things", () => {
     };
     const type = { ...defaultRule, definition: [[new Terminal("x")]], placeholders: ["A"] };
 
-    expect(match(input, structure, [statement, type])).toEqual({ A: new NonTerminalAST("A", [new TerminalAST("x")]) });
+    expect(match(input, structure, [statement, type], {})).toEqual({
+      A: new NonTerminalAST("A", [new TerminalAST("x")]),
+    });
   });
 
   it("matches arrows", () => {
@@ -52,7 +55,7 @@ describe("Matches things", () => {
       placeholders: ["A", "B"],
     };
 
-    expect(match(input, structure, [statement, type])).toEqual({
+    expect(match(input, structure, [statement, type], {})).toEqual({
       A: new NonTerminalAST("A", [new TerminalAST("x")]),
       B: new NonTerminalAST("B", [new TerminalAST("y")]),
     });
@@ -91,7 +94,7 @@ describe("Matches things", () => {
       placeholders: ["\\Gamma"],
     };
 
-    expect(match(input, structure, [statement, type, context])).toEqual({
+    expect(match(input, structure, [statement, type, context], {})).toEqual({
       "\\Gamma": new NonTerminalAST("\\Gamma", [
         new MultisetAST([
           new NonTerminalAST("A", [new TerminalAST("x")]),
@@ -133,9 +136,81 @@ describe("Matches things", () => {
       placeholders: ["\\Gamma"],
     };
 
-    expect(match(input, structure, [statement, type, context])).toEqual({
+    expect(match(input, structure, [statement, type, context], {})).toEqual({
       "\\Gamma": new NonTerminalAST("\\Gamma", [new MultisetAST([new NonTerminalAST("A", [new TerminalAST("y")])])]),
       A: new NonTerminalAST("A", [new TerminalAST("x")]),
+    });
+  });
+});
+
+describe("Verifies logic inference rules are applied correctly", () => {
+  // Syntax
+  const statement = {
+    ...defaultRule,
+    definition: [[new NonTerminal(2, "\\Gamma"), new Terminal("|-"), new NonTerminal(1, "A")]],
+  };
+  const type = {
+    ...defaultRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("z")],
+      [new Terminal("("), new NonTerminal(1, "A"), new Terminal("->"), new NonTerminal(1, "B"), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+  const context = {
+    ...defaultRule,
+    definition: [[new Multiset(new NonTerminal(1, "A"))]],
+    placeholders: ["\\Gamma"],
+  };
+
+  const syntax = [statement, type, context];
+
+  const action: InferenceRule = {
+    name: "Ax",
+    premises: [],
+    conclusion: {
+      structure: [
+        new NonTerminal(2, "\\Gamma"),
+        new Terminal(","),
+        new NonTerminal(1, "A"),
+        new Terminal("|-"),
+        new NonTerminal(1, "A"),
+      ],
+      sanitised: "",
+      unsanitised: "",
+    },
+  };
+
+  describe("Verifies correct applications of the action rule", () => {
+    function check(conclusion: string) {
+      expect(verify(conclusion, [], action, syntax)).toBe(true);
+    }
+
+    it("verifies context with variables only", () => {
+      check("x, y, z |- y");
+    });
+
+    it("verifies context with arrow terms", () => {
+      check("(x -> y), x |- (x -> y)");
+    });
+
+    it("verifies context with duplicate elements", () => {
+      check("y, y, y, x, y, x |- x");
+    });
+  });
+
+  describe("Verifies incorrect application of action rule", () => {
+    it("rejects when conclusion does not appear in context", () => {
+      const conclusion = "x, y |- z";
+      expect(verify(conclusion, [], action, syntax)).toBe(false);
+    });
+
+    it("rejects non-empty premises", () => {
+      const conclusion = "x |- x";
+      const premises = ["x |- x"];
+      expect(verify(conclusion, premises, action, syntax)).toBe(false);
     });
   });
 });

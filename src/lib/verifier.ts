@@ -2,7 +2,7 @@ import { buildParsers, getTokenParser } from "./parsers/syntax";
 import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "./types/ast";
 import { map, then } from "parjs/combinators";
 import { NonTerminal, Terminal, Token } from "./types/token";
-import { SyntaxRule } from "./types/rules";
+import { InferenceRule, SyntaxRule } from "./types/rules";
 import _ from "lodash";
 
 function astToString(ast: AST): string {
@@ -128,8 +128,10 @@ function matchMultiset(multiset: NonTerminalAST, toMatch: Token[], names: Record
 
   for (const name of namesToMatch) {
     if (Object.hasOwn(names, name)) {
+      // We already matched this name elsewhere, remove the associated AST from the multiset
       elements = removeFromMultiset(elements, names[name]);
     } else {
+      // We have not seen this name before
       unmatchedNames.push(name);
     }
   }
@@ -144,7 +146,12 @@ function matchMultiset(multiset: NonTerminalAST, toMatch: Token[], names: Record
   return matchedNames;
 }
 
-function match(input: string, structure: Token[], syntax: SyntaxRule[]): Record<string, AST> {
+function match(
+  input: string,
+  structure: Token[],
+  syntax: SyntaxRule[],
+  names: Record<string, AST>,
+): Record<string, AST> {
   const parser = buildParsers(syntax)[0];
   const parseResult = parser.parse(input);
 
@@ -154,8 +161,6 @@ function match(input: string, structure: Token[], syntax: SyntaxRule[]): Record<
 
   const [leftInput, rightInput] = splitInputASTByTurnstile(parseResult.value);
   const [leftStructure, rightStructure] = splitTokensByTurnstile(structure);
-
-  let names: Record<string, AST> = {};
 
   // Assume there's only one node on both the left and the right, for now
   if (!isMultiset(leftInput[0])) {
@@ -183,4 +188,23 @@ function match(input: string, structure: Token[], syntax: SyntaxRule[]): Record<
   return names;
 }
 
-export { match };
+function verify(conclusion: string, premises: string[], rule: InferenceRule, syntax: SyntaxRule[]): boolean {
+  if (premises.length !== rule.premises.length) {
+    return false;
+  }
+
+  try {
+    let names = match(conclusion, rule.conclusion.structure, syntax, {});
+
+    premises.forEach((premise, index) => {
+      const premiseStructure = rule.premises[index].structure;
+      names = match(premise, premiseStructure, syntax, names);
+    });
+
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+export { match, verify };

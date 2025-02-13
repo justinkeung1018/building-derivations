@@ -4,8 +4,8 @@ import { Button } from "./shadcn/Button";
 import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
-import { parseInferenceRules } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
+import { parseInferenceRules } from "@/lib/parsers/inference";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -16,11 +16,9 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
           onClick={() => {
             setInferenceRules((old) => {
               const newPremise = {
-                placeholders: [],
-                definition: [],
-                definitionSanitised: [],
-                placeholdersUnsanitised: "",
-                definitionUnsanitised: "",
+                structure: [],
+                sanitised: "",
+                unsanitised: "",
               };
               const newRule = { ...rule, premises: [newPremise] };
               return old.map((r, i) => (i === index ? newRule : r));
@@ -39,7 +37,7 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
         <Input
           key={`${index.toString()}-${premiseIndex.toString()}-premise`}
           className="w-48"
-          value={premise.definitionUnsanitised}
+          value={premise.unsanitised}
           onChange={(e) => {
             setInferenceRules((old) => {
               const newPremise = { ...premise, definitionUnsanitised: e.target.value };
@@ -62,7 +60,7 @@ function ConclusionEditor({ rule, index, setInferenceRules }: DefinitionEditorPr
       <Input
         key={`${index.toString()}-conclusion`}
         className="w-96"
-        value={rule.conclusion.definitionUnsanitised}
+        value={rule.conclusion.unsanitised}
         onChange={(e) => {
           setInferenceRules((old) => {
             const newConclusion = { ...rule.conclusion, definitionUnsanitised: e.target.value };
@@ -88,10 +86,8 @@ function DefinitionEditor(props: DefinitionEditorProps) {
   const { editing, rule } = props;
 
   if (!editing) {
-    const premisesLaTeX = rule.premises
-      .map((premise) => premise.definitionSanitised.map(latexify).join(" "))
-      .join(" \\quad ");
-    const conclusionLaTeX = rule.conclusion.definitionSanitised.map(latexify).join(" ");
+    const premisesLaTeX = rule.premises.map((premise) => latexify(premise.sanitised)).join(" \\quad ");
+    const conclusionLaTeX = latexify(rule.conclusion.sanitised);
     return <MathJax>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>;
   }
 
@@ -162,11 +158,9 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                 name: "",
                 premises: [],
                 conclusion: {
-                  placeholders: [],
-                  definition: [],
-                  definitionSanitised: [],
-                  placeholdersUnsanitised: "",
-                  definitionUnsanitised: "",
+                  structure: [],
+                  sanitised: "",
+                  unsanitised: "",
                 },
               },
             ]);

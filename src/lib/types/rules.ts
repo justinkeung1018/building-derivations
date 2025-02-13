@@ -8,10 +8,17 @@ interface SyntaxRule {
   definitionUnsanitised: string;
 }
 
+// Statements as part of an inference rule should not have multiple alternatives
+interface InferenceRuleStatement {
+  structure: Token[];
+  sanitised: string;
+  unsanitised: string;
+}
+
 interface InferenceRule {
   name: string;
-  premises: SyntaxRule[];
-  conclusion: SyntaxRule;
+  premises: InferenceRuleStatement[];
+  conclusion: InferenceRuleStatement;
 }
 
 export type { SyntaxRule, InferenceRule };

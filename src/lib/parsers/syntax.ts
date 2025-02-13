@@ -2,7 +2,7 @@ import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
-import { SyntaxRule, InferenceRule } from "../types/rules";
+import { SyntaxRule } from "../types/rules";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -88,24 +88,6 @@ function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
   return syntax;
 }
 
-function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): InferenceRule[] {
-  // Assume the syntax is well-formed and already parsed
-  const parser = buildSyntaxRuleParser(syntax);
-
-  for (const rule of rules) {
-    for (const premise of rule.premises) {
-      premise.definitionSanitised = sanitiseDefinition(premise.definitionUnsanitised);
-      premise.definition = premise.definitionSanitised.map((alternative) => parser.parse(alternative).value);
-    }
-    rule.conclusion.definitionSanitised = sanitiseDefinition(rule.conclusion.definitionUnsanitised);
-    rule.conclusion.definition = rule.conclusion.definitionSanitised.map(
-      (alternative) => parser.parse(alternative).value,
-    );
-  }
-
-  return rules;
-}
-
 function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST> {
   if (token instanceof Terminal) {
     return string(token.value).pipe(
@@ -151,4 +133,11 @@ function buildParsers(syntax: SyntaxRule[]): Parjser<AST[]>[] {
   return parsers;
 }
 
-export { parseSyntax, parseInferenceRules, getPlaceholderToRuleIndex, getTokenParser, buildParsers };
+export {
+  buildSyntaxRuleParser,
+  parseSyntax,
+  getPlaceholderToRuleIndex,
+  getTokenParser,
+  buildParsers,
+  sanitiseDefinition,
+};
