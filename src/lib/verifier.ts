@@ -112,7 +112,7 @@ function removeFromMultiset(elements: NonTerminalAST[], toRemove: AST): NonTermi
   for (let i = 0; i < elements.length; i++) {
     if (_.isEqual(elements[i].children, toRemove.children)) {
       // Only remove one instance from multiset, if multiset contains multiple instances of the same element
-      return [...elements.splice(0, i), ...elements.splice(i + 1)];
+      return elements.filter((_, index) => i !== index);
     }
   }
   throw new Error("Element does not exist in multiset");
@@ -128,8 +128,16 @@ function matchMultiset(multiset: NonTerminalAST, toMatch: Token[], names: Record
 
   for (const name of namesToMatch) {
     if (Object.hasOwn(names, name)) {
-      // We already matched this name elsewhere, remove the associated AST from the multiset
-      elements = removeFromMultiset(elements, names[name]);
+      // We already matched this name elsewhere
+      if (isMultiset(names[name])) {
+        // Remove all the elements that are in our previously matched multiset
+        for (const element of ((names[name] as NonTerminalAST).children[0] as MultisetAST).elements) {
+          elements = removeFromMultiset(elements, element);
+        }
+      } else {
+        // Remove the associated AST
+        elements = removeFromMultiset(elements, names[name]);
+      }
     } else {
       // We have not seen this name before
       unmatchedNames.push(name);
@@ -202,7 +210,8 @@ function verify(conclusion: string, premises: string[], rule: InferenceRule, syn
     });
 
     return true;
-  } catch (_) {
+  } catch (e) {
+    console.error(e);
     return false;
   }
 }

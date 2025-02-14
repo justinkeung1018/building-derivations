@@ -221,57 +221,81 @@ describe("Verifies logic inference rules are applied correctly", () => {
     });
   });
 
-  // describe("Arrow introduction", () => {
-  //   const arrow: InferenceRule = {
-  //     name: "->I",
-  //     premises: [
-  //       {
-  //         structure: [
-  //           new NonTerminal(2, "\\Gamma"),
-  //           new Terminal(","),
-  //           new NonTerminal(1, "A"),
-  //           new Terminal("|-"),
-  //           new NonTerminal(1, "B"),
-  //         ],
-  //         sanitised: "",
-  //         unsanitised: "",
-  //       },
-  //     ],
-  //     conclusion: {
-  //       structure: [
-  //         new NonTerminal(2, "\\Gamma"),
-  //         new Terminal("|-"),
-  //         new Terminal("("),
-  //         new NonTerminal(1, "A"),
-  //         new Terminal("->"),
-  //         new NonTerminal(1, "B"),
-  //         new Terminal(")"),
-  //       ],
-  //       sanitised: "",
-  //       unsanitised: "",
-  //     },
-  //   };
+  describe("Arrow introduction", () => {
+    const arrow: InferenceRule = {
+      name: "->I",
+      premises: [
+        {
+          structure: [
+            new NonTerminal(2, "\\Gamma"),
+            new Terminal(","),
+            new NonTerminal(1, "A"),
+            new Terminal("|-"),
+            new NonTerminal(1, "B"),
+          ],
+          sanitised: "",
+          unsanitised: "",
+        },
+      ],
+      conclusion: {
+        structure: [
+          new NonTerminal(2, "\\Gamma"),
+          new Terminal("|-"),
+          new Terminal("("),
+          new NonTerminal(1, "A"),
+          new Terminal("->"),
+          new NonTerminal(1, "B"),
+          new Terminal(")"),
+        ],
+        sanitised: "",
+        unsanitised: "",
+      },
+    };
 
-  //   describe("Correct applications", () => {
-  //     it("verifies empty contexts", () => {
-  //       const conclusion = "\\varnothing |- (x -> y)";
-  //       const premises = ["x |- y"];
-  //       expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
-  //     });
+    describe("Correct applications", () => {
+      it("verifies empty contexts", () => {
+        const conclusion = "\\varnothing |- (x -> y)";
+        const premises = ["x |- y"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
 
-  //     it("verifies non-empty contexts", () => {
-  //       const conclusion = "x |- (y -> z)";
-  //       const premises = ["y, x |- z"];
-  //       expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
-  //     });
-  //   });
+      it("verifies non-empty contexts", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises = ["y, x |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
 
-  //   describe("Incorrect applications", () => {
-  //     it("rejects inconsistent contexts", () => {
-  //       const conclusion = "x |- (y -> z)";
-  //       const premises = ["y |- z"];
-  //       expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
-  //     });
-  //   });
-  // });
+      it("verifies contexts with duplicate elements", () => {
+        const conclusion = "x, y, x, x, y |- (x -> y)";
+        const premises = ["x, x, y, x, x, y |- y"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
+    });
+
+    describe("Incorrect applications", () => {
+      it("rejects inconsistent contexts", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises = ["y |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
+
+      it("rejects when there are too few premises", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises: string[] = [];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
+
+      it("rejects when there are too many premises", () => {
+        const conclusion = "x |- (y -> z)";
+        const premises = ["x, y |- z", "x, z |- y"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
+
+      it("rejects conclusions showing non-arrow term", () => {
+        const conclusion = "x |- y";
+        const premises = ["x, y |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
+    });
+  });
 });
