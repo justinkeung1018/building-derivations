@@ -151,6 +151,10 @@ function matchMultiset(multiset: NonTerminalAST, toMatch: Token[], names: Record
     matchedNames[unmatchedNames[0]] = new NonTerminalAST(multiset.name, [new MultisetAST(elements)]);
   }
 
+  if (unmatchedNames.length === 0 && elements.length !== 0) {
+    throw new Error("Multiset contains redundant elements");
+  }
+
   return matchedNames;
 }
 
@@ -210,8 +214,7 @@ function verify(conclusion: string, premises: string[], rule: InferenceRule, syn
     });
 
     return true;
-  } catch (e) {
-    console.error(e);
+  } catch (_) {
     return false;
   }
 }

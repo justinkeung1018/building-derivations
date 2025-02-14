@@ -298,4 +298,63 @@ describe("Verifies logic inference rules are applied correctly", () => {
       });
     });
   });
+
+  describe("Arrow elimination", () => {
+    const arrow: InferenceRule = {
+      name: "->E",
+      premises: [
+        {
+          structure: [
+            new NonTerminal(2, "\\Gamma"),
+            new Terminal("|-"),
+            new Terminal("("),
+            new NonTerminal(1, "A"),
+            new Terminal("->"),
+            new NonTerminal(1, "B"),
+            new Terminal(")"),
+          ],
+          sanitised: "",
+          unsanitised: "",
+        },
+        {
+          structure: [new NonTerminal(2, "\\Gamma"), new Terminal("|-"), new NonTerminal(1, "A")],
+          sanitised: "",
+          unsanitised: "",
+        },
+      ],
+      conclusion: {
+        structure: [new NonTerminal(2, "\\Gamma"), new Terminal("|-"), new NonTerminal(1, "B")],
+        sanitised: "",
+        unsanitised: "",
+      },
+    };
+
+    describe("Correct applications", () => {
+      it("verifies empty contexts", () => {
+        const conclusion = "\\varnothing |- y";
+        const premises = ["\\varnothing |- (x -> y)", "\\varnothing |- x"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
+
+      it("verifies non-empty contexts with shuffled ordering", () => {
+        const conclusion = "x, y, z |- y";
+        const premises = ["z, x, y |- (x -> y)", "y, z, x |- x"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
+
+      it("verifies nested arrow types", () => {
+        const conclusion = "\\varnothing |- (x -> y)";
+        const premises = ["\\varnothing |- (z -> (x -> y))", "\\varnothing |- z"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(true);
+      });
+    });
+
+    describe("Incorrect applications", () => {
+      it("rejects inconsistent contexts", () => {
+        const conclusion = "\\varnothing |- y";
+        const premises = ["\\varnothing |- (x -> y)", "x |- x"];
+        expect(verify(conclusion, premises, arrow, syntax)).toBe(false);
+      });
+    });
+  });
 });
