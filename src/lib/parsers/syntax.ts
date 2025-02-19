@@ -13,9 +13,7 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
 
 function sanitiseDefinition(definitionUnsanitised: string): string[] {
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
-  return turnstile
-    .split("|")
-    .map((alternative) => alternative.trim().replaceAll("\\vdash", "|-").replaceAll("{", "\\{"));
+  return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
 }
 
 function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
