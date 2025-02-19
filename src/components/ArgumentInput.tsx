@@ -1,10 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/shadcn/Input";
 import { MathJax } from "better-react-mathjax";
-import { lex } from "@/lib/ts-parsec/lexer";
-import { latexify } from "@/lib/ts-parsec/latexify";
 import { Button } from "./shadcn/Button";
 import { Plus } from "lucide-react";
+import { latexify } from "@/lib/latexify";
 
 interface FocusingInputProps extends React.ComponentProps<"input"> {
   edited: boolean;
@@ -42,7 +41,7 @@ function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
                 ...old[index].ruleNameInputState,
                 edited: true,
                 isEditing: false,
-                latex: `\\((\\mathit{${old[index].ruleNameInputState.value}})\\)`,
+                latex: `\\((\\mathit{${latexify(old[index].ruleNameInputState.value)}})\\)`,
               },
             },
           }));
@@ -113,7 +112,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
         ...states[index].conclusionInputState,
         edited: true,
         isEditing: false,
-        latex: `\\(${latexify(lex(value))}\\)`,
+        latex: `\\(${latexify(value)}\\)`,
       };
 
       setStates((old) => ({ ...old, [index]: { ...old[index], conclusionInputState: newState } }));
