@@ -33,8 +33,22 @@ describe("Parses syntax rules", () => {
     expect(contextParsed.definition).toEqual([[new Multiset(new NonTerminal(1, "A"))]]);
   });
 
+  it("parses multisets of non-terminals with spaces between curly braces", () => {
+    const context = { ...defaultRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" };
+    const type = { ...defaultRule, placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
+    const [contextParsed, _] = parseSyntax([context, type]);
+    expect(contextParsed.definition).toEqual([[new Multiset(new NonTerminal(1, "A"))]]);
+  });
+
   it("fails when trying to parse multisets of terminals", () => {
+    // Since A (in the definition of \\Gamma) does not appear in the list of placeholders, it is treated as a terminal "A"
     expect(() => parseSyntax([context])).toThrow(ParjsParsingFailure);
+  });
+
+  it("fails when there are duplicate placeholders", () => {
+    const rule1 = { ...defaultRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "x" };
+    const rule2 = { ...defaultRule, placeholdersUnsanitised: "B, C", definitionUnsanitised: "y" };
+    expect(() => parseSyntax([rule1, rule2])).toThrow(Error);
   });
 
   it("parses logic syntax", () => {

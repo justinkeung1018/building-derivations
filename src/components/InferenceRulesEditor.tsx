@@ -3,7 +3,7 @@ import { MathJax } from "better-react-mathjax";
 import { Button } from "./shadcn/Button";
 import { Input } from "./shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
-import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
+import { InferenceRule, InferenceRuleStatement, SyntaxRule } from "@/lib/types/rules";
 import { latexify } from "@/lib/latexify";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 
@@ -40,8 +40,8 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
           value={premise.unsanitised}
           onChange={(e) => {
             setInferenceRules((old) => {
-              const newPremise = { ...premise, definitionUnsanitised: e.target.value };
-              const newRule = {
+              const newPremise: InferenceRuleStatement = { ...premise, unsanitised: e.target.value };
+              const newRule: InferenceRule = {
                 ...rule,
                 premises: rule.premises.map((p, i) => (i === premiseIndex ? newPremise : p)),
               };
@@ -63,8 +63,8 @@ function ConclusionEditor({ rule, index, setInferenceRules }: DefinitionEditorPr
         value={rule.conclusion.unsanitised}
         onChange={(e) => {
           setInferenceRules((old) => {
-            const newConclusion = { ...rule.conclusion, definitionUnsanitised: e.target.value };
-            const newRule = {
+            const newConclusion: InferenceRuleStatement = { ...rule.conclusion, unsanitised: e.target.value };
+            const newRule: InferenceRule = {
               ...rule,
               conclusion: newConclusion,
             };
@@ -175,7 +175,6 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
               setInferenceRules((old) => parseInferenceRules(old, syntax));
-              console.log(inferenceRules);
               setEditing(false);
             }}
           >

@@ -3,7 +3,6 @@ import { Input } from "@/components/shadcn/Input";
 import { MathJax } from "better-react-mathjax";
 import { lex } from "@/lib/ts-parsec/lexer";
 import { latexify } from "@/lib/ts-parsec/latexify";
-import { Argument, parseArgument } from "@/lib/ts-parsec/parsers/argument";
 import { Button } from "./shadcn/Button";
 import { Plus } from "lucide-react";
 
@@ -24,14 +23,161 @@ function FocusingInput({ edited, autoFocus, onBlur, ...props }: FocusingInputPro
   return <Input ref={ref} autoFocus={autoFocus} onBlur={onBlur} {...props} />;
 }
 
-interface ArgumentInputState {
-  index: number;
-  autofocus: boolean;
+function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
+  const showInput = states[index].ruleNameInputState.isEditing || states[index].ruleNameInputState.value.length == 0;
+
+  if (showInput) {
+    return (
+      <FocusingInput
+        className="w-full"
+        value={states[index].ruleNameInputState.value}
+        edited={states[index].ruleNameInputState.edited}
+        autoFocus={false}
+        onBlur={() => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              ruleNameInputState: {
+                ...old[index].ruleNameInputState,
+                edited: true,
+                isEditing: false,
+                latex: `\\((\\mathit{${old[index].ruleNameInputState.value}})\\)`,
+              },
+            },
+          }));
+        }}
+        onFocus={() => {
+          setStates((old) => ({
+            ...old,
+            [index]: { ...old[index], ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true } },
+          }));
+        }}
+        onChange={(e) => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              ruleNameInputState: { ...old[index].ruleNameInputState, value: e.target.value },
+            },
+          }));
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="px-4">
+      <MathJax
+        onClick={() => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              ruleNameInputState: { ...old[index].ruleNameInputState, edited: true, isEditing: true },
+            },
+          }));
+        }}
+      >
+        {states[index].ruleNameInputState.latex}
+      </MathJax>
+    </div>
+  );
+}
+
+function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
+  const showInput =
+    states[index].conclusionInputState.isEditing || states[index].conclusionInputState.value.length == 0;
+
+  if (showInput) {
+    const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      const value = e.target.value.trim();
+
+      if (!value && states[index].conclusionIndex !== null && states[index].premiseIndices.length === 0) {
+        // Delete newly added input (i.e. no premises) if it is empty
+        const rest: Record<number, ArgumentInputState> = {};
+        for (const key in states) {
+          if (+key !== index) {
+            rest[key] = states[key];
+          }
+        }
+
+        // Remove premise from conclusion input
+        const conclusionIndex = states[index].conclusionIndex;
+        rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
+        setStates(rest);
+        return;
+      }
+
+      const newState = {
+        ...states[index].conclusionInputState,
+        edited: true,
+        isEditing: false,
+        latex: `\\(${latexify(lex(value))}\\)`,
+      };
+
+      setStates((old) => ({ ...old, [index]: { ...old[index], conclusionInputState: newState } }));
+    };
+
+    return (
+      <FocusingInput
+        value={states[index].conclusionInputState.value}
+        edited={states[index].conclusionInputState.edited}
+        autoFocus={states[index].autofocus}
+        onBlur={onBlur}
+        onFocus={() => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              conclusionInputState: { ...states[index].conclusionInputState, isEditing: true },
+            },
+          }));
+        }}
+        onChange={(e) => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              conclusionInputState: { ...states[index].conclusionInputState, value: e.target.value },
+            },
+          }));
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="px-4">
+      <MathJax
+        onClick={() => {
+          setStates((old) => ({
+            ...old,
+            [index]: {
+              ...old[index],
+              conclusionInputState: { ...old[index].conclusionInputState, edited: true, isEditing: true },
+            },
+          }));
+        }}
+      >
+        {states[index].conclusionInputState.latex}
+      </MathJax>
+    </div>
+  );
+}
+
+interface InputState {
   isEditing: boolean;
   edited: boolean; // Focus input when we try to edit from the second time onwards
   value: string;
   latex: string;
-  conclusion: Argument | null;
+}
+
+interface ArgumentInputState {
+  index: number;
+  autofocus: boolean;
+  conclusionInputState: InputState;
+  ruleNameInputState: InputState;
   conclusionIndex: number | null;
   premiseIndices: number[];
 }
@@ -40,11 +186,18 @@ function getDefaultState(index: number, conclusionIndex: number | null): Argumen
   return {
     index,
     autofocus: index !== 0, // Autofocus for newly generated inputs
-    isEditing: true,
-    edited: false,
-    value: "",
-    latex: "",
-    conclusion: null,
+    conclusionInputState: {
+      isEditing: true,
+      edited: false,
+      value: "",
+      latex: "",
+    },
+    ruleNameInputState: {
+      isEditing: false,
+      edited: false,
+      value: "",
+      latex: "",
+    },
     conclusionIndex,
     premiseIndices: [],
   };
@@ -54,101 +207,49 @@ interface ArgumentInputProps {
   index: number;
   valid: boolean;
   states: Record<number, ArgumentInputState>;
-  setStates: (states: Record<number, ArgumentInputState>) => void;
+  setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
 }
 
-function ArgumentInput({ index, valid, states, setStates }: ArgumentInputProps) {
-  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim();
+function ArgumentInput(props: ArgumentInputProps) {
+  const { index, valid, states, setStates } = props;
 
-    if (!value && states[index].conclusionIndex !== null && states[index].premiseIndices.length === 0) {
-      // Delete newly added input (i.e. no premises) if it is empty
-      const rest: Record<number, ArgumentInputState> = {};
-      for (const key in states) {
-        if (+key !== index) {
-          rest[key] = states[key];
-        }
-      }
-
-      // Remove premise from conclusion input
-      const conclusionIndex = states[index].conclusionIndex;
-      rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
-      setStates(rest);
-      return;
-    }
-
-    // If input nonempty, try to parse it
-    let conclusion = null;
-    try {
-      const arg = parseArgument(value);
-      conclusion = arg;
-    } catch {
-      // TODO: display input error
-    }
-
-    const newState = {
-      ...states[index],
-      edited: true,
-      isEditing: false,
-      latex: `\\(${latexify(lex(value))}\\)`,
-      conclusion,
-    };
-    setStates({ ...states, [index]: newState });
-  };
+  const showPremises =
+    states[index].conclusionInputState.edited &&
+    (states[index].conclusionInputState.value.length > 0 || states[index].premiseIndices.length > 0);
 
   return (
     <div className="flex flex-col items-center">
-      {states[index].edited && (states[index].value.length > 0 || states[index].premiseIndices.length > 0) && (
-        <div className="w-full">
-          <div className="flex space-x-4 items-end justify-center">
-            {states[index].premiseIndices.map((index) => (
-              <ArgumentInput index={index} valid={valid} states={states} setStates={setStates} />
-            ))}
-            {!valid && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  // Generate new state for the premise subtree and update current state
-                  const premiseIndex = Object.keys(states).length;
-                  const newState = {
-                    ...states[index],
-                    premiseIndices: [...states[index].premiseIndices, premiseIndex],
-                  };
-                  setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
-                  return newState;
-                }}
-              >
-                <Plus />
-              </Button>
-            )}
+      <div className="w-full grid grid-cols-[1fr_5em] place-items-center gap-x-2">
+        {showPremises && (
+          <div className="w-full">
+            <div className="flex space-x-4 items-end justify-center">
+              {states[index].premiseIndices.map((index) => (
+                <ArgumentInput index={index} valid={valid} states={states} setStates={setStates} />
+              ))}
+              {!valid && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    // Generate new state for the premise subtree and update current state
+                    const premiseIndex = Object.keys(states).length;
+                    const newState = {
+                      ...states[index],
+                      premiseIndices: [...states[index].premiseIndices, premiseIndex],
+                    };
+                    setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
+                    return newState;
+                  }}
+                >
+                  <Plus />
+                </Button>
+              )}
+            </div>
           </div>
-          <hr className="my-2 h-px border-black text-black bg-black" />
-        </div>
-      )}
-      {states[index].isEditing || states[index].value.length == 0 ? (
-        <FocusingInput
-          value={states[index].value}
-          edited={states[index].edited}
-          autoFocus={states[index].autofocus}
-          onBlur={onBlur}
-          onFocus={() => {
-            setStates({ ...states, [index]: { ...states[index], isEditing: true } });
-          }}
-          onChange={(e) => {
-            setStates({ ...states, [index]: { ...states[index], value: e.target.value } });
-          }}
-        />
-      ) : (
-        <div className="px-4">
-          <MathJax
-            onClick={() => {
-              setStates({ ...states, [index]: { ...states[index], edited: true, isEditing: true } });
-            }}
-          >
-            {states[index].latex}
-          </MathJax>
-        </div>
-      )}
+        )}
+        <hr className="col-start-1 w-full h-px border-black text-black bg-black" />
+        <RuleNameInput {...props} />
+        <ConclusionInput {...props} />
+      </div>
     </div>
   );
 }

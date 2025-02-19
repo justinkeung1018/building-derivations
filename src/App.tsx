@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { ArgumentInput, ArgumentInputState, getDefaultState } from "./components/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
-import { action, arrowElimination, arrowIntroduction } from "./lib/ts-parsec/verifiers/lambda";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
 import { Button } from "./components/shadcn/Button";
 import { InferenceRule, SyntaxRule } from "./lib/types/rules";
 import { SyntaxEditor } from "./components/SyntaxEditor";
 import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
+import { verify } from "./lib/verifier";
 
 export function App() {
   const [valid, setValid] = useState(false);
@@ -22,26 +22,26 @@ export function App() {
   ]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
-  function verify(index: number): boolean {
-    const conclusion = states[index].conclusion;
+  function verifyInput(index: number): boolean {
+    const conclusion = states[index].conclusionInputState.value;
 
-    if (conclusion === null) {
+    if (!states[index].premiseIndices.every((index) => verifyInput(index))) {
       return false;
     }
 
-    if (!states[index].premiseIndices.every((index) => verify(index))) {
+    const premises = states[index].premiseIndices.map((index) => states[index].conclusionInputState.value);
+
+    const rule = inferenceRules.find((rule) => states[index].ruleNameInputState.value === rule.name);
+
+    if (rule === undefined) {
       return false;
     }
 
-    const premises = states[index].premiseIndices
-      .map((index) => states[index].conclusion)
-      .filter((premise) => premise !== null);
-
-    return [action, arrowIntroduction, arrowElimination].some((rule) => rule(conclusion, premises));
+    return verify(conclusion, premises, rule, syntax);
   }
 
   useEffect(() => {
-    setValid(verify(0));
+    setValid(verifyInput(0));
   }, [states]);
 
   return (

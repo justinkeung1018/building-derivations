@@ -13,7 +13,9 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
 
 function sanitiseDefinition(definitionUnsanitised: string): string[] {
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
-  return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
+  return turnstile
+    .split("|")
+    .map((alternative) => alternative.trim().replaceAll("\\vdash", "|-").replaceAll("{", "\\{"));
 }
 
 function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
@@ -64,7 +66,9 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
     }
     const nonTerminal = nonTerminalStr.pipe(map((x) => new NonTerminal(placeholderToRuleIndex[x], x)));
     const multiset = string("{").pipe(
+      between(whitespace()),
       qthen(nonTerminal),
+      between(whitespace()),
       thenq(string("}")),
       map((x) => new Multiset(x)),
     );

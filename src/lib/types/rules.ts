@@ -21,4 +21,4 @@ interface InferenceRule {
   conclusion: InferenceRuleStatement;
 }
 
-export type { SyntaxRule, InferenceRule };
+export type { SyntaxRule, InferenceRule, InferenceRuleStatement };
