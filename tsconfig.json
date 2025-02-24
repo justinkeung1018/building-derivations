@@ -109,5 +109,11 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
-  }
+  },
+  "exclude": [
+    // tsc doesn't use the tsconfig in test/frontend so no type checks happen in any of the Cypress tests
+    // The tsconfig there is purely for IntelliSense
+    "cypress.config.ts",
+    "test/frontend"
+  ]
 }
