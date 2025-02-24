@@ -13,6 +13,7 @@
     "build:css": "tailwindcss -i src/index.css -o dist/index.css --minify",
     "start": "http-server dist/",
     "test": "jest",
+    "test:frontend": "cypress run --config baseUrl=http://localhost:8000",
     "prepare": "husky install"
   },
   "keywords": [],
