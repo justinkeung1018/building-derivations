@@ -27,8 +27,14 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run tests
+      - name: Run backend tests
         run: npm run test
+
+      - name: Run frontend tests
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm start
 
       - name: Deploy to render
         uses: bankfliptech/deploy-to-render@v1
