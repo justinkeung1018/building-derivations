@@ -56,10 +56,11 @@
     "typescript-parsec": "^0.3.4"
   },
   "lint-staged": {
-    "**/*.{mjs,js,jsx,ts,tsx}": [
+    "*/**/*.{mjs,js,jsx,ts,tsx}": [
       "eslint --cache --fix",
       "prettier --write"
     ],
+    "*.{mjs,js,jsx,ts,tsx}": "prettier --write",
     "**/*.{css,md,yml,json}": "prettier --write"
   }
 }
