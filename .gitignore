@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,react
 
+# Cypress
+cypress
+
 ### Node ###
 # Logs
 logs
@@ -24,6 +27,9 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
+cypress-coverage
+jest-coverage
+reports
 coverage
 *.lcov
 

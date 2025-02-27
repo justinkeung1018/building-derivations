@@ -1,4 +1,7 @@
 export default {
+  collectCoverage: true,
+  collectCoverageFrom: ["src/lib/**"],
+  coverageDirectory: "jest-coverage",
   moduleNameMapper: {
     "@/(.*)": "<rootDir>/src/$1",
   },
