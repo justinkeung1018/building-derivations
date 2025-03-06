@@ -6,6 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from ".
 import { InferenceRule, InferenceRuleStatement, SyntaxRule } from "@/lib/types/rules";
 import { latexify } from "@/lib/latexify";
 import { parseInferenceRules } from "@/lib/parsers/inference";
+import { Plus } from "lucide-react";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -52,6 +53,26 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
           data-cy={`premise-${index}-${premiseIndex}`}
         />
       ))}
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setInferenceRules((old) => {
+            const newPremise: InferenceRuleStatement = {
+              structure: [],
+              sanitised: "",
+              unsanitised: "",
+            };
+            const newRule: InferenceRule = {
+              ...rule,
+              premises: [...rule.premises, newPremise],
+            };
+            return old.map((r, i) => (i === index ? newRule : r));
+          });
+        }}
+        data-cy={`add-premise-button-${index}`}
+      >
+        <Plus />
+      </Button>
     </div>
   );
 }
