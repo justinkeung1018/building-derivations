@@ -20,11 +20,11 @@
     "cov:build:esbuild": "esbuild src/index.tsx src/index.html --sourcemap=inline --bundle --loader:.html=copy --outdir=dist",
     "cov:build:css": "tailwindcss -i src/index.css -o dist/index.css",
     "postcov:build": "nyc instrument --in-place dist",
-    "cov:frontend": "cypress run",
+    "cov:frontend": "cypress run --config baseUrl=http://localhost:8080",
     "cov:backend": "jest --coverage",
     "mkdir:reports": "mkdir reports || true",
     "precopy:reports": "npm run mkdir:reports",
-    "copy:reports": "cp cypress-coverage/coverage-final.json reports/from-cypress.json && cp jest-coverage/coverage-final.json reports/from-jest.json",
+    "copy:reports": "cp coverage/coverage-final.json reports/from-cypress.json && cp jest-coverage/coverage-final.json reports/from-jest.json",
     "precombine:reports": "npm run copy:reports && mkdir .nyc_output || true",
     "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
     "prereport:combined": "npm run combine:reports",
@@ -32,7 +32,7 @@
     "test:dev": "npm-run-all --parallel test:dev:*",
     "test:dev:frontend": "cypress run --config baseUrl=http://localhost:8000",
     "test:dev:backend": "jest",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "Justin Keung",

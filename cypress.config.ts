@@ -9,7 +9,6 @@ export default defineConfig({
     },
     specPattern: "test/frontend/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "test/frontend/support/e2e.{js,jsx,ts,tsx}",
-    baseUrl: "http://localhost:8080",
   },
   env: {
     codeCoverage: {

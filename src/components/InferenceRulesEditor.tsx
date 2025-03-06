@@ -24,6 +24,7 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
               return old.map((r, i) => (i === index ? newRule : r));
             });
           }}
+          data-cy={`add-premise-button-${index}`}
         >
           Add premise
         </Button>
@@ -48,6 +49,7 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
               return old.map((r, i) => (i === index ? newRule : r));
             });
           }}
+          data-cy={`premise-${index}-${premiseIndex}`}
         />
       ))}
     </div>
@@ -71,6 +73,7 @@ function ConclusionEditor({ rule, index, setInferenceRules }: DefinitionEditorPr
             return old.map((r, i) => (i === index ? newRule : r));
           });
         }}
+        data-cy={`conclusion-${index}`}
       />
     </div>
   );
@@ -135,6 +138,7 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                         return old.map((r, i) => (i === index ? newRule : r));
                       });
                     }}
+                    data-cy={`inference-name-${index}`}
                   />
                 ) : (
                   <MathJax>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
@@ -165,6 +169,7 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
               },
             ]);
           }}
+          data-cy="add-inference-button"
         >
           Add rule
         </Button>
@@ -177,6 +182,7 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
               setInferenceRules((old) => parseInferenceRules(old, syntax));
               setEditing(false);
             }}
+            data-cy="apply-inference-button"
           >
             Apply changes
           </Button>
@@ -186,6 +192,7 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
             onClick={() => {
               setEditing(true);
             }}
+            data-cy="edit-inference-button"
           >
             Edit
           </Button>

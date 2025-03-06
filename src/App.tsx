@@ -46,10 +46,13 @@ export function App() {
 
   return (
     <MathJaxContext>
-      <div className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}>
+      <div
+        className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
+        data-cy="container"
+      >
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="absolute top-4 left-4" variant="outline">
+            <Button className="absolute top-4 left-4" variant="outline" data-cy="edit-rules-button">
               Edit syntax and rules
             </Button>
           </SheetTrigger>

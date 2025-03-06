@@ -61,6 +61,7 @@ function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
             },
           }));
         }}
+        data-cy={`tree-rule-${index}`}
       />
     );
   }
@@ -77,6 +78,7 @@ function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
             },
           }));
         }}
+        data-cy={`tree-rule-latex-${index}`}
       >
         {states[index].ruleNameInputState.latex}
       </MathJax>
@@ -142,6 +144,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
             },
           }));
         }}
+        data-cy={`tree-conclusion-${index}`}
       />
     );
   }
@@ -158,6 +161,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
             },
           }));
         }}
+        data-cy={`tree-conclusion-latex-${index}`}
       >
         {states[index].conclusionInputState.latex}
       </MathJax>
@@ -238,6 +242,7 @@ function ArgumentInput(props: ArgumentInputProps) {
                     setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
                     return newState;
                   }}
+                  data-cy={`tree-add-premise-button-${index}`}
                 >
                   <Plus />
                 </Button>

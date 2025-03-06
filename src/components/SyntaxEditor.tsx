@@ -45,6 +45,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                         return old.map((r, i) => (i === index ? newRule : r));
                       });
                     }}
+                    data-cy={`syntax-placeholders-${index}`}
                   />
                 ) : (
                   <MathJax>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
@@ -65,6 +66,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                         return old.map((r, i) => (i === index ? newRule : r));
                       });
                     }}
+                    data-cy={`syntax-def-${index}`}
                   />
                 ) : (
                   <MathJax>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
@@ -90,6 +92,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
               },
             ]);
           }}
+          data-cy="add-syntax-button"
         >
           Add rule
         </Button>
@@ -102,6 +105,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
               setSyntax((old) => parseSyntax(old));
               setEditing(false);
             }}
+            data-cy="apply-syntax-button"
           >
             Apply changes
           </Button>
@@ -111,6 +115,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             onClick={() => {
               setEditing(true);
             }}
+            data-cy="edit-syntax-button"
           >
             Edit
           </Button>
