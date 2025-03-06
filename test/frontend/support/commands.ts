@@ -3,7 +3,8 @@ Cypress.Commands.add("getBySel", (selector, ...args) => {
 });
 
 Cypress.Commands.add("clickOutside", () => {
-  return cy.get("body").click(-50, -50, { force: true });
+  cy.get("body").click(-50, -50, { force: true });
+  cy.wait(1000); // TODO: make less hacky
 });
 
 Cypress.Commands.add("derivationIsCorrect", () => {

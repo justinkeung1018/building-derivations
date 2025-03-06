@@ -60,7 +60,7 @@ export function App() {
             <SheetHeader>
               <SheetTitle>Edit syntax and inference rules</SheetTitle>
             </SheetHeader>
-            <div className="flex items-start mt-4 space-x-6">
+            <div className="flex items-start mt-4 space-x-6" data-cy="editor">
               <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
               <InferenceRulesEditor
                 syntax={syntax}
