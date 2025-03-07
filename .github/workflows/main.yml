@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Check out contents of repo
         uses: actions/checkout@v4
@@ -21,21 +20,38 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Check formatting
-        run: npx prettier --check .
+  formatting:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - run: npx prettier --check .
 
-      - name: Build application
-        run: npm run build
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - run: npm run build
 
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Run backend tests
-        run: npm run test
+        run: npm run cov:backend
 
       - name: Run frontend tests
         uses: cypress-io/github-action@v6
         with:
-          build: npm run build
+          build: npm run cov:build
           start: npm start
 
+      - name: Combined coverage
+        run: npm run report:combined
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
       - name: Deploy to render
         uses: bankfliptech/deploy-to-render@v1
         with:
