@@ -36,6 +36,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out contents of repo
+        uses: actions/checkout@v4
+
       - name: Run backend tests
         run: npm run cov:backend
 
