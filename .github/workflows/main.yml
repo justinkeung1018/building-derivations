@@ -81,6 +81,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [frontend-test, backend-test]
     steps:
+      - name: Check out contents of repo
+        uses: actions/checkout@v4
+
       - name: Combine coverage reports
         run: npm run report:combined
 
