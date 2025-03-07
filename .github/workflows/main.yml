@@ -62,6 +62,7 @@ jobs:
         with:
           build: npm run cov:build
           start: npm start
+          config: baseUrl=http://localhost:8080
 
       - name: Upload artifacts for code coverage
         uses: actions/upload-artifact@v4
