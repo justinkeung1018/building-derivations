@@ -33,11 +33,14 @@ jobs:
       - name: Check formatting
         run: npx prettier --check .
 
-  frontend-test:
+  backend-test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out contents of repo
         uses: actions/checkout@v4
+
+      - name: Install Node dependencies
+        run: npm ci
 
       - name: Run backend tests
         run: npm run cov:backend
@@ -48,7 +51,7 @@ jobs:
           name: jest-coverage
           path: jest-coverage/
 
-  backend-test:
+  frontend-test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out contents of repo
