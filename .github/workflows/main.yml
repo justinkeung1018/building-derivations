@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  setup:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out contents of repo
@@ -21,21 +21,20 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Build
+        run: npm run build
+
   formatting:
     runs-on: ubuntu-latest
-    needs: setup
     steps:
-      - run: npx prettier --check .
+      - name: Check out contents of repo
+        uses: actions/checkout@v4
 
-  build:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - run: npm run build
+      - name: Check formatting
+        run: npx prettier --check .
 
   test:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Run backend tests
         run: npm run cov:backend
@@ -51,7 +50,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [build, formatting, test]
     steps:
       - name: Deploy to render
         uses: bankfliptech/deploy-to-render@v1
