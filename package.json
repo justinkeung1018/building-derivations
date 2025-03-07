@@ -32,6 +32,7 @@
     "test:dev": "npm-run-all --parallel test:dev:*",
     "test:dev:frontend": "cypress run --config baseUrl=http://localhost:8000",
     "test:dev:backend": "jest",
+    "cy:open": "cypress open --config baseUrl=http://localhost:8000",
     "prepare": "husky"
   },
   "keywords": [],

@@ -74,7 +74,7 @@ function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
             ...old,
             [index]: {
               ...old[index],
-              ruleNameInputState: { ...old[index].ruleNameInputState, edited: true, isEditing: true },
+              ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true },
             },
           }));
         }}
@@ -131,7 +131,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
             ...old,
             [index]: {
               ...old[index],
-              conclusionInputState: { ...states[index].conclusionInputState, isEditing: true },
+              conclusionInputState: { ...old[index].conclusionInputState, isEditing: true },
             },
           }));
         }}
@@ -140,7 +140,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
             ...old,
             [index]: {
               ...old[index],
-              conclusionInputState: { ...states[index].conclusionInputState, value: e.target.value },
+              conclusionInputState: { ...old[index].conclusionInputState, value: e.target.value },
             },
           }));
         }}
@@ -157,7 +157,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
             ...old,
             [index]: {
               ...old[index],
-              conclusionInputState: { ...old[index].conclusionInputState, edited: true, isEditing: true },
+              conclusionInputState: { ...old[index].conclusionInputState, isEditing: true },
             },
           }));
         }}
@@ -233,14 +233,15 @@ function ArgumentInput(props: ArgumentInputProps) {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    // Generate new state for the premise subtree and update current state
-                    const premiseIndex = Object.keys(states).length;
-                    const newState = {
-                      ...states[index],
-                      premiseIndices: [...states[index].premiseIndices, premiseIndex],
-                    };
-                    setStates({ ...states, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) });
-                    return newState;
+                    setStates((old) => {
+                      // Generate new state for the premise subtree and update current state
+                      const premiseIndex = Object.keys(states).length;
+                      const newState: ArgumentInputState = {
+                        ...old[index],
+                        premiseIndices: [...old[index].premiseIndices, premiseIndex],
+                      };
+                      return { ...old, [index]: newState, [premiseIndex]: getDefaultState(premiseIndex, index) };
+                    });
                   }}
                   data-cy={`tree-add-premise-button-${index}`}
                 >
