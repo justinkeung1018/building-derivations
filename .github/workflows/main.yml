@@ -104,13 +104,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jest-coverage
-          path: jest-coverage # Default behaviour unpacks all files and we don't want that
+          path: jest-coverage # Default behaviour unpacks all files and we don't want that, so we put the unpacked files in a directory
 
       - name: Download frontend coverage report
         uses: actions/download-artifact@v4
         with:
           name: coverage
-          path: coverage # Default behaviour unpacks all files and we don't want that
+          path: coverage # Default behaviour unpacks all files and we don't want that, so we put the unpacked files in a directory
 
       - name: Combine coverage reports
         run: npm run report:combined
