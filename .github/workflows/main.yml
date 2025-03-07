@@ -49,7 +49,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: eslint src test
+        run: npx eslint src test
 
   backend-test:
     runs-on: ubuntu-latest
