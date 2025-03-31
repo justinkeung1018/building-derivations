@@ -102,7 +102,7 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setSyntax((old) => parseSyntax(old));
+              setSyntax((old) => parseSyntax(old).rules);
               setEditing(false);
             }}
             data-cy="apply-syntax-button"
