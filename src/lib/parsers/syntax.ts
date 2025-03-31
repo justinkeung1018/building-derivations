@@ -2,7 +2,7 @@ import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, later, many, many1, manyBetween, manySepBy, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
-import { SyntaxRule } from "../types/rules";
+import { ParseResult, SyntaxRule, Warning } from "../types/rules";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
@@ -78,15 +78,31 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   return parser;
 }
 
-function parseSyntax(syntax: SyntaxRule[]): SyntaxRule[] {
+function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
   const parser = buildSyntaxRuleParser(syntax);
+  const warnings: Warning[] = [];
 
-  for (const rule of syntax) {
+  syntax.forEach((rule, index) => {
     rule.definitionSanitised = sanitiseDefinition(rule.definitionUnsanitised);
-    rule.definition = rule.definitionSanitised.map((alternative) => parser.parse(alternative).value);
-  }
+    rule.definition = [];
 
-  return syntax;
+    for (const alternative of rule.definitionSanitised) {
+      const tokens = parser.parse(alternative).value;
+
+      for (const token of tokens) {
+        if (token instanceof Multiset) {
+          const elements = token.tokens;
+          if (elements.every((element) => element instanceof Terminal)) {
+            warnings.push({ index, message: "Multiset contains terminals only" });
+          }
+        }
+      }
+
+      rule.definition.push(tokens);
+    }
+  });
+
+  return { rules: syntax, warnings };
 }
 
 function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST> {

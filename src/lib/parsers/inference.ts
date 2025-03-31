@@ -1,11 +1,11 @@
-import { InferenceRule, SyntaxRule } from "../types/rules";
+import { InferenceRule, ParseResult, SyntaxRule } from "../types/rules";
 import { buildSyntaxRuleParser, sanitiseDefinition } from "./syntax";
 
 function sanitise(unsanitised: string) {
   return sanitiseDefinition(unsanitised)[0];
 }
 
-function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): InferenceRule[] {
+function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): ParseResult<InferenceRule> {
   // Assume the syntax is well-formed and already parsed
   const parser = buildSyntaxRuleParser(syntax);
 
@@ -18,7 +18,7 @@ function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): Infe
     rule.conclusion.structure = parser.parse(rule.conclusion.sanitised).value;
   }
 
-  return rules;
+  return { rules, warnings: [] };
 }
 
 export { parseInferenceRules };

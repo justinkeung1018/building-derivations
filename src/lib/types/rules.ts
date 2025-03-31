@@ -21,4 +21,14 @@ interface InferenceRule {
   conclusion: InferenceRuleStatement;
 }
 
-export type { SyntaxRule, InferenceRule, InferenceRuleStatement };
+interface Warning {
+  index: number;
+  message: string;
+}
+
+interface ParseResult<RuleType> {
+  rules: RuleType[];
+  warnings: Warning[];
+}
+
+export type { SyntaxRule, InferenceRule, InferenceRuleStatement, Warning, ParseResult };
