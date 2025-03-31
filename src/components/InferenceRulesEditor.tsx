@@ -200,7 +200,7 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setInferenceRules((old) => parseInferenceRules(old, syntax));
+              setInferenceRules((old) => parseInferenceRules(old, syntax).rules);
               setEditing(false);
             }}
             data-cy="apply-inference-button"
