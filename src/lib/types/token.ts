@@ -10,7 +10,7 @@ class NonTerminal {
 }
 
 class Multiset {
-  constructor(readonly nonTerminal: NonTerminal) {}
+  constructor(readonly tokens: Token[]) {} // TODO: investigate whether we can type this as (Terminal | NonTerminal)[]
 }
 
 type Token = Terminal | NonTerminal | Multiset;

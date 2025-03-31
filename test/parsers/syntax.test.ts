@@ -1,7 +1,7 @@
 import { buildParsers, parseSyntax } from "@/lib/parsers/syntax";
 import { MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { SyntaxRule } from "@/lib/types/rules";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
-import { ParjsParsingFailure } from "parjs";
 
 const defaultRule = {
   placeholders: [],
@@ -30,19 +30,14 @@ describe("Parses syntax rules", () => {
   it("parses multisets of non-terminals", () => {
     const type = { ...defaultRule, placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
     const [contextParsed, _] = parseSyntax([context, type]);
-    expect(contextParsed.definition).toEqual([[new Multiset(new NonTerminal(1, "A"))]]);
+    expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(1, "A")])]]);
   });
 
   it("parses multisets of non-terminals with spaces between curly braces", () => {
     const context = { ...defaultRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" };
     const type = { ...defaultRule, placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
     const [contextParsed, _] = parseSyntax([context, type]);
-    expect(contextParsed.definition).toEqual([[new Multiset(new NonTerminal(1, "A"))]]);
-  });
-
-  it("fails when trying to parse multisets of terminals", () => {
-    // Since A (in the definition of \\Gamma) does not appear in the list of placeholders, it is treated as a terminal "A"
-    expect(() => parseSyntax([context])).toThrow(ParjsParsingFailure);
+    expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(1, "A")])]]);
   });
 
   it("fails when there are duplicate placeholders", () => {
@@ -65,7 +60,7 @@ describe("Parses syntax rules", () => {
       [new NonTerminal(1, "\\Gamma"), new Terminal("|-"), new NonTerminal(2, "A")],
     ]);
     expect(contextParsed.placeholders).toEqual(["\\Gamma"]);
-    expect(contextParsed.definition).toEqual([[new Multiset(new NonTerminal(2, "A"))]]);
+    expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(2, "A")])]]);
     expect(typeParsed.placeholders).toEqual(["A", "B"]);
     expect(typeParsed.definition).toEqual([
       [new NonTerminal(3, "\\varphi")],
@@ -78,6 +73,70 @@ describe("Parses syntax rules", () => {
       [new Terminal("3")],
       [new Terminal("4")],
       [new Terminal("5")],
+    ]);
+  });
+
+  it("parses lambda calculus with type assignment syntax", () => {
+    const statement: SyntaxRule = { ...defaultRule, definitionUnsanitised: "\\Gamma |- M: A" };
+    const context: SyntaxRule = {
+      ...defaultRule,
+      placeholdersUnsanitised: "\\Gamma",
+      definitionUnsanitised: "{ varasmt }",
+    };
+    const varasmt: SyntaxRule = { ...defaultRule, placeholdersUnsanitised: "varasmt", definitionUnsanitised: "var: A" };
+    const variable: SyntaxRule = { ...defaultRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" };
+    const type: SyntaxRule = {
+      ...defaultRule,
+      placeholdersUnsanitised: "A, B",
+      definitionUnsanitised: "\\varphi | (A -> B)",
+    };
+    const typevar: SyntaxRule = {
+      ...defaultRule,
+      placeholdersUnsanitised: "\\varphi",
+      definitionUnsanitised: "1 | 2 | 3 | 4 | 5",
+    };
+    const lambda: SyntaxRule = {
+      ...defaultRule,
+      placeholdersUnsanitised: "M, N",
+      definitionUnsanitised: "var | (\\lambda var. M) | (MN)",
+    };
+    const [statementParsed, contextParsed, varasmtParsed, variableParsed, typeParsed, typevarParsed, lambdaParsed] =
+      parseSyntax([statement, context, varasmt, variable, type, typevar, lambda]);
+
+    expect(statementParsed.definition).toEqual([
+      [
+        new NonTerminal(1, "\\Gamma"),
+        new Terminal("|-"),
+        new NonTerminal(6, "M"),
+        new Terminal(":"),
+        new NonTerminal(4, "A"),
+      ],
+    ]);
+    expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(2, "varasmt")])]]);
+    expect(varasmtParsed.definition).toEqual([[new NonTerminal(3, "var"), new Terminal(":"), new NonTerminal(4, "A")]]);
+    expect(variableParsed.definition).toEqual([[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]]);
+    expect(typeParsed.definition).toEqual([
+      [new NonTerminal(5, "\\varphi")],
+      [new Terminal("("), new NonTerminal(4, "A"), new Terminal("->"), new NonTerminal(4, "B"), new Terminal(")")],
+    ]);
+    expect(typevarParsed.definition).toEqual([
+      [new Terminal("1")],
+      [new Terminal("2")],
+      [new Terminal("3")],
+      [new Terminal("4")],
+      [new Terminal("5")],
+    ]);
+    expect(lambdaParsed.definition).toEqual([
+      [new NonTerminal(3, "var")],
+      [
+        new Terminal("("),
+        new Terminal("\\lambda"),
+        new NonTerminal(3, "var"),
+        new Terminal("."),
+        new NonTerminal(6, "M"),
+        new Terminal(")"),
+      ],
+      [new Terminal("("), new NonTerminal(6, "M"), new NonTerminal(6, "N"), new Terminal(")")],
     ]);
   });
 });
@@ -111,16 +170,16 @@ describe("Builds parser based on syntax rules", () => {
     ]);
   });
 
-  const statement = { ...defaultRule, definition: [[new Multiset(new NonTerminal(1, "A"))]] };
+  const statement = { ...defaultRule, definition: [[new Multiset([new NonTerminal(1, "A")])]] };
   const type = { ...defaultRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
   const parser = buildParsers([statement, type])[0];
 
   it("parses non-empty multisets", () => {
     expect(parser.parse("a, b,a").value).toEqual([
       new MultisetAST([
-        new NonTerminalAST("A", [new TerminalAST("a")]),
-        new NonTerminalAST("A", [new TerminalAST("b")]),
-        new NonTerminalAST("A", [new TerminalAST("a")]),
+        [new NonTerminalAST("A", [new TerminalAST("a")])],
+        [new NonTerminalAST("A", [new TerminalAST("b")])],
+        [new NonTerminalAST("A", [new TerminalAST("a")])],
       ]),
     ]);
   });
@@ -137,7 +196,7 @@ describe("Builds parser based on syntax rules", () => {
     const context = {
       ...defaultRule,
       placeholders: ["\\Gamma"],
-      definition: [[new Multiset(new NonTerminal(2, "A"))]],
+      definition: [[new Multiset([new NonTerminal(2, "A")])]],
     };
     const type = {
       ...defaultRule,
@@ -169,8 +228,8 @@ describe("Builds parser based on syntax rules", () => {
     expect(parser.parse("1, 2 |- (1 -> 2)").value).toEqual([
       new NonTerminalAST("\\Gamma", [
         new MultisetAST([
-          new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
-          new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+          [new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])])],
+          [new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])])],
         ]),
       ]),
       new TerminalAST("|-"),

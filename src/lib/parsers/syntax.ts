@@ -1,6 +1,6 @@
 import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
-import { between, later, many, many1, manySepBy, map, or, qthen, then, thenq } from "parjs/combinators";
+import { between, later, many, many1, manyBetween, manySepBy, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
 import { SyntaxRule } from "../types/rules";
 
@@ -63,11 +63,10 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
       nonTerminalStr = nonTerminalStr.pipe(or(string(placeholder)));
     }
     const nonTerminal = nonTerminalStr.pipe(map((x) => new NonTerminal(placeholderToRuleIndex[x], x)));
-    const multiset = string("{").pipe(
+    const multiset = nonTerminal.pipe(
+      or(terminal),
       between(whitespace()),
-      qthen(nonTerminal),
-      between(whitespace()),
-      thenq(string("}")),
+      manyBetween(string("{"), string("}")),
       map((x) => new Multiset(x)),
     );
     parser = nonTerminal.pipe(or(multiset), or(terminal), between(whitespace()), many());
@@ -100,8 +99,14 @@ function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST> {
     return parsers[token.index].pipe(map((x) => new NonTerminalAST(token.name, x)));
   } else {
     // Multiset
-    const nonempty = parsers[token.nonTerminal.index].pipe(
-      map((x) => new NonTerminalAST(token.nonTerminal.name, x)),
+    let term = getTokenParser(token.tokens[0], parsers).pipe(map((x) => [x]));
+    for (const subToken of token.tokens.slice(1)) {
+      term = term.pipe(
+        then(getTokenParser(subToken, parsers)),
+        map(([x, y]) => [...x, y]),
+      );
+    }
+    const nonempty = term.pipe(
       manySepBy(string(",").pipe(between(whitespace()))),
       map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
     );

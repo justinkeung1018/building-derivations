@@ -10,7 +10,7 @@ class NonTerminalAST {
 }
 
 class MultisetAST {
-  constructor(readonly elements: NonTerminalAST[]) {}
+  constructor(readonly elements: AST[][]) {} // TODO: investigate whether we can type this as (TerminalAST | NonTerminalAST)[][]
 }
 
 type AST = TerminalAST | NonTerminalAST | MultisetAST;
