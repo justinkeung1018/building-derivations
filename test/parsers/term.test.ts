@@ -43,7 +43,11 @@ describe("Builds parser based on syntax rules", () => {
   const type = { ...defaultRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
   const parser = buildParsers([statement, type])[0];
 
-  it("parses non-empty multisets", () => {
+  it("parses multiset with one element", () => {
+    expect(parser.parse("a").value).toEqual([new MultisetAST([[new NonTerminalAST("A", [new TerminalAST("a")])]])]);
+  });
+
+  it("parses multiset with multiple elements", () => {
     expect(parser.parse("a, b,a").value).toEqual([
       new MultisetAST([
         [new NonTerminalAST("A", [new TerminalAST("a")])],
@@ -80,6 +84,11 @@ describe("Builds parser based on syntax rules", () => {
       definition: [[new Multiset([new NonTerminal(1, "A")]), new Terminal(","), new NonTerminal(1, "A")]],
     };
     const parser = buildParsers([statement, type])[0];
+    expect(parser.parse("a,b").value).toEqual([
+      new MultisetAST([[new NonTerminalAST("A", [new TerminalAST("a")])]]),
+      new TerminalAST(","),
+      new NonTerminalAST("A", [new TerminalAST("b")]),
+    ]);
     expect(parser.parse("a,b,a,b").value).toEqual([
       new MultisetAST([
         [new NonTerminalAST("A", [new TerminalAST("a")])],
