@@ -74,8 +74,7 @@ describe("Builds parser based on syntax rules", () => {
     ]);
   });
 
-  it("fails to parse ambiguously placed commas", () => {
-    // TODO: there's probably a formal term for this, rename the test
+  it("parses greedily until the rest of the input matches", () => {
     const statement = {
       ...defaultRule,
       definition: [[new Multiset([new NonTerminal(1, "A")]), new Terminal(","), new NonTerminal(1, "A")]],
