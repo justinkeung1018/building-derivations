@@ -145,17 +145,17 @@ function getTokenParser(token: Token, parsers: Parjser<AST[]>[], suffixParser: P
         map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
       );
     } else {
-      // We need eof() because manyTill() internally calls apply() (but not parse()) which succeeds even when not all input is consumed.
-      // We need backtrack() because the internal call to apply() in manyTill() will advance the position of the parser without consuming the input,
-      // but we want to consume the input to construct the AST in the final parser.
-      // We need recover() because manyTill() will produce hard failure if the till parser (i.e. its argument) produces hard failure,
-      // e.g. when the till parser succeeds until it fails on a then(). This is stupid.
       const rest = string(",").pipe(
         qthen(term),
         manyTill(
           suffixParser.pipe(
+            // We need eof() because manyTill() internally calls apply() (but not parse()) which succeeds even when not all input is consumed.
             thenq(eof()),
+            // We need backtrack() because the internal call to apply() in manyTill() will advance the position of the parser without consuming the input,
+            // but we want to consume the input to construct the AST in the final parser.
             backtrack(),
+            // We need recover() because manyTill() will produce hard failure if the till parser (i.e. its argument) produces hard failure,
+            // e.g. when the till parser succeeds until it fails on a then(). This is stupid.
             recover(() => ({ kind: "Soft" })),
           ),
         ),
