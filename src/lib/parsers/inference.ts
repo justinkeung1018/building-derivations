@@ -7,6 +7,8 @@ function sanitise(unsanitised: string) {
 
 function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): ParseResult<InferenceRule> {
   // Assume the syntax is well-formed and already parsed
+  rules = structuredClone(rules);
+
   const parser = buildSyntaxRuleParser(syntax);
 
   for (const rule of rules) {

@@ -34,7 +34,6 @@ function sanitiseDefinition(definitionUnsanitised: string): string[] {
 function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
   const placeholderToRuleIndex: Record<string, number> = {};
   for (let i = 0; i < syntax.length; i++) {
-    syntax[i].placeholders = sanitisePlaceholders(syntax[i].placeholdersUnsanitised);
     for (const placeholder of syntax[i].placeholders) {
       if (Object.hasOwn(placeholderToRuleIndex, placeholder)) {
         throw new Error(`Placeholder ${placeholder} is used multiple times`);
@@ -94,6 +93,12 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
 }
 
 function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
+  syntax = structuredClone(syntax);
+
+  for (const rule of syntax) {
+    rule.placeholders = sanitisePlaceholders(rule.placeholdersUnsanitised);
+  }
+
   const parser = buildSyntaxRuleParser(syntax);
   const warnings: Warning[] = [];
 
