@@ -1,3 +1,4 @@
+import { Matchable } from "./matchable";
 import { Token } from "./token";
 
 interface SyntaxRule {
@@ -10,7 +11,7 @@ interface SyntaxRule {
 
 // Statements as part of an inference rule should not have multiple alternatives
 interface InferenceRuleStatement {
-  structure: Token[];
+  structure: Matchable[];
   sanitised: string;
   unsanitised: string;
 }

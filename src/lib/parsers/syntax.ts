@@ -1,21 +1,5 @@
-import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
-import { anyChar, eof, letter, Parjser, string, whitespace } from "parjs";
-import {
-  backtrack,
-  between,
-  later,
-  many,
-  many1,
-  manyBetween,
-  manySepBy,
-  manyTill,
-  map,
-  or,
-  qthen,
-  recover,
-  then,
-  thenq,
-} from "parjs/combinators";
+import { anyChar, letter, Parjser, string, whitespace } from "parjs";
+import { between, many, many1, manyBetween, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
 import { ParseResult, SyntaxRule, Warning } from "../types/rules";
 
@@ -23,15 +7,16 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return placeholdersUnsanitised
     .split(",")
     .filter((x) => x.length > 0)
-    .map((placeholder) => placeholder.trim());
+    .map((placeholder) => placeholder.trim())
+    .sort((a, b) => b.length - a.length); // Sort in descending order of length
 }
 
-function sanitiseDefinition(definitionUnsanitised: string): string[] {
+export function sanitiseDefinition(definitionUnsanitised: string): string[] {
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
   return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
 }
 
-function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
+export function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
   const placeholderToRuleIndex: Record<string, number> = {};
   for (let i = 0; i < syntax.length; i++) {
     for (const placeholder of syntax[i].placeholders) {
@@ -92,7 +77,7 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   return parser;
 }
 
-function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
+export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
   syntax = structuredClone(syntax);
 
   for (const rule of syntax) {
@@ -124,87 +109,3 @@ function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
 
   return { rules: syntax, warnings };
 }
-
-function getTokenParser(token: Token, parsers: Parjser<AST[]>[], suffixParser: Parjser<AST[]> | null): Parjser<AST> {
-  if (token instanceof Terminal) {
-    return string(token.value).pipe(
-      between(whitespace()),
-      map((x) => new TerminalAST(x)),
-    );
-  } else if (token instanceof NonTerminal) {
-    return parsers[token.index].pipe(map((x) => new NonTerminalAST(token.name, x)));
-  } else {
-    // Multiset
-    let term = getTokenParser(token.tokens[0], parsers, suffixParser).pipe(map((x) => [x]));
-    for (const subToken of token.tokens.slice(1)) {
-      term = term.pipe(
-        then(getTokenParser(subToken, parsers, suffixParser)),
-        map(([x, y]) => [...x, y]),
-      );
-    }
-    let nonempty;
-    if (suffixParser === null) {
-      // The multiset token is the last token
-      nonempty = term.pipe(
-        manySepBy(string(",").pipe(between(whitespace()))),
-        map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
-      );
-    } else {
-      const rest = string(",").pipe(
-        qthen(term),
-        manyTill(
-          suffixParser.pipe(
-            // We need eof() because manyTill() internally calls apply() (but not parse()) which succeeds even when not all input is consumed.
-            thenq(eof()),
-            // We need backtrack() because the internal call to apply() in manyTill() will advance the position of the parser without consuming the input,
-            // but we want to consume the input to construct the AST in the final parser.
-            backtrack(),
-            // We need recover() because manyTill() will produce hard failure if the till parser (i.e. its argument) produces hard failure,
-            // e.g. when the till parser succeeds until it fails on a then(). This is stupid.
-            recover(() => ({ kind: "Soft" })),
-          ),
-        ),
-      );
-      nonempty = term.pipe(
-        then(rest),
-        map(([x, y]) => new MultisetAST([x, ...y])),
-      );
-    }
-    const empty = string("\\varnothing").pipe(map(() => new MultisetAST([])));
-    return empty.pipe(or(nonempty));
-  }
-}
-
-function buildParsers(syntax: SyntaxRule[]): Parjser<AST[]>[] {
-  const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
-  for (let i = 0; i < syntax.length; i++) {
-    const alternativeParsers = [];
-    for (const alternative of syntax[i].definition) {
-      let parser = getTokenParser(alternative[alternative.length - 1], parsers, null).pipe(map((x) => [x]));
-      for (let j = alternative.length - 2; j >= 0; j--) {
-        parser = getTokenParser(alternative[j], parsers, parser).pipe(
-          then(parser),
-          map(([x, y]) => [x, ...y]),
-        );
-      }
-      alternativeParsers.push(parser);
-    }
-
-    let parser = alternativeParsers[0];
-    for (const alternativeParser of alternativeParsers.slice(1)) {
-      parser = parser.pipe(or(alternativeParser));
-    }
-
-    parsers[i].init(parser);
-  }
-  return parsers;
-}
-
-export {
-  buildSyntaxRuleParser,
-  parseSyntax,
-  getPlaceholderToRuleIndex,
-  getTokenParser,
-  buildParsers,
-  sanitiseDefinition,
-};

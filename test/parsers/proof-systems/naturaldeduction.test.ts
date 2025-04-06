@@ -3,6 +3,13 @@ import { parseSyntax } from "@/lib/parsers/syntax";
 import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "../utils";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { SyntaxRule } from "@/lib/types/rules";
+import {
+  MatchableMultiset,
+  MatchableNonTerminal,
+  MatchableTerminal,
+  MultisetElement,
+  Name,
+} from "@/lib/types/matchable";
 
 const statementCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
@@ -76,46 +83,50 @@ describe("Parses natural deduction rules", () => {
       syntax,
     ).rules;
     expect(actionParsed.conclusion.structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal(","),
-      new NonTerminal(2, "A"),
-      new Terminal("|-"),
-      new NonTerminal(2, "A"),
+      new MatchableNonTerminal(1, "\\Gamma", [
+        new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
+      ]),
+      new MatchableTerminal("|-"),
+      new Name(2, "A"),
     ]);
     expect(arrowIntroductionParsed.premises[0].structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal(","),
-      new NonTerminal(2, "A"),
-      new Terminal("|-"),
-      new NonTerminal(2, "B"),
+      new MatchableNonTerminal(1, "\\Gamma", [
+        new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
+      ]),
+      new MatchableTerminal("|-"),
+      new Name(2, "B"),
     ]);
     expect(arrowIntroductionParsed.conclusion.structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal("|-"),
-      new Terminal("("),
-      new NonTerminal(2, "A"),
-      new Terminal("->"),
-      new NonTerminal(2, "B"),
-      new Terminal(")"),
+      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableTerminal("|-"),
+      new MatchableNonTerminal(2, "A", [
+        new MatchableTerminal("("),
+        new Name(2, "A"),
+        new MatchableTerminal("->"),
+        new Name(2, "B"),
+        new MatchableTerminal(")"),
+      ]),
     ]);
     expect(arrowEliminationParsed.premises[0].structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal("|-"),
-      new Terminal("("),
-      new NonTerminal(2, "A"),
-      new Terminal("->"),
-      new NonTerminal(2, "B"),
-      new Terminal(")"),
+      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableTerminal("|-"),
+      new MatchableNonTerminal(2, "A", [
+        new MatchableTerminal("("),
+        new Name(2, "A"),
+        new MatchableTerminal("->"),
+        new Name(2, "B"),
+        new MatchableTerminal(")"),
+      ]),
     ]);
     expect(arrowEliminationParsed.premises[1].structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal("|-"),
-      new NonTerminal(2, "A"),
+      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableTerminal("|-"),
+      new Name(2, "A"),
     ]);
     expect(arrowEliminationParsed.conclusion.structure).toEqual([
-      new NonTerminal(1, "\\Gamma"),
-      new Terminal("|-"),
-      new NonTerminal(2, "B"),
+      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableTerminal("|-"),
+      new Name(2, "B"),
     ]);
   });
 });
