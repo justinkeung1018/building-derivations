@@ -108,7 +108,6 @@ function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): Pars
       premise.structure = parser.parse(premise.sanitised).value;
     }
     rule.conclusion.sanitised = sanitise(rule.conclusion.unsanitised);
-    console.log(parser.parse(rule.conclusion.sanitised).toString());
     rule.conclusion.structure = parser.parse(rule.conclusion.sanitised).value;
   }
 
