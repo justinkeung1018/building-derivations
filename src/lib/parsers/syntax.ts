@@ -1,6 +1,6 @@
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, many, many1, manyBetween, map, or, then } from "parjs/combinators";
-import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
+import { NonTerminal, Multiset, Token, Terminal, Or } from "../types/token";
 import { ParseResult, SyntaxRule, Warning } from "../types/rules";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
@@ -94,6 +94,10 @@ function addAlternativeFirstSet(firstSet: Set<string>, alternative: Token[], syn
     for (const token of getFirstSet(alternative[0].index, syntax)) {
       firstSet.add(token);
     }
+  } else if (alternative[0] instanceof Or) {
+    for (const alt of alternative[0].alternatives) {
+      addAlternativeFirstSet(firstSet, alt, syntax);
+    }
   } else {
     firstSet.add("\\varnothing");
     addAlternativeFirstSet(firstSet, alternative[0].tokens, syntax);
@@ -101,9 +105,8 @@ function addAlternativeFirstSet(firstSet: Set<string>, alternative: Token[], syn
 }
 
 function getFirstSet(index: number, syntax: SyntaxRule[]): Set<string> {
-  const definition = syntax[index].definition;
   const firstSet = new Set<string>();
-  for (const alternative of definition) {
+  for (const alternative of syntax[index].definition.alternatives) {
     addAlternativeFirstSet(firstSet, alternative, syntax);
   }
   return firstSet;
@@ -121,7 +124,7 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
 
   syntax.forEach((rule, index) => {
     rule.definitionSanitised = sanitiseDefinition(rule.definitionUnsanitised);
-    rule.definition = [];
+    rule.definition = new Or([]);
 
     for (const alternative of rule.definitionSanitised) {
       const tokens = parser.parse(alternative).value;
@@ -135,15 +138,15 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
         }
       }
 
-      rule.definition.push(tokens);
+      rule.definition.alternatives.push(tokens);
     }
   });
 
   const firstSets: Set<string>[] = syntax.map((_, index) => getFirstSet(index, syntax));
-  for (const rule of syntax) {
+  syntax.forEach((rule, index) => {
     // We can handle different alternatives beginning with the same terminal
     // and different alternatives beginnning with the same non-terminal (i.e. they refer to the same rule)
-    const firstTokens = rule.definition.map((x) => x[0]);
+    const firstTokens = syntax[index].definition.alternatives.map((x) => x[0]);
     const firstNonTerminalIndices = [
       ...new Set(firstTokens.filter((x) => x instanceof NonTerminal).map((x) => x.index)),
     ];
@@ -158,7 +161,7 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
         unique.add(token);
       }
     }
-  }
+  });
 
   return { rules: syntax, warnings };
 }

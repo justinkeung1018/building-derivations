@@ -13,4 +13,8 @@ export class Multiset {
   constructor(readonly tokens: Token[]) {} // TODO: investigate whether we can type this as (Terminal | NonTerminal)[]
 }
 
-export type Token = Terminal | NonTerminal | Multiset;
+export class Or {
+  constructor(readonly alternatives: Token[][]) {}
+}
+
+export type Token = Terminal | NonTerminal | Multiset | Or;

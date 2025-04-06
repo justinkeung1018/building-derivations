@@ -6,6 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from ".
 import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
+import { Or } from "@/lib/types/token";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -85,7 +86,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
               ...old,
               {
                 placeholders: [],
-                definition: [],
+                definition: new Or([]),
                 definitionSanitised: [],
                 placeholdersUnsanitised: "",
                 definitionUnsanitised: "",
