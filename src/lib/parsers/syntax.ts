@@ -4,16 +4,26 @@ import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
 import { ParseResult, SyntaxRule, Warning } from "../types/rules";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
-  return placeholdersUnsanitised
-    .split(",")
-    .filter((x) => x.length > 0)
-    .map((placeholder) => placeholder.trim())
-    .sort((a, b) => b.length - a.length); // Sort in descending order of length
+  if (placeholdersUnsanitised.trim().length === 0) {
+    throw new Error("Every non-statement rule must have at least one placeholder");
+  }
+  const split = placeholdersUnsanitised.split(",").map((x) => x.trim());
+  if (split.some((x) => x.length === 0)) {
+    throw new Error("Empty placeholder supplied");
+  }
+  return split.sort((a, b) => b.length - a.length);
 }
 
 export function sanitiseDefinition(definitionUnsanitised: string): string[] {
+  if (definitionUnsanitised.trim().length === 0) {
+    throw new Error("Every rule must have a definition");
+  }
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
-  return turnstile.split("|").map((alternative) => alternative.trim().replaceAll("\\vdash", "|-"));
+  const result = turnstile.split("|").map((x) => x.trim().replaceAll("\\vdash", "|-"));
+  if (result.some((x) => x.length === 0)) {
+    throw new Error("Empty alternative definition supplied");
+  }
+  return result;
 }
 
 export function getPlaceholderToRuleIndex(syntax: SyntaxRule[]): Record<string, number> {
@@ -77,10 +87,32 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   return parser;
 }
 
+function addAlternativeFirstSet(firstSet: Set<string>, alternative: Token[], syntax: SyntaxRule[]) {
+  if (alternative[0] instanceof Terminal) {
+    firstSet.add(alternative[0].value);
+  } else if (alternative[0] instanceof NonTerminal) {
+    for (const token of getFirstSet(alternative[0].index, syntax)) {
+      firstSet.add(token);
+    }
+  } else {
+    firstSet.add("\\varnothing");
+    addAlternativeFirstSet(firstSet, alternative[0].tokens, syntax);
+  }
+}
+
+function getFirstSet(index: number, syntax: SyntaxRule[]): Set<string> {
+  const definition = syntax[index].definition;
+  const firstSet = new Set<string>();
+  for (const alternative of definition) {
+    addAlternativeFirstSet(firstSet, alternative, syntax);
+  }
+  return firstSet;
+}
+
 export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
   syntax = structuredClone(syntax);
 
-  for (const rule of syntax) {
+  for (const rule of syntax.slice(1)) {
     rule.placeholders = sanitisePlaceholders(rule.placeholdersUnsanitised);
   }
 
@@ -106,6 +138,27 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
       rule.definition.push(tokens);
     }
   });
+
+  const firstSets: Set<string>[] = syntax.map((_, index) => getFirstSet(index, syntax));
+  for (const rule of syntax) {
+    // We can handle different alternatives beginning with the same terminal
+    // and different alternatives beginnning with the same non-terminal (i.e. they refer to the same rule)
+    const firstTokens = rule.definition.map((x) => x[0]);
+    const firstNonTerminalIndices = [
+      ...new Set(firstTokens.filter((x) => x instanceof NonTerminal).map((x) => x.index)),
+    ];
+    const relevantFirstSets = firstNonTerminalIndices.map((x) => firstSets[x]);
+
+    const unique = new Set();
+    for (const firstSet of relevantFirstSets) {
+      for (const token of firstSet) {
+        if (unique.has(token)) {
+          throw new Error("Alternatives beginning with different non-terminals have the same first set");
+        }
+        unique.add(token);
+      }
+    }
+  }
 
   return { rules: syntax, warnings };
 }
