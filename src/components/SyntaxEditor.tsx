@@ -12,7 +12,7 @@ interface SyntaxEditorProps {
   setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
 }
 
-function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
+export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   const [editing, setEditing] = useState(false);
 
   return (
@@ -124,5 +124,3 @@ function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
     </div>
   );
 }
-
-export { SyntaxEditor };

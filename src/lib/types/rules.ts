@@ -1,7 +1,7 @@
 import { Matchable } from "./matchable";
 import { Token } from "./token";
 
-interface SyntaxRule {
+export interface SyntaxRule {
   definition: Token[][];
   placeholders: string[];
   definitionSanitised: string[];
@@ -10,26 +10,24 @@ interface SyntaxRule {
 }
 
 // Statements as part of an inference rule should not have multiple alternatives
-interface InferenceRuleStatement {
+export interface InferenceRuleStatement {
   structure: Matchable[];
   sanitised: string;
   unsanitised: string;
 }
 
-interface InferenceRule {
+export interface InferenceRule {
   name: string;
   premises: InferenceRuleStatement[];
   conclusion: InferenceRuleStatement;
 }
 
-interface Warning {
+export interface Warning {
   index: number;
   message: string;
 }
 
-interface ParseResult<RuleType> {
+export interface ParseResult<RuleType> {
   rules: RuleType[];
   warnings: Warning[];
 }
-
-export type { SyntaxRule, InferenceRule, InferenceRuleStatement, Warning, ParseResult };

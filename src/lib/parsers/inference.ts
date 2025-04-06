@@ -96,7 +96,7 @@ function buildInferenceRuleStatementParser(syntax: SyntaxRule[]): Parjser<Matcha
   return parsers[0];
 }
 
-function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): ParseResult<InferenceRule> {
+export function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): ParseResult<InferenceRule> {
   // Assume the syntax is well-formed and already parsed
   rules = structuredClone(rules);
 
@@ -113,5 +113,3 @@ function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): Pars
 
   return { rules, warnings: [] };
 }
-
-export { parseInferenceRules };

@@ -1,4 +1,4 @@
-function latexify(sanitised: string): string {
+export function latexify(sanitised: string): string {
   return sanitised
     .replaceAll("|-", "\\vdash")
     .replaceAll("->", "\\to")
@@ -6,5 +6,3 @@ function latexify(sanitised: string): string {
     .replaceAll("{", "\\{")
     .replaceAll("}", "\\}");
 }
-
-export { latexify };

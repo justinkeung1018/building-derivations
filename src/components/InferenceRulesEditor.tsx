@@ -130,7 +130,7 @@ interface InferenceRulesEditorProps {
   setInferenceRules: React.Dispatch<React.SetStateAction<InferenceRule[]>>;
 }
 
-function InferenceRulesEditor(props: InferenceRulesEditorProps) {
+export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const { syntax, inferenceRules, setInferenceRules } = props;
   const [editing, setEditing] = useState(false);
 
@@ -222,5 +222,3 @@ function InferenceRulesEditor(props: InferenceRulesEditorProps) {
     </div>
   );
 }
-
-export { InferenceRulesEditor };

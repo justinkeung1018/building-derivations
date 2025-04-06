@@ -176,7 +176,7 @@ interface InputState {
   latex: string;
 }
 
-interface ArgumentInputState {
+export interface ArgumentInputState {
   index: number;
   autofocus: boolean;
   conclusionInputState: InputState;
@@ -185,7 +185,7 @@ interface ArgumentInputState {
   premiseIndices: number[];
 }
 
-function getDefaultState(index: number, conclusionIndex: number | null): ArgumentInputState {
+export function getDefaultState(index: number, conclusionIndex: number | null): ArgumentInputState {
   return {
     index,
     autofocus: index !== 0, // Autofocus for newly generated inputs
@@ -213,7 +213,7 @@ interface ArgumentInputProps {
   setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
 }
 
-function ArgumentInput(props: ArgumentInputProps) {
+export function ArgumentInput(props: ArgumentInputProps) {
   const { index, valid, states, setStates } = props;
 
   const showPremises =
@@ -258,6 +258,3 @@ function ArgumentInput(props: ArgumentInputProps) {
     </div>
   );
 }
-
-export { getDefaultState, ArgumentInput };
-export type { ArgumentInputState };
