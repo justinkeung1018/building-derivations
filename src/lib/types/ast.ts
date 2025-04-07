@@ -4,7 +4,7 @@ export class TerminalAST {
 
 export class NonTerminalAST {
   constructor(
-    readonly name: string,
+    readonly index: number,
     readonly children: AST[],
   ) {}
 }

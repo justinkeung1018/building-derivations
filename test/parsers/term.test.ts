@@ -1,79 +1,80 @@
-import { buildParsers } from "@/lib/parsers/term";
+import { buildTermParser } from "@/lib/parsers/term";
 import { TerminalAST, NonTerminalAST, MultisetAST } from "@/lib/types/ast";
-import { Terminal, NonTerminal, Multiset } from "@/lib/types/token";
+import { Terminal, NonTerminal, Multiset, Or, Maybe } from "@/lib/types/token";
 import { defaultSyntaxRule } from "./utils";
 import { ResultKind } from "parjs";
+import { SyntaxRule } from "@/lib/types/rules";
 
 it("parses terminals", () => {
   const statement = {
     ...defaultSyntaxRule,
     definition: [[new Terminal("x"), new Terminal("|-"), new Terminal("y")]],
   };
-  const parser = buildParsers([statement])[0];
+  const parser = buildTermParser([statement]);
   expect(parser.parse("x |- y").value).toEqual([new TerminalAST("x"), new TerminalAST("|-"), new TerminalAST("y")]);
 });
 
 it("parses non-terminals", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new NonTerminal(1, "A")]] };
+  const statement = { ...defaultSyntaxRule, definition: [[new NonTerminal(1)]] };
   const type = {
     ...defaultSyntaxRule,
     placeholders: ["A"],
     definition: [
       [new Terminal("x")],
-      [new Terminal("("), new NonTerminal(1, "A"), new Terminal("->"), new NonTerminal(1, "A"), new Terminal(")")],
+      [new Terminal("("), new NonTerminal(1), new Terminal("->"), new NonTerminal(1), new Terminal(")")],
     ],
   };
-  const parser = buildParsers([statement, type])[0];
+  const parser = buildTermParser([statement, type]);
   expect(parser.parse("(x -> x)").value).toEqual([
-    new NonTerminalAST("A", [
+    new NonTerminalAST(1, [
       new TerminalAST("("),
-      new NonTerminalAST("A", [new TerminalAST("x")]),
+      new NonTerminalAST(1, [new TerminalAST("x")]),
       new TerminalAST("->"),
-      new NonTerminalAST("A", [new TerminalAST("x")]),
+      new NonTerminalAST(1, [new TerminalAST("x")]),
       new TerminalAST(")"),
     ]),
   ]);
 });
 
 it("parses multiset with one element", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1, "A")])]] };
+  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, type])[0];
-  expect(parser.parse("a").value).toEqual([new MultisetAST([[new NonTerminalAST("A", [new TerminalAST("a")])]])]);
+  const parser = buildTermParser([statement, type]);
+  expect(parser.parse("a").value).toEqual([new MultisetAST([[new NonTerminalAST(1, [new TerminalAST("a")])]])]);
 });
 
 it("parses multiset with multiple elements", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1, "A")])]] };
+  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, type])[0];
+  const parser = buildTermParser([statement, type]);
   expect(parser.parse("a, b,a").value).toEqual([
     new MultisetAST([
-      [new NonTerminalAST("A", [new TerminalAST("a")])],
-      [new NonTerminalAST("A", [new TerminalAST("b")])],
-      [new NonTerminalAST("A", [new TerminalAST("a")])],
+      [new NonTerminalAST(1, [new TerminalAST("a")])],
+      [new NonTerminalAST(1, [new TerminalAST("b")])],
+      [new NonTerminalAST(1, [new TerminalAST("a")])],
     ]),
   ]);
 });
 
 it("parses empty multisets", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1, "A")])]] };
+  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, type])[0];
+  const parser = buildTermParser([statement, type]);
   expect(parser.parse("\\varnothing").value).toEqual([new MultisetAST([])]);
 });
 
 it("parses multiset followed by comma", () => {
   const statement = {
     ...defaultSyntaxRule,
-    definition: [[new Multiset([new NonTerminal(1, "A")]), new Terminal(","), new Terminal("x")]],
+    definition: [[new Multiset([new NonTerminal(1)]), new Terminal(","), new Terminal("x")]],
   };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, type])[0];
+  const parser = buildTermParser([statement, type]);
   expect(parser.parse("a,b,a,x").value).toEqual([
     new MultisetAST([
-      [new NonTerminalAST("A", [new TerminalAST("a")])],
-      [new NonTerminalAST("A", [new TerminalAST("b")])],
-      [new NonTerminalAST("A", [new TerminalAST("a")])],
+      [new NonTerminalAST(1, [new TerminalAST("a")])],
+      [new NonTerminalAST(1, [new TerminalAST("b")])],
+      [new NonTerminalAST(1, [new TerminalAST("a")])],
     ]),
     new TerminalAST(","),
     new TerminalAST("x"),
@@ -83,49 +84,86 @@ it("parses multiset followed by comma", () => {
 it("parses multisets greedily without caring about the rest of the same rule", () => {
   const statement = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma"), new Terminal(";")]],
+    definition: [[new NonTerminal(1), new Terminal(";")]],
   };
   const context = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A")]), new Terminal(","), new NonTerminal(1, "A")]],
+    definition: [[new Multiset([new NonTerminal(2)]), new Terminal(","), new NonTerminal(1)]],
   };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, context, type])[0];
+  const parser = buildTermParser([statement, context, type]);
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
 });
 
 it("parses multisets greedily without caring about other rules", () => {
   const statement = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma"), new Terminal(","), new NonTerminal(1, "A"), new Terminal(";")]],
+    definition: [[new NonTerminal(1), new Terminal(","), new NonTerminal(1), new Terminal(";")]],
   };
   const context = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A")])]],
+    definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
-  const parser = buildParsers([statement, context, type])[0];
+  const parser = buildTermParser([statement, context, type]);
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
+});
+
+// it("parses rules with alternatives beginning with the same terminal", () => {
+//   const rule = {
+//     ...defaultSyntaxRule,
+//     definition: [[new Terminal("("), new Terminal("a"), new Terminal(")")], [new Terminal("("), new Terminal("b"), new Terminal(")")]],
+//   };
+//   const parser = buildTermParser([rule]);
+//   expect(parser.parse("(b)").value).toEqual(true);
+// })
+
+it("parses rules with Ors", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [
+      [
+        new Terminal("("),
+        new Or([
+          [new Terminal("a"), new Terminal(")")],
+          [new Terminal("b"), new Terminal(")")],
+        ]),
+      ],
+    ],
+  };
+  const parser = buildTermParser([statement]);
+  expect(parser.parse("(a)").value).toEqual([new TerminalAST("("), new TerminalAST("a"), new TerminalAST(")")]);
+  expect(parser.parse("(b)").value).toEqual([new TerminalAST("("), new TerminalAST("b"), new TerminalAST(")")]);
+});
+
+it("parses rules with Maybes", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("a"), new Maybe([[new Terminal("b")]])]],
+  };
+  const parser = buildTermParser([statement]);
+  expect(parser.parse("a").value).toEqual([new TerminalAST("a")]);
+  expect(parser.parse("ab").value).toEqual([new TerminalAST("a"), new TerminalAST("b")]);
 });
 
 it("parses statements in logic", () => {
   const statement = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma"), new Terminal("|-"), new NonTerminal(2, "A")]],
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A")])]],
+    definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type = {
     ...defaultSyntaxRule,
     placeholders: ["A", "B"],
     definition: [
-      [new NonTerminal(3, "\\varphi")],
-      [new Terminal("("), new NonTerminal(2, "A"), new Terminal("->"), new NonTerminal(2, "B"), new Terminal(")")],
+      [new NonTerminal(3)],
+      [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
     ],
   };
   const typevar = {
@@ -134,32 +172,32 @@ it("parses statements in logic", () => {
     definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")]],
   };
 
-  const parser = buildParsers([statement, context, type, typevar])[0];
+  const parser = buildTermParser([statement, context, type, typevar]);
   expect(parser.parse("\\varnothing |- (1 -> 2)").value).toEqual([
-    new NonTerminalAST("\\Gamma", [new MultisetAST([])]),
+    new NonTerminalAST(1, [new MultisetAST([])]),
     new Terminal("|-"),
-    new NonTerminalAST("A", [
+    new NonTerminalAST(2, [
       new TerminalAST("("),
-      new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
+      new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("1")])]),
       new TerminalAST("->"),
-      new NonTerminalAST("B", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+      new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("2")])]),
       new TerminalAST(")"),
     ]),
   ]);
 
   expect(parser.parse("1, 2 |- (1 -> 2)").value).toEqual([
-    new NonTerminalAST("\\Gamma", [
+    new NonTerminalAST(1, [
       new MultisetAST([
-        [new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])])],
-        [new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])])],
+        [new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("1")])])],
+        [new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("2")])])],
       ]),
     ]),
     new TerminalAST("|-"),
-    new NonTerminalAST("A", [
+    new NonTerminalAST(2, [
       new TerminalAST("("),
-      new NonTerminalAST("A", [new NonTerminalAST("\\varphi", [new TerminalAST("1")])]),
+      new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("1")])]),
       new TerminalAST("->"),
-      new NonTerminalAST("B", [new NonTerminalAST("\\varphi", [new TerminalAST("2")])]),
+      new NonTerminalAST(2, [new NonTerminalAST(3, [new TerminalAST("2")])]),
       new TerminalAST(")"),
     ]),
   ]);
