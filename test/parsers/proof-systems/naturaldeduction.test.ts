@@ -13,19 +13,19 @@ import {
 
 const statementCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
-  definition: [[new NonTerminal(1, "\\Gamma"), new Terminal("|-"), new NonTerminal(2, "A")]],
+  definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
 };
 const contextCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
   placeholders: ["\\Gamma"],
-  definition: [[new Multiset([new NonTerminal(2, "A")])]],
+  definition: [[new Multiset([new NonTerminal(2)])]],
 };
 const typeCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
   placeholders: ["A", "B"],
   definition: [
-    [new NonTerminal(3, "\\varphi")],
-    [new Terminal("("), new NonTerminal(2, "A"), new Terminal("->"), new NonTerminal(2, "B"), new Terminal(")")],
+    [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
+    [new NonTerminal(3)],
   ],
 };
 const typevarCorrect: SyntaxRule = {
@@ -83,23 +83,23 @@ describe("Parses natural deduction rules", () => {
       syntax,
     ).rules;
     expect(actionParsed.conclusion.structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [
+      new MatchableNonTerminal(1, [
         new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
       ]),
       new MatchableTerminal("|-"),
       new Name(2, "A"),
     ]);
     expect(arrowIntroductionParsed.premises[0].structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [
+      new MatchableNonTerminal(1, [
         new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
       ]),
       new MatchableTerminal("|-"),
       new Name(2, "B"),
     ]);
     expect(arrowIntroductionParsed.conclusion.structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
       new MatchableTerminal("|-"),
-      new MatchableNonTerminal(2, "A", [
+      new MatchableNonTerminal(2, [
         new MatchableTerminal("("),
         new Name(2, "A"),
         new MatchableTerminal("->"),
@@ -108,9 +108,9 @@ describe("Parses natural deduction rules", () => {
       ]),
     ]);
     expect(arrowEliminationParsed.premises[0].structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
       new MatchableTerminal("|-"),
-      new MatchableNonTerminal(2, "A", [
+      new MatchableNonTerminal(2, [
         new MatchableTerminal("("),
         new Name(2, "A"),
         new MatchableTerminal("->"),
@@ -119,12 +119,12 @@ describe("Parses natural deduction rules", () => {
       ]),
     ]);
     expect(arrowEliminationParsed.premises[1].structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
       new MatchableTerminal("|-"),
       new Name(2, "A"),
     ]);
     expect(arrowEliminationParsed.conclusion.structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
+      new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])]),
       new MatchableTerminal("|-"),
       new Name(2, "B"),
     ]);

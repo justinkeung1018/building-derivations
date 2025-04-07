@@ -12,7 +12,6 @@ export class Name {
 export class MatchableNonTerminal {
   constructor(
     readonly index: number,
-    readonly name: string,
     readonly children: Matchable[],
   ) {}
 }
@@ -30,4 +29,4 @@ export class MatchableMultiset {
   ) {}
 }
 
-export type Matchable = MatchableTerminal | Name | MatchableMultiset;
+export type Matchable = MatchableTerminal | Name | MatchableNonTerminal | MatchableMultiset;

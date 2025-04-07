@@ -13,7 +13,7 @@ import {
 it("parses placeholders consisting of one character", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "A")]],
+    definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -34,7 +34,7 @@ it("parses placeholders consisting of one character", () => {
 it("parses placeholders consisting of multiple characters", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "var")]],
+    definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -55,7 +55,7 @@ it("parses placeholders consisting of multiple characters", () => {
 it("parses statements with multiple tokens", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "A"), new Terminal("|-"), new NonTerminal(1, "B")]],
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -76,12 +76,12 @@ it("parses statements with multiple tokens", () => {
 it("fails to parse left-recursive non-terminal rules", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "A")]],
+    definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholders: ["A", "B"],
-    definition: [[new Terminal("x")], [new NonTerminal(1, "A"), new Terminal(";"), new NonTerminal(1, "B")]],
+    definition: [[new Terminal("x")], [new NonTerminal(1), new Terminal(";"), new NonTerminal(1)]],
   };
   const rule: InferenceRule = {
     ...defaultInferenceRule,
@@ -96,15 +96,12 @@ it("fails to parse left-recursive non-terminal rules", () => {
 it("parses non-terminals where a placeholder name is same as the stringified definition", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "A")]],
+    definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholders: ["A", "B", "(A;B"],
-    definition: [
-      [new Terminal("x")],
-      [new Terminal("("), new NonTerminal(1, "A"), new Terminal(";"), new NonTerminal(1, "B")],
-    ],
+    definition: [[new Terminal("x")], [new Terminal("("), new NonTerminal(1), new Terminal(";"), new NonTerminal(1)]],
   };
   const rule: InferenceRule = {
     ...defaultInferenceRule,
@@ -115,7 +112,7 @@ it("parses non-terminals where a placeholder name is same as the stringified def
   };
   const [ruleParsed] = parseInferenceRules([rule], [statement, type]).rules;
   expect(ruleParsed.conclusion.structure).toEqual([
-    new MatchableNonTerminal(1, "A", [
+    new MatchableNonTerminal(1, [
       new MatchableTerminal("("),
       new Name(1, "A"),
       new MatchableTerminal(";"),
@@ -127,12 +124,12 @@ it("parses non-terminals where a placeholder name is same as the stringified def
 it("parses multisets where each element consists of one non-terminal", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma")]],
+    definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A")])]],
+    definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -148,7 +145,7 @@ it("parses multisets where each element consists of one non-terminal", () => {
   };
   const [ruleParsed] = parseInferenceRules([rule], [statement, context, type]).rules;
   expect(ruleParsed.conclusion.structure).toEqual([
-    new MatchableNonTerminal(1, "\\Gamma", [
+    new MatchableNonTerminal(1, [
       new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
     ]),
   ]);
@@ -157,12 +154,12 @@ it("parses multisets where each element consists of one non-terminal", () => {
 it("parses rules consisting of a non-terminal representing a multiset, followed by something else", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma"), new Terminal(";")]],
+    definition: [[new NonTerminal(1), new Terminal(";")]],
   };
   const context: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A")])]],
+    definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -178,7 +175,7 @@ it("parses rules consisting of a non-terminal representing a multiset, followed 
   };
   const [ruleParsed] = parseInferenceRules([rule], [statement, context, type]).rules;
   expect(ruleParsed.conclusion.structure).toEqual([
-    new MatchableNonTerminal(1, "\\Gamma", [
+    new MatchableNonTerminal(1, [
       new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
     ]),
     new MatchableTerminal(";"),
@@ -188,12 +185,12 @@ it("parses rules consisting of a non-terminal representing a multiset, followed 
 describe("multisets where each element consists of multiple tokens", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "\\Gamma")]],
+    definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholders: ["\\Gamma"],
-    definition: [[new Multiset([new NonTerminal(2, "A"), new Terminal(";"), new NonTerminal(2, "B")])]],
+    definition: [[new Multiset([new NonTerminal(2), new Terminal(";"), new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
@@ -211,7 +208,7 @@ describe("multisets where each element consists of multiple tokens", () => {
     };
     const [ruleParsed] = parseInferenceRules([rule], [statement, context, type]).rules;
     expect(ruleParsed.conclusion.structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [
+      new MatchableNonTerminal(1, [
         new MatchableMultiset(1, [
           new Name(1, "\\Gamma"),
           new MultisetElement([new Name(2, "A"), new MatchableTerminal(";"), new Name(2, "B")]),
@@ -230,7 +227,7 @@ describe("multisets where each element consists of multiple tokens", () => {
     };
     const [ruleParsed] = parseInferenceRules([rule], [statement, context, type]).rules;
     expect(ruleParsed.conclusion.structure).toEqual([
-      new MatchableNonTerminal(1, "\\Gamma", [
+      new MatchableNonTerminal(1, [
         new MatchableMultiset(1, [
           new MultisetElement([new Name(2, "A"), new MatchableTerminal(";"), new Name(2, "B")]),
           new Name(1, "\\Gamma"),
@@ -243,7 +240,7 @@ describe("multisets where each element consists of multiple tokens", () => {
 it("does not modify the arguments", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
-    definition: [[new NonTerminal(1, "A")]],
+    definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
