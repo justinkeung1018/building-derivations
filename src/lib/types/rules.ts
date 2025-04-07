@@ -1,8 +1,8 @@
 import { Matchable } from "./matchable";
-import { Or } from "./token";
+import { Token } from "./token";
 
 export interface SyntaxRule {
-  definition: Or;
+  definition: Token[][];
   placeholders: string[];
   definitionSanitised: string[];
   placeholdersUnsanitised: string;

@@ -3,10 +3,7 @@ export class Terminal {
 }
 
 export class NonTerminal {
-  constructor(
-    readonly index: number,
-    readonly name: string,
-  ) {}
+  constructor(readonly index: number) {}
 }
 
 export class Multiset {
@@ -17,4 +14,8 @@ export class Or {
   constructor(readonly alternatives: Token[][]) {}
 }
 
-export type Token = Terminal | NonTerminal | Multiset | Or;
+export class Maybe {
+  constructor(readonly alternatives: Token[][]) {}
+}
+
+export type Token = Terminal | NonTerminal | Multiset | Or | Maybe;
