@@ -6,7 +6,7 @@ import { Button } from "./components/shadcn/Button";
 import { InferenceRule, SyntaxRule } from "./lib/types/rules";
 import { SyntaxEditor } from "./components/SyntaxEditor";
 import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
-import { verify } from "./lib/verifier";
+import { verify } from "./lib/verifier/verify";
 
 export function App() {
   const [valid, setValid] = useState(false);
