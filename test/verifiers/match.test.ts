@@ -92,7 +92,6 @@ describe("fails to match a multiset to an existing value in the mapping", () => 
         [new NonTerminalAST(2, [new TerminalAST("a")])],
       ]),
     };
-
     expect(() => match(input, structure, [statement, context, type], names)).toThrow("not found");
   });
 });
