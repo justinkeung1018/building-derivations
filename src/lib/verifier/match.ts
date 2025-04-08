@@ -10,15 +10,7 @@ import {
   Name,
 } from "../types/matchable";
 import { buildTermParser } from "../parsers/term";
-
-function astToString(ast: AST): string {
-  if (ast instanceof TerminalAST) {
-    return ast.value;
-  } else if (ast instanceof NonTerminalAST) {
-    return ast.children.map(astToString).join(" ");
-  }
-  return ast.elements.map((element) => element.map(astToString).join(" ")).join(", ");
-}
+import { astToString } from "../utils";
 
 function matchTerminal(ast: TerminalAST, token: Matchable) {
   if (!(token instanceof MatchableTerminal)) {
