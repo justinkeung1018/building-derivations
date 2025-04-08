@@ -27,6 +27,18 @@ it("matches basic statements", () => {
   });
 });
 
+it("fails when the input is nonsense", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")]],
+  };
+
+  const input = "werioahjvoi";
+  const structure: Matchable[] = [new MatchableTerminal("x")];
+
+  expect(() => match(input, structure, [statement], {})).toThrow("Malformed");
+});
+
 it("fails when the existing value for a name mapping to a non-terminal is not compatible with the input", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
