@@ -52,7 +52,7 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
   if (!(token instanceof MatchableMultiset)) {
     throw new Error("Cannot match a multiset against a non-multiset");
   }
-  const matched: boolean[] = Array<boolean>(token.elements.length).fill(false);
+  const matched: boolean[] = Array<boolean>(ast.elements.length).fill(false);
 
   const namesToMatch: string[] = token.elements.filter((x) => x instanceof Name).map((x) => x.name);
   const multisetElementsToMatch: MultisetElement[] = token.elements.filter((x) => x instanceof MultisetElement);
@@ -80,6 +80,10 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
     if (!matchMultisetElement(ast, multisetElement, names, matched, conservative)) {
       numUnmatchedMultisetElements++;
     }
+  }
+
+  if (unmatchedNames.length === 0 && numUnmatchedMultisetElements === 0 && !matched.every((x) => x)) {
+    throw new Error("Unmatched multiset elements leftover");
   }
 
   if (unmatchedNames.length === 1 && numUnmatchedMultisetElements === 0) {
@@ -114,7 +118,7 @@ function matchMultisetElement(
 
 function markAsMatched(ast: MultisetAST, element: AST[], matched: boolean[]): boolean {
   for (let i = 0; i < ast.elements.length; i++) {
-    if (_.isEqual(ast.elements[i], element)) {
+    if (!matched[i] && _.isEqual(ast.elements[i], element)) {
       matched[i] = true;
       return true;
     }

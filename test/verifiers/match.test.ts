@@ -1,4 +1,4 @@
-import { MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
+import { AST, MultisetAST, NonTerminalAST, TerminalAST } from "@/lib/types/ast";
 import {
   Matchable,
   Name,
@@ -13,36 +13,91 @@ import { defaultSyntaxRule } from "../parsers/utils";
 import { match } from "@/lib/verifier/match";
 
 it("matches basic statements", () => {
-  const input = "x |- x";
-  const structure: Matchable[] = [new Name(1, "A"), new MatchableTerminal("|-"), new Name(1, "A")];
-
-  // Syntax
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
   };
   const type: SyntaxRule = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("x")]] };
 
+  const input = "x |- x";
+  const structure: Matchable[] = [new Name(1, "A"), new MatchableTerminal("|-"), new Name(1, "A")];
+
   expect(match(input, structure, [statement, type], {})).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
   });
 });
 
-it("matches arrows", () => {
-  const input = "x |- (x -> y)";
-  const structure: Matchable[] = [
-    new Name(1, "A"),
-    new MatchableTerminal("|-"),
-    new MatchableNonTerminal(1, [
-      new MatchableTerminal("("),
-      new Name(1, "A"),
-      new MatchableTerminal("->"),
-      new Name(1, "B"),
-      new MatchableTerminal(")"),
-    ]),
-  ];
+it("fails when the existing value for a name mapping to a non-terminal is not compatible with the input", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1)]],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["A"],
+    definition: [[new Terminal("x")], [new Terminal("y")]],
+  };
 
-  // Syntax
+  const input = "x";
+  const structure: Matchable[] = [new Name(1, "A")];
+
+  expect(() =>
+    match(input, structure, [statement, type], { A: new NonTerminalAST(1, [new TerminalAST("y")]) }),
+  ).toThrow("Incompatible");
+});
+
+describe("fails to match a multiset to an existing value in the mapping", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2)])]],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["A", "B"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
+
+  const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
+
+  it("fails when the existing multiset has fewer elements", () => {
+    const input = "a,b";
+    const names: Record<string, AST> = {
+      "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("a")])]]),
+    };
+    expect(() => match(input, structure, [statement, context, type], names)).toThrow("leftover");
+  });
+
+  it("fails when the existing multiset has more elements", () => {
+    const input = "a,a";
+    const names: Record<string, AST> = {
+      "\\Gamma": new MultisetAST([
+        [new NonTerminalAST(2, [new TerminalAST("a")])],
+        [new NonTerminalAST(2, [new TerminalAST("a")])],
+        [new NonTerminalAST(2, [new TerminalAST("a")])],
+      ]),
+    };
+    expect(() => match(input, structure, [statement, context, type], names)).toThrow("not found");
+  });
+
+  it("fails when the existing multiset has the same number of elements but different elements", () => {
+    const input = "a,b";
+    const names: Record<string, AST> = {
+      "\\Gamma": new MultisetAST([
+        [new NonTerminalAST(2, [new TerminalAST("a")])],
+        [new NonTerminalAST(2, [new TerminalAST("a")])],
+      ]),
+    };
+
+    expect(() => match(input, structure, [statement, context, type], names)).toThrow("not found");
+  });
+});
+
+it("matches arrows", () => {
   const statement = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
@@ -57,6 +112,19 @@ it("matches arrows", () => {
     placeholders: ["A", "B"],
   };
 
+  const input = "x |- (x -> y)";
+  const structure: Matchable[] = [
+    new Name(1, "A"),
+    new MatchableTerminal("|-"),
+    new MatchableNonTerminal(1, [
+      new MatchableTerminal("("),
+      new Name(1, "A"),
+      new MatchableTerminal("->"),
+      new Name(1, "B"),
+      new MatchableTerminal(")"),
+    ]),
+  ];
+
   expect(match(input, structure, [statement, type], {})).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
     B: new NonTerminalAST(1, [new TerminalAST("y")]),
@@ -64,10 +132,6 @@ it("matches arrows", () => {
 });
 
 it("matches multisets with unique elements that do not need to be inferred", () => {
-  const input = "x, y, z";
-  const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
-
-  // Syntax
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1)]],
@@ -82,6 +146,9 @@ it("matches multisets with unique elements that do not need to be inferred", () 
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A"],
   };
+
+  const input = "x, y, z";
+  const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
 
   expect(match(input, structure, [statement, context, type], {})).toEqual({
     "\\Gamma": new MultisetAST([
@@ -93,10 +160,6 @@ it("matches multisets with unique elements that do not need to be inferred", () 
 });
 
 it("matches multisets with duplicate elements that do not need to be inferred", () => {
-  const input = "x, y, x,x,x,y,z";
-  const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
-
-  // Syntax
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1)]],
@@ -112,6 +175,9 @@ it("matches multisets with duplicate elements that do not need to be inferred", 
     placeholders: ["A"],
   };
 
+  const input = "x, y, x,x,x,y,z";
+  const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
+
   expect(match(input, structure, [statement, context, type], {})).toEqual({
     "\\Gamma": new MultisetAST([
       [new NonTerminalAST(2, [new TerminalAST("x")])],
@@ -125,17 +191,7 @@ it("matches multisets with duplicate elements that do not need to be inferred", 
   });
 });
 
-it("matches multisets that need to be inferred", () => {
-  const input = "x, y |- x";
-  const structure: Matchable[] = [
-    new MatchableNonTerminal(1, [
-      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
-    ]),
-    new MatchableTerminal("|-"),
-    new Name(1, "A"),
-  ];
-
-  // Syntax
+it("matches multisets with unique elements that need to be inferred", () => {
   const statement = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
@@ -151,8 +207,99 @@ it("matches multisets that need to be inferred", () => {
     placeholders: ["A", "B"],
   };
 
+  const input = "x, y |- x";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(1, "A"),
+  ];
+
   expect(match(input, structure, [statement, context, type], {})).toEqual({
     "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
     A: new NonTerminalAST(2, [new TerminalAST("x")]),
+  });
+});
+
+it("matches multisets with duplicate elements that need to be inferred", () => {
+  const statement = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
+  };
+  const context = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")]],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "x,x ,x |- x";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(1, "A"),
+  ];
+
+  expect(match(input, structure, [statement, context, type], {})).toEqual({
+    "\\Gamma": new MultisetAST([
+      [new NonTerminalAST(2, [new TerminalAST("x")])],
+      [new NonTerminalAST(2, [new TerminalAST("x")])],
+    ]),
+    A: new NonTerminalAST(2, [new TerminalAST("x")]),
+  });
+});
+
+it("matches multisets where each element consists of multiple tokens", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2), new Terminal(":"), new NonTerminal(3)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2), new Terminal(":"), new NonTerminal(3)])]],
+  };
+  const variable: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["var"],
+    definition: [[new Terminal("x")], [new Terminal("y")]],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholders: ["\\varphi"],
+    definition: [[new Terminal("1")], [new Terminal("2")]],
+  };
+
+  const input = "x:1, y:2 |- y:2";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [
+        new Name(1, "\\Gamma"),
+        new MultisetElement([new Name(2, "var"), new MatchableTerminal(":"), new Name(3, "\\varphi")]),
+      ]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(2, "var"),
+    new MatchableTerminal(":"),
+    new Name(3, "\\varphi"),
+  ];
+
+  expect(match(input, structure, [statement, context, variable, type], {})).toEqual({
+    "\\Gamma": new MultisetAST([
+      [
+        new NonTerminalAST(2, [new TerminalAST("x")]),
+        new TerminalAST(":"),
+        new NonTerminalAST(3, [new TerminalAST("1")]),
+      ],
+    ]),
+    var: new NonTerminalAST(2, [new TerminalAST("y")]),
+    "\\varphi": new NonTerminalAST(3, [new TerminalAST("2")]),
   });
 });
