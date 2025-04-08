@@ -1,4 +1,4 @@
-import { Parjser, string, whitespace } from "parjs/.";
+import { Parjser, string, whitespace } from "parjs";
 import { between, map, then, manySepBy, or, later, flatten, maybe } from "parjs/combinators";
 import { AST, TerminalAST, NonTerminalAST, MultisetAST } from "../types/ast";
 import { SyntaxRule } from "../types/rules";
