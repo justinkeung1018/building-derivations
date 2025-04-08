@@ -111,15 +111,6 @@ it("parses multisets greedily without caring about other rules", () => {
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
 });
 
-// it("parses rules with alternatives beginning with the same terminal", () => {
-//   const rule = {
-//     ...defaultSyntaxRule,
-//     definition: [[new Terminal("("), new Terminal("a"), new Terminal(")")], [new Terminal("("), new Terminal("b"), new Terminal(")")]],
-//   };
-//   const parser = buildTermParser([rule]);
-//   expect(parser.parse("(b)").value).toEqual(true);
-// })
-
 it("parses rules with Ors", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
