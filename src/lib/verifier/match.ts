@@ -35,7 +35,7 @@ function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<s
     }
   } else if (token instanceof MatchableNonTerminal) {
     if (ast.index !== token.index) {
-      throw new Error(`Matching non-terminals corresponding to different rules: ${ast.index} and ${token.index}`);
+      throw new Error(`Cannot match non-terminals corresponding to different rules: ${ast.index} and ${token.index}`);
     }
     if (ast.children.length !== token.children.length) {
       throw new Error("Malformed non-terminal children structure");
