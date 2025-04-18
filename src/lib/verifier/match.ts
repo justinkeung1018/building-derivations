@@ -10,7 +10,7 @@ import {
   Name,
 } from "../types/matchable";
 import { buildTermParser } from "../parsers/term";
-import { astToString } from "../utils";
+import { astToString, multisetElementToString } from "../utils";
 
 function matchTerminal(ast: TerminalAST, token: Matchable) {
   if (!(token instanceof MatchableTerminal)) {
@@ -83,7 +83,12 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
   }
 
   if (unmatchedNames.length === 0 && numUnmatchedMultisetElements === 0 && !matched.every((x) => x)) {
-    throw new Error("Unmatched multiset elements leftover");
+    throw new Error(
+      `Unmatched multiset elements leftover: ${ast.elements
+        .filter((_, i) => !matched[i])
+        .map((x) => x.map(astToString).join(" "))
+        .join(", ")}`,
+    );
   }
 
   if (unmatchedNames.length === 1 && numUnmatchedMultisetElements === 0) {
@@ -98,6 +103,10 @@ function matchMultisetElement(
   matched: boolean[],
   conservative: boolean,
 ): boolean {
+  if (matched.every((x) => x)) {
+    throw new Error(`There is nothing to match ${multisetElementToString(element)} against`);
+  }
+
   for (let i = 0; i < ast.elements.length; i++) {
     const elementAST = ast.elements[i];
     if (elementAST.length !== element.tokens.length || matched[i]) {

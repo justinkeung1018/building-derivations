@@ -202,7 +202,7 @@ it("matches multisets with duplicate elements that do not need to be inferred", 
   });
 });
 
-it("matches multisets with unique elements that need to be inferred", () => {
+it("matches multisets with unique elements that need to be inferred from the rest of the statement", () => {
   const statement = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
@@ -233,7 +233,107 @@ it("matches multisets with unique elements that need to be inferred", () => {
   });
 });
 
-it("matches multisets with duplicate elements that need to be inferred", () => {
+it("matches multisets that need to be inferred from the names", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "x, y |- z";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(1, "B"),
+  ];
+
+  const names: Record<string, AST> = {
+    "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
+  };
+
+  expect(match(input, structure, [statement, context, type], names)).toEqual({
+    "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
+    A: new NonTerminalAST(2, [new TerminalAST("x")]),
+    B: new NonTerminalAST(2, [new TerminalAST("z")]),
+  });
+});
+
+it("fails to match multisets that need to be inferred from the names but are incompatible with the names", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "x, y |- z";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(1, "B"),
+  ];
+  const names: Record<string, AST> = {
+    "\\Gamma": new MultisetAST([
+      [new NonTerminalAST(2, [new TerminalAST("y")])],
+      [new NonTerminalAST(2, [new TerminalAST("x")])],
+    ]),
+  };
+
+  expect(() => match(input, structure, [statement, context, type], names)).toThrow("nothing");
+});
+
+it("leaves uninferrable multisets alone", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "x, y |- z";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(1, "A")])]),
+    ]),
+    new MatchableTerminal("|-"),
+    new Name(1, "B"),
+  ];
+
+  expect(match(input, structure, [statement, context, type], {})).toEqual({
+    B: new NonTerminalAST(2, [new TerminalAST("z")]),
+  });
+});
+
+it("matches multisets with duplicate elements that need to be inferred from the rest of the statement", () => {
   const statement = {
     ...defaultSyntaxRule,
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],

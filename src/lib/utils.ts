@@ -3,6 +3,7 @@ import { Parjser } from "parjs";
 import { or } from "parjs/combinators";
 import { twMerge } from "tailwind-merge";
 import { AST, TerminalAST, NonTerminalAST } from "./types/ast";
+import { Matchable, MatchableNonTerminal, MatchableTerminal, MultisetElement, Name } from "./types/matchable";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,4 +24,26 @@ export function astToString(ast: AST): string {
     return ast.children.map(astToString).join(" ");
   }
   return ast.elements.map((element) => element.map(astToString).join(" ")).join(", ");
+}
+
+export function multisetElementToString(element: MultisetElement): string {
+  return element.tokens.map(matchableToString).join(" ");
+}
+
+export function matchableToString(matchable: Matchable): string {
+  if (matchable instanceof MatchableTerminal) {
+    return matchable.value;
+  } else if (matchable instanceof MatchableNonTerminal) {
+    return matchable.children.map(matchableToString).join(" ");
+  } else if (matchable instanceof Name) {
+    return matchable.name;
+  }
+  return matchable.elements
+    .map((x) => {
+      if (x instanceof Name) {
+        return matchableToString(x);
+      }
+      return multisetElementToString(x);
+    })
+    .join(", ");
 }
