@@ -183,6 +183,19 @@ it("fails when multiple alternatives are exactly the same", () => {
   expect(() => parseSyntax([statement, rule])).toThrow("duplicate");
 });
 
+it("fails when the rule is left-recursive", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definitionUnsanitised: "dummy",
+  };
+  const rule: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "A",
+    definitionUnsanitised: "Abc",
+  };
+  expect(() => parseSyntax([statement, rule])).toThrow("recursive");
+});
+
 it("does not modify the arguments", () => {
   const rule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B, C", definitionUnsanitised: "a" };
   const clone = structuredClone(rule);

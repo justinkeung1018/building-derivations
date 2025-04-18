@@ -87,19 +87,22 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   return parser;
 }
 
-function addAlternativeFirstSet(firstSet: Set<string>, alternative: Token[], syntax: SyntaxRule[]) {
+function addAlternativeFirstSet(firstSet: Set<string>, index: number, alternative: Token[], syntax: SyntaxRule[]) {
   if (alternative[0] instanceof Terminal) {
     firstSet.add(alternative[0].value);
   } else if (alternative[0] instanceof NonTerminal) {
+    if (index === alternative[0].index) {
+      throw new Error("Left-recursive definitions are not allowed");
+    }
     for (const token of getFirstSet(alternative[0].index, syntax)) {
       firstSet.add(token);
     }
   } else if (alternative[0] instanceof Multiset) {
     firstSet.add("\\varnothing");
-    addAlternativeFirstSet(firstSet, alternative[0].tokens, syntax);
+    addAlternativeFirstSet(firstSet, index, alternative[0].tokens, syntax);
   } else if (alternative[0] instanceof Or) {
     for (const alt of alternative[0].alternatives) {
-      addAlternativeFirstSet(firstSet, alt, syntax);
+      addAlternativeFirstSet(firstSet, index, alt, syntax);
     }
   } else {
     throw new Error("Rule definitions should be non-empty and never begin with a Maybe token");
@@ -109,7 +112,7 @@ function addAlternativeFirstSet(firstSet: Set<string>, alternative: Token[], syn
 function getFirstSet(index: number, syntax: SyntaxRule[]): Set<string> {
   const firstSet = new Set<string>();
   for (const alternative of syntax[index].definition) {
-    addAlternativeFirstSet(firstSet, alternative, syntax);
+    addAlternativeFirstSet(firstSet, index, alternative, syntax);
   }
   return firstSet;
 }
