@@ -7,6 +7,8 @@ import { InferenceRule, InferenceRuleStatement, SyntaxRule } from "@/lib/types/r
 import { latexify } from "@/lib/latexify";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { Plus } from "lucide-react";
+import { ErrorMap } from "@/lib/types/messagemap";
+import { Errors } from "./Errors";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -133,6 +135,7 @@ interface InferenceRulesEditorProps {
 export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const { syntax, inferenceRules, setInferenceRules } = props;
   const [editing, setEditing] = useState(false);
+  const [errors, setErrors] = useState(new ErrorMap());
 
   return (
     <div className="space-y-2">
@@ -144,9 +147,9 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
             <TableHead className="w-96">Definition</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {inferenceRules.map((rule, index) => (
-            <TableRow>
+        {inferenceRules.map((rule, index) => (
+          <TableBody className="group border-b last:border-0">
+            <TableRow className="group-hover:bg-muted/50 border-0">
               <TableCell>
                 {editing ? (
                   <Input
@@ -169,8 +172,9 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                 <DefinitionEditor editing={editing} rule={rule} index={index} {...props} />
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
+            <Errors index={index} errors={errors} />
+          </TableBody>
+        ))}
       </Table>
       {editing && (
         <Button
@@ -200,8 +204,14 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setInferenceRules((old) => parseInferenceRules(old, syntax).rules);
-              setEditing(false);
+              setInferenceRules((old) => {
+                const parseResult = parseInferenceRules(old, syntax);
+                setErrors(parseResult.errors);
+                if (parseResult.errors.size === 0) {
+                  setEditing(false);
+                }
+                return parseResult.rules;
+              });
             }}
             data-cy="apply-inference-button"
           >

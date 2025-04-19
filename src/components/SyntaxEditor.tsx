@@ -7,7 +7,7 @@ import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
-import { CircleAlert } from "lucide-react";
+import { Errors } from "./Errors";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -76,20 +76,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                 )}
               </TableCell>
             </TableRow>
-            {errors.has(index) && (
-              <TableRow className="group-hover:bg-muted/50 border-0 mt-20">
-                <TableCell className="pt-0" colSpan={3}>
-                  <div className="flex flex-col gap-y-1">
-                    {errors.get(index).map((message) => (
-                      <div className="flex items-center gap-x-2 text-red-600 font-bold">
-                        <CircleAlert size={20} />
-                        {message}
-                      </div>
-                    ))}
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
+            <Errors index={index} errors={errors} />
           </TableBody>
         ))}
       </Table>
