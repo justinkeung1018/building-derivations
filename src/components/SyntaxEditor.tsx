@@ -28,7 +28,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             <TableHead>
               <MathJax>{"\\(::=\\)"}</MathJax>
             </TableHead>
-            <TableHead className="w-48">Definition</TableHead>
+            <TableHead className="min-w-48">Definition</TableHead>
           </TableRow>
         </TableHeader>
         {syntax.map((rule, index) => (
@@ -61,7 +61,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                 {editing ? (
                   <Input
                     key={index}
-                    className="w-48"
+                    className="w-full"
                     value={rule.definitionUnsanitised}
                     onChange={(e) => {
                       setSyntax((old) => {
