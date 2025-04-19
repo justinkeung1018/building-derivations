@@ -6,6 +6,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from ".
 import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
+import { ErrorMap } from "@/lib/types/messagemap";
+import { CircleAlert } from "lucide-react";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -13,6 +15,7 @@ interface SyntaxEditorProps {
 }
 
 export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
+  const [errors, setErrors] = useState(new ErrorMap());
   const [editing, setEditing] = useState(false);
 
   return (
@@ -28,9 +31,9 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             <TableHead className="w-48">Definition</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {syntax.map((rule, index) => (
-            <TableRow>
+        {syntax.map((rule, index) => (
+          <TableBody className="group border-b last:border-0">
+            <TableRow className="group-hover:bg-muted/50 border-0">
               <TableCell>
                 {index === 0 ? (
                   "Statement"
@@ -73,8 +76,22 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                 )}
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
+            {errors.has(index) && (
+              <TableRow className="group-hover:bg-muted/50 border-0 mt-20">
+                <TableCell className="pt-0" colSpan={3}>
+                  <div className="flex flex-col gap-y-1">
+                    {errors.get(index).map((message) => (
+                      <div className="flex items-center gap-x-2 text-red-600 font-bold">
+                        <CircleAlert size={20} />
+                        {message}
+                      </div>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        ))}
       </Table>
       {editing && (
         <Button
@@ -102,8 +119,14 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setSyntax((old) => parseSyntax(old).rules);
-              setEditing(false);
+              setSyntax((old) => {
+                const parseResult = parseSyntax(old);
+                setErrors(parseResult.errors);
+                if (parseResult.errors.size === 0) {
+                  setEditing(false);
+                }
+                return parseResult.rules;
+              });
             }}
             data-cy="apply-syntax-button"
           >

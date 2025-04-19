@@ -16,6 +16,10 @@ export class MessageMap extends Map<number, string[]> {
     return messages;
   }
 
+  get size(): number {
+    return super.size + this.overallMessages.length;
+  }
+
   pushOverall(message: string) {
     this.overallMessages.push(message);
   }
