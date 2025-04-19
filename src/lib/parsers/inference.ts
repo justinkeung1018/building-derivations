@@ -10,11 +10,15 @@ import {
 import { InferenceRule, ParseResult, SyntaxRule } from "../types/rules";
 import { Multiset, NonTerminal, Or, Terminal, Token } from "../types/token";
 import { between, flatten, later, manySepBy, map, maybe, or, then } from "parjs/combinators";
-import { sanitiseDefinition } from "./syntax";
 import { ors } from "../utils";
+import { ErrorMap, WarningMap } from "../types/messagemap";
 
-function sanitise(unsanitised: string) {
-  return sanitiseDefinition(unsanitised)[0];
+function sanitise(statementName: string, unsanitised: string): string {
+  const result = unsanitised.trim();
+  if (result.length === 0) {
+    throw new Error(`${statementName} cannot be empty`);
+  }
+  return result;
 }
 
 function getTokenParser(
@@ -139,17 +143,42 @@ function buildInferenceRuleStatementParser(syntax: SyntaxRule[]): Parjser<Matcha
 export function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]): ParseResult<InferenceRule> {
   // Assume the syntax is well-formed and already parsed
   rules = structuredClone(rules);
+  const errors = new ErrorMap();
 
   const parser = buildInferenceRuleStatementParser(syntax);
 
-  for (const rule of rules) {
-    for (const premise of rule.premises) {
-      premise.sanitised = sanitise(premise.unsanitised);
-      premise.structure = parser.parse(premise.sanitised).value;
-    }
-    rule.conclusion.sanitised = sanitise(rule.conclusion.unsanitised);
-    rule.conclusion.structure = parser.parse(rule.conclusion.sanitised).value;
-  }
+  rules.forEach((rule, index) => {
+    rule.premises.forEach((premise, premiseIndex) => {
+      try {
+        premise.sanitised = sanitise(`Premise ${premiseIndex + 1}`, premise.unsanitised);
+        const result = parser.parse(premise.sanitised);
+        if (result.isOk) {
+          premise.structure = result.value;
+        } else {
+          // TODO: add detailed parsing error as inline accordion menu?
+          errors.pushError(
+            index,
+            new Error(`Premise ${premiseIndex + 1} (${premise.sanitised}) is not a valid statement`),
+          );
+        }
+      } catch (error) {
+        errors.pushError(index, error);
+      }
+    });
 
-  return { rules, warnings: [] };
+    try {
+      rule.conclusion.sanitised = sanitise("Conclusion", rule.conclusion.unsanitised);
+      const result = parser.parse(rule.conclusion.sanitised);
+      if (result.isOk) {
+        rule.conclusion.structure = result.value;
+      } else {
+        // TODO: add detailed parsing error as inline accordion menu?
+        errors.pushError(index, new Error(`Conclusion (${rule.conclusion.sanitised}) is not a valid statement`));
+      }
+    } catch (error) {
+      errors.pushError(index, error);
+    }
+  });
+
+  return { rules, warnings: new WarningMap(), errors };
 }

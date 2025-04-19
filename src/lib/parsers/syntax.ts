@@ -15,14 +15,14 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   return split.sort((a, b) => b.length - a.length);
 }
 
-export function sanitiseDefinition(definitionUnsanitised: string): string[] {
+function sanitiseDefinition(definitionUnsanitised: string): string[] {
   if (definitionUnsanitised.trim().length === 0) {
-    throw new Error("Every rule must have a definition");
+    throw new Error("Rule definition cannot be empty");
   }
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
   const result = turnstile.split("|").map((x) => x.trim().replaceAll("\\vdash", "|-"));
   if (result.some((x) => x.length === 0)) {
-    throw new Error("Empty alternative definition supplied");
+    throw new Error(`All alternative definitions must be non-empty`);
   }
   return result;
 }
