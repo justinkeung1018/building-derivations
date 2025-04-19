@@ -15,7 +15,7 @@ export const defaultInferenceRuleStatement: InferenceRuleStatement = {
 };
 
 export const defaultInferenceRule: InferenceRule = {
-  name: "",
+  name: "dummy",
   premises: [],
   conclusion: {
     structure: [],

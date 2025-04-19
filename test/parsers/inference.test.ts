@@ -10,6 +10,18 @@ import {
   Name,
 } from "@/lib/types/matchable";
 
+it("fails when empty rule name is supplied", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")]],
+  };
+  const rule: InferenceRule = {
+    ...defaultInferenceRule,
+    name: "    ",
+  };
+  expect(parseInferenceRules([rule], [statement]).errors).toEmit(0, "name");
+});
+
 it("parses placeholders consisting of one character", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,

@@ -148,6 +148,9 @@ export function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]
   const parser = buildInferenceRuleStatementParser(syntax);
 
   rules.forEach((rule, index) => {
+    if (rule.name.trim().length === 0) {
+      errors.pushError(index, new Error("Rule name cannot be empty"));
+    }
     rule.premises.forEach((premise, premiseIndex) => {
       try {
         premise.sanitised = sanitise(`Premise ${premiseIndex + 1}`, premise.unsanitised);
