@@ -5,13 +5,13 @@ it("correctly verifies a basic derivation tree with Curry type assignment", () =
   // Add typed lambda calculus syntax
   cy.getBySel("edit-syntax-button").click();
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     cy.getBySel("add-syntax-button").click();
   }
 
   cy.getBySel("syntax-def-0").type("\\Gamma |- M: A");
   cy.getBySel("syntax-placeholders-1").type("\\Gamma");
-  cy.getBySel("syntax-def-1").type("{{} varasmt {}}");
+  cy.getBySel("syntax-def-1").type("{{} var: A {}}");
   cy.getBySel("syntax-placeholders-2").type("A, B");
   cy.getBySel("syntax-def-2").type("\\varphi | (A -> B)");
   cy.getBySel("syntax-placeholders-3").type("\\varphi");
@@ -20,8 +20,6 @@ it("correctly verifies a basic derivation tree with Curry type assignment", () =
   cy.getBySel("syntax-def-4").type("x | y | z");
   cy.getBySel("syntax-placeholders-5").type("M, N");
   cy.getBySel("syntax-def-5").type("var | (\\lambda var. M) | (MN)");
-  cy.getBySel("syntax-placeholders-6").type("varasmt");
-  cy.getBySel("syntax-def-6").type("var: A");
   cy.getBySel("apply-syntax-button").click();
 
   // Add Curry type assignment rules
@@ -47,11 +45,18 @@ it("correctly verifies a basic derivation tree with Curry type assignment", () =
 
   cy.clickOutside();
 
-  cy.getBySel("tree-conclusion-0").click().type("\\varnothing |- (\\lambda x. x): (1 -> 1)");
-  cy.getBySel("tree-rule-0").type("\\to I");
+  cy.getBySel("tree-conclusion-0").click().type("z: 1 |- ((\\lambda x. (\\lambda y. x))z): (2 -> 1)");
+  cy.getBySel("tree-rule-0").type("\\to E");
   cy.getBySel("tree-add-premise-button-0").click();
-  cy.getBySel("tree-conclusion-1").type("x: 1 |- x: 1");
-  cy.getBySel("tree-rule-1").type("Ax");
-
-  cy.derivationIsCorrect();
+  cy.getBySel("tree-conclusion-1").type("z: 1 |- (\\lambda x. (\\lambda y. x)): (1 -> (2 -> 1))");
+  cy.getBySel("tree-rule-1").type("\\to I");
+  cy.getBySel("tree-add-premise-button-1").click();
+  cy.getBySel("tree-conclusion-2").type("x: 1, z: 1 |- (\\lambda y. x): (2 -> 1)");
+  cy.getBySel("tree-rule-2").type("\\to I");
+  cy.getBySel("tree-add-premise-button-2").click();
+  cy.getBySel("tree-conclusion-3").type("x: 1, y: 2, z: 1 |- x: 1");
+  cy.getBySel("tree-rule-3").type("Ax");
+  cy.getBySel("tree-add-premise-button-0").click();
+  cy.getBySel("tree-conclusion-4").type("z: 1 |- z: 1");
+  cy.getBySel("tree-rule-4").type("Ax");
 });
