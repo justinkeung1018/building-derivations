@@ -1,7 +1,8 @@
 import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, many, many1, manyBetween, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal, Or, Maybe } from "../types/token";
-import { ParseResult, SyntaxRule, Warning } from "../types/rules";
+import { ParseResult, SyntaxRule } from "../types/rules";
+import { ErrorMap, WarningMap } from "../types/messagemap";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   if (placeholdersUnsanitised.trim().length === 0) {
@@ -192,37 +193,66 @@ export function factorise(alternatives: Token[][]): Token[][] {
 
 export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
   syntax = structuredClone(syntax);
-
-  for (const rule of syntax.slice(1)) {
-    rule.placeholders = sanitisePlaceholders(rule.placeholdersUnsanitised);
-  }
-
-  const parser = buildSyntaxRuleParser(syntax);
-  const warnings: Warning[] = [];
+  const warnings = new WarningMap();
+  const errors = new ErrorMap();
 
   syntax.forEach((rule, index) => {
-    rule.definitionSanitised = sanitiseDefinition(rule.definitionUnsanitised);
-    rule.definition = [];
-
-    for (const alternative of rule.definitionSanitised) {
-      const tokens = parser.parse(alternative).value;
-
-      for (const token of tokens) {
-        if (token instanceof Multiset) {
-          const elements = token.tokens;
-          if (elements.every((element) => element instanceof Terminal)) {
-            warnings.push({ index, message: "Multiset contains terminals only" });
-          }
-        }
-      }
-
-      rule.definition.push(tokens);
+    if (index === 0) {
+      return;
     }
-
-    rule.definition = factorise(rule.definition);
+    try {
+      rule.placeholders = sanitisePlaceholders(rule.placeholdersUnsanitised);
+    } catch (error) {
+      errors.pushError(index, error);
+    }
   });
 
-  const firstSets: Set<string>[] = syntax.map((_, index) => getFirstSet(index, syntax));
+  let parser: Parjser<Token[]>;
+  try {
+    parser = buildSyntaxRuleParser(syntax);
+  } catch (error) {
+    if (!(error instanceof Error)) {
+      throw error;
+    }
+    errors.pushOverall(error.message);
+    return { rules: syntax, warnings, errors };
+  }
+
+  syntax.forEach((rule, index) => {
+    try {
+      rule.definitionSanitised = sanitiseDefinition(rule.definitionUnsanitised);
+      rule.definition = [];
+
+      for (const alternative of rule.definitionSanitised) {
+        const tokens = parser.parse(alternative).value;
+
+        for (const token of tokens) {
+          if (token instanceof Multiset) {
+            const elements = token.tokens;
+            if (elements.every((element) => element instanceof Terminal)) {
+              warnings.pushWarning(index, "Multiset contains terminals only");
+            }
+          }
+        }
+
+        rule.definition.push(tokens);
+      }
+
+      rule.definition = factorise(rule.definition);
+    } catch (error) {
+      errors.pushError(index, error);
+    }
+  });
+
+  const firstSets: Set<string>[] = syntax.map((_, index) => {
+    try {
+      return getFirstSet(index, syntax);
+    } catch (error) {
+      errors.pushError(index, error);
+      return new Set();
+    }
+  });
+
   for (const rule of syntax) {
     // We can handle different alternatives beginning with the same terminal
     // and different alternatives beginnning with the same non-terminal (i.e. they refer to the same rule)
@@ -236,12 +266,12 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
     for (const firstSet of relevantFirstSets) {
       for (const token of firstSet) {
         if (unique.has(token)) {
-          throw new Error("Alternatives beginning with different non-terminals have the same first set");
+          errors.pushOverall("Alternatives beginning with different non-terminals have the same first set");
         }
         unique.add(token);
       }
     }
   }
 
-  return { rules: syntax, warnings };
+  return { rules: syntax, warnings, errors };
 }

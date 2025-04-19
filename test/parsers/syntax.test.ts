@@ -9,18 +9,18 @@ function getDefaultStatement(): SyntaxRule {
 
 it("fails when no definition is provided", () => {
   const statement = { ...defaultSyntaxRule };
-  expect(() => parseSyntax([statement])).toThrow("definition");
+  expect(parseSyntax([statement]).errors).toEmit(0, "definition");
 });
 
 it("fails when any of the definition alternatives is empty", () => {
   const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "| a | b" };
-  expect(() => parseSyntax([statement])).toThrow("alternative");
+  expect(parseSyntax([statement]).errors).toEmit(0, "alternative");
 });
 
 it("fails when a non-statement rule has no placeholders", () => {
   const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "abc" };
   const rule: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "def" };
-  expect(() => parseSyntax([statement, rule])).toThrow("placeholder");
+  expect(parseSyntax([statement, rule]).errors).toEmit(1, "placeholder");
 });
 
 it("parses placeholders", () => {
@@ -92,14 +92,14 @@ it("warns when user defines multiset consisting only of terminals", () => {
   expect(contextParsed.definition).toEqual([
     [new Multiset([new Terminal("a"), new Terminal("b"), new Terminal("c"), new Terminal("d"), new Terminal("e")])],
   ]);
-  expect(warnings).toHaveLength(1);
-  expect(warnings[0].message).toContain("terminal");
+  expect(warnings.size).toEqual(1);
+  expect(warnings).toEmit(1, "terminal");
 });
 
 it("fails when there are duplicate placeholders", () => {
   const rule1 = { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "x" };
   const rule2 = { ...defaultSyntaxRule, placeholdersUnsanitised: "B, C", definitionUnsanitised: "y" };
-  expect(() => parseSyntax([getDefaultStatement(), rule1, rule2])).toThrow("multiple");
+  expect(parseSyntax([getDefaultStatement(), rule1, rule2]).errors).toEmitOverall("multiple");
 });
 
 it("parses rules with alternatives beginning with the same terminal", () => {
@@ -167,7 +167,7 @@ it("fails when a rule has alternatives beginning with different non-terminals th
     placeholdersUnsanitised: "B",
     definitionUnsanitised: "(b)",
   };
-  expect(() => parseSyntax([statement, a, b])).toThrow("first set");
+  expect(parseSyntax([statement, a, b]).errors).toEmitOverall("first set");
 });
 
 it("fails when multiple alternatives are exactly the same", () => {
@@ -180,7 +180,7 @@ it("fails when multiple alternatives are exactly the same", () => {
     placeholdersUnsanitised: "A, B",
     definitionUnsanitised: "x",
   };
-  expect(() => parseSyntax([statement, rule])).toThrow("duplicate");
+  expect(parseSyntax([statement, rule]).errors).toEmit(0, "duplicate");
 });
 
 it("fails when the rule is left-recursive", () => {
@@ -193,7 +193,7 @@ it("fails when the rule is left-recursive", () => {
     placeholdersUnsanitised: "A",
     definitionUnsanitised: "Abc",
   };
-  expect(() => parseSyntax([statement, rule])).toThrow("recursive");
+  expect(parseSyntax([statement, rule]).errors).toEmit(1, "recursive");
 });
 
 it("does not modify the arguments", () => {

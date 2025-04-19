@@ -9,4 +9,5 @@ export default {
     "\\.ts$": "esbuild-runner/jest",
   },
   verbose: true,
+  setupFilesAfterEnv: ["./test/custom-matchers.ts"],
 };

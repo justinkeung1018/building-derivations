@@ -1,4 +1,5 @@
 import { Matchable } from "./matchable";
+import { ErrorMap, WarningMap } from "./messagemap";
 import { Token } from "./token";
 
 export interface SyntaxRule {
@@ -22,12 +23,8 @@ export interface InferenceRule {
   conclusion: InferenceRuleStatement;
 }
 
-export interface Warning {
-  index: number;
-  message: string;
-}
-
 export interface ParseResult<RuleType> {
   rules: RuleType[];
-  warnings: Warning[];
+  warnings: WarningMap;
+  errors: ErrorMap;
 }
