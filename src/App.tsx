@@ -12,13 +12,13 @@ import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule 
 import { parseSyntax } from "./lib/parsers/syntax";
 import { parseInferenceRules } from "./lib/parsers/inference";
 
-const NATURAL_DEDUCTION_SYNTAX = [
+const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "x | y | z" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "var | (A -> B)" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
 ];
-const NATURAL_DEDUCTION_INFERENCE_RULES = [
+const NATURAL_DEDUCTION_INFERENCE_RULES: InferenceRule[] = [
   {
     ...defaultInferenceRule,
     name: "Ax",
@@ -40,7 +40,7 @@ const NATURAL_DEDUCTION_INFERENCE_RULES = [
     ],
   },
 ];
-const LAMBDA_SYNTAX = [
+const LAMBDA_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- M: A" },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ var: A }" },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
@@ -48,7 +48,7 @@ const LAMBDA_SYNTAX = [
   { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "M, N", definitionUnsanitised: "var | (\\lambda var. M) | (MN)" },
 ];
-const LAMBDA_INFERENCE_RULES = [
+const LAMBDA_INFERENCE_RULES: InferenceRule[] = [
   {
     ...defaultInferenceRule,
     name: "Ax",
@@ -66,11 +66,11 @@ const LAMBDA_INFERENCE_RULES = [
     conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (MN): B" },
     premises: [
       { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- M: (A -> B)" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: B" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: A" },
     ],
   },
 ];
-const SEQUENT_SYNTAX = [
+const SEQUENT_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- \\Delta" },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma, \\Delta, \\Sigma, \\Pi", definitionUnsanitised: "{ A }" },
   {
@@ -80,7 +80,7 @@ const SEQUENT_SYNTAX = [
   },
   { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
 ];
-const SEQUENT_INFERENCE_RULES = [
+const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
   {
     ...defaultInferenceRule,
     name: "Ax",
@@ -241,9 +241,15 @@ export function App() {
                 setSystem(value);
               }}
             >
-              <ToggleGroupItem value="natural-deduction">Natural deduction</ToggleGroupItem>
-              <ToggleGroupItem value="lambda">Lambda calculus</ToggleGroupItem>
-              <ToggleGroupItem value="sequent">Sequent calculus</ToggleGroupItem>
+              <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
+                Natural deduction
+              </ToggleGroupItem>
+              <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
+                Lambda calculus
+              </ToggleGroupItem>
+              <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
+                Sequent calculus
+              </ToggleGroupItem>
             </ToggleGroup>
             <h1>or define your own:</h1>
             <div className="flex items-start mt-4 space-x-6" data-cy="editor">
