@@ -9,6 +9,7 @@ import { parseInferenceRules } from "@/lib/parsers/inference";
 import { Plus } from "lucide-react";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
+import { DeleteRuleIcon } from "./DeleteRuleIcon";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -171,6 +172,15 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
               <TableCell>
                 <DefinitionEditor editing={editing} rule={rule} index={index} {...props} />
               </TableCell>
+              {editing && (
+                <TableCell>
+                  <DeleteRuleIcon
+                    onClick={() => {
+                      setInferenceRules((old) => old.filter((_, i) => i !== index));
+                    }}
+                  />
+                </TableCell>
+              )}
             </TableRow>
             <Errors index={index} errors={errors} />
           </TableBody>

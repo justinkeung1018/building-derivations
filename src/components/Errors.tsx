@@ -14,7 +14,7 @@ export function Errors({ index, errors }: ErrorsProps) {
   }
   return (
     <TableRow className="group-hover:bg-muted/50 border-0 mt-20">
-      <TableCell className="pt-0" colSpan={3}>
+      <TableCell className="pt-0" colSpan={4}>
         <div className="flex flex-col gap-y-1">
           {errors.get(index).map((message) => (
             <div className="flex items-center gap-x-2 text-red-600 font-bold">

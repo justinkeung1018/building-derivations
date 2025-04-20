@@ -8,6 +8,7 @@ import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
+import { DeleteRuleIcon } from "./DeleteRuleIcon";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -75,6 +76,17 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                   <MathJax>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
                 )}
               </TableCell>
+              {editing && (
+                <TableCell>
+                  {index > 0 && (
+                    <DeleteRuleIcon
+                      onClick={() => {
+                        setSyntax((old) => old.filter((_, i) => i !== index));
+                      }}
+                    />
+                  )}
+                </TableCell>
+              )}
             </TableRow>
             <Errors index={index} errors={errors} />
           </TableBody>
