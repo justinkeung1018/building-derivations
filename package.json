@@ -64,6 +64,8 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-toggle": "^1.1.6",
+    "@radix-ui/react-toggle-group": "^1.1.7",
     "better-react-mathjax": "^2.0.4-beta1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

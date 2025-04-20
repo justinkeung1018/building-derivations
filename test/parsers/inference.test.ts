@@ -1,5 +1,4 @@
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./utils";
 import { Maybe, Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import {
@@ -9,6 +8,7 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
+import { defaultSyntaxRule, defaultInferenceRule, defaultInferenceRuleStatement } from "@/lib/utils";
 
 it("fails when empty rule name is supplied", () => {
   const statement: SyntaxRule = {

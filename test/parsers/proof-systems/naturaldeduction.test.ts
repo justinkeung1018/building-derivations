@@ -1,6 +1,5 @@
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
 import { parseSyntax } from "@/lib/parsers/syntax";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "../utils";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { SyntaxRule } from "@/lib/types/rules";
 import {
@@ -10,6 +9,7 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
+import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "@/lib/utils";
 
 const statementCorrect: SyntaxRule = {
   ...defaultSyntaxRule,

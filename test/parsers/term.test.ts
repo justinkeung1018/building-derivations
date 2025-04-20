@@ -1,9 +1,9 @@
 import { buildTermParser } from "@/lib/parsers/term";
 import { TerminalAST, NonTerminalAST, MultisetAST } from "@/lib/types/ast";
 import { Terminal, NonTerminal, Multiset, Or, Maybe } from "@/lib/types/token";
-import { defaultSyntaxRule } from "./utils";
 import { ResultKind } from "parjs";
 import { SyntaxRule } from "@/lib/types/rules";
+import { defaultSyntaxRule } from "@/lib/utils";
 
 it("parses terminals", () => {
   const statement = {

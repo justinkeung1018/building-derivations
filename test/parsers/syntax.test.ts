@@ -1,7 +1,7 @@
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { Maybe, Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
-import { defaultSyntaxRule } from "./utils";
 import { SyntaxRule } from "@/lib/types/rules";
+import { defaultSyntaxRule } from "@/lib/utils";
 
 function getDefaultStatement(): SyntaxRule {
   return { ...defaultSyntaxRule, definitionUnsanitised: "x" };

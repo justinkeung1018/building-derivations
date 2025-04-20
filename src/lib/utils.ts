@@ -4,6 +4,7 @@ import { or } from "parjs/combinators";
 import { twMerge } from "tailwind-merge";
 import { AST, TerminalAST, NonTerminalAST } from "./types/ast";
 import { Matchable, MatchableNonTerminal, MatchableTerminal, MultisetElement, Name } from "./types/matchable";
+import { SyntaxRule, InferenceRuleStatement, InferenceRule } from "./types/rules";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -47,3 +48,27 @@ export function matchableToString(matchable: Matchable): string {
     })
     .join(", ");
 }
+
+export const defaultSyntaxRule: SyntaxRule = {
+  placeholders: [],
+  definition: [],
+  definitionSanitised: [],
+  placeholdersUnsanitised: "",
+  definitionUnsanitised: "",
+};
+
+export const defaultInferenceRuleStatement: InferenceRuleStatement = {
+  structure: [],
+  sanitised: "",
+  unsanitised: "",
+};
+
+export const defaultInferenceRule: InferenceRule = {
+  name: "dummy",
+  premises: [],
+  conclusion: {
+    structure: [],
+    sanitised: "",
+    unsanitised: "",
+  },
+};

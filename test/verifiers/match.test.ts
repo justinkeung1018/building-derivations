@@ -9,7 +9,7 @@ import {
 } from "@/lib/types/matchable";
 import { SyntaxRule } from "@/lib/types/rules";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
-import { defaultSyntaxRule } from "../parsers/utils";
+import { defaultSyntaxRule } from "@/lib/utils";
 import { match } from "@/lib/verifier/match";
 
 it("matches basic statements", () => {

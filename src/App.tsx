@@ -7,6 +7,155 @@ import { InferenceRule, SyntaxRule } from "./lib/types/rules";
 import { SyntaxEditor } from "./components/SyntaxEditor";
 import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
 import { verify } from "./lib/verifier/verify";
+import { ToggleGroup, ToggleGroupItem } from "./components/shadcn/ToggleGroup";
+import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./lib/utils";
+import { parseSyntax } from "./lib/parsers/syntax";
+import { parseInferenceRules } from "./lib/parsers/inference";
+
+const NATURAL_DEDUCTION_SYNTAX = [
+  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "x | y | z" },
+];
+const NATURAL_DEDUCTION_INFERENCE_RULES = [
+  {
+    ...defaultInferenceRule,
+    name: "Ax",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- A" },
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to I",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to E",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B" },
+    premises: [
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A" },
+    ],
+  },
+];
+const LAMBDA_SYNTAX = [
+  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- M: A" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ var: A }" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "1 | 2 | 3" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "M, N", definitionUnsanitised: "var | (\\lambda var. M) | (MN)" },
+];
+const LAMBDA_INFERENCE_RULES = [
+  {
+    ...defaultInferenceRule,
+    name: "Ax",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- var: A" },
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to I",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- M: B" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to E",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (MN): B" },
+    premises: [
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- M: (A -> B)" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: B" },
+    ],
+  },
+];
+const SEQUENT_SYNTAX = [
+  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- \\Delta" },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma, \\Delta, \\Sigma, \\Pi", definitionUnsanitised: "{ A }" },
+  {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "A, B",
+    definitionUnsanitised: "var | (A \\to B) | (A \\land B) | (A \\lor B) | (\\lnot A)",
+  },
+  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
+];
+const SEQUENT_INFERENCE_RULES = [
+  {
+    ...defaultInferenceRule,
+    name: "Ax",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta, A" },
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\land L_1",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\land L_2",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\lor L",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\lor B) |- \\Delta" },
+    premises: [
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" },
+    ],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to L",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, \\Sigma, (A \\to B) |- \\Delta, \\Pi" },
+    premises: [
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Sigma, B |- \\Pi" },
+    ],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\lnot L",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (\\lnot A) |- \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\lor R_1",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\lor R_2",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\land R",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\land B), \\Delta" },
+    premises: [
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" },
+    ],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\to R",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\to B), \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B, \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "\\lnot R",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lnot A), \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
+  },
+];
 
 export function App() {
   const [valid, setValid] = useState(false);
@@ -44,6 +193,29 @@ export function App() {
     setValid(verifyInput(0));
   }, [states]);
 
+  function setSystem(system: string) {
+    let syntaxUnsanitised: SyntaxRule[] = [];
+    let inferenceRulesUnsanitised: InferenceRule[] = [];
+
+    if (system === "natural-deduction") {
+      syntaxUnsanitised = NATURAL_DEDUCTION_SYNTAX;
+      inferenceRulesUnsanitised = NATURAL_DEDUCTION_INFERENCE_RULES;
+    } else if (system === "lambda") {
+      syntaxUnsanitised = LAMBDA_SYNTAX;
+      inferenceRulesUnsanitised = LAMBDA_INFERENCE_RULES;
+    } else if (system === "sequent") {
+      syntaxUnsanitised = SEQUENT_SYNTAX;
+      inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
+    }
+
+    if (syntaxUnsanitised.length > 0 && inferenceRulesUnsanitised.length > 0) {
+      const syntax = parseSyntax(syntaxUnsanitised).rules;
+      setSyntax(syntax);
+      const inferenceRules = parseInferenceRules(inferenceRulesUnsanitised, syntax).rules;
+      setInferenceRules(inferenceRules);
+    }
+  }
+
   return (
     <MathJaxContext>
       <div
@@ -56,10 +228,24 @@ export function App() {
               Edit syntax and rules
             </Button>
           </SheetTrigger>
-          <SheetContent side="left">
+          <SheetContent side="left" className="overflow-auto">
             <SheetHeader>
               <SheetTitle>Edit syntax and inference rules</SheetTitle>
             </SheetHeader>
+            <h1 className="font-medium mt-4 mb-2">Select a predefined system:</h1>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              className="justify-start mb-4"
+              onValueChange={(value) => {
+                setSystem(value);
+              }}
+            >
+              <ToggleGroupItem value="natural-deduction">Natural deduction</ToggleGroupItem>
+              <ToggleGroupItem value="lambda">Lambda calculus</ToggleGroupItem>
+              <ToggleGroupItem value="sequent">Sequent calculus</ToggleGroupItem>
+            </ToggleGroup>
+            <h1>or define your own:</h1>
             <div className="flex items-start mt-4 space-x-6" data-cy="editor">
               <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
               <InferenceRulesEditor
