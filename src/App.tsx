@@ -194,8 +194,8 @@ export function App() {
   }, [states]);
 
   function setSystem(system: string) {
-    let syntaxUnsanitised: SyntaxRule[] = [];
-    let inferenceRulesUnsanitised: InferenceRule[] = [];
+    let syntaxUnsanitised: SyntaxRule[] | undefined = undefined;
+    let inferenceRulesUnsanitised: InferenceRule[] | undefined = undefined;
 
     if (system === "natural-deduction") {
       syntaxUnsanitised = NATURAL_DEDUCTION_SYNTAX;
@@ -208,7 +208,7 @@ export function App() {
       inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
     }
 
-    if (syntaxUnsanitised.length > 0 && inferenceRulesUnsanitised.length > 0) {
+    if (syntaxUnsanitised !== undefined && inferenceRulesUnsanitised !== undefined) {
       const syntax = parseSyntax(syntaxUnsanitised).rules;
       setSyntax(syntax);
       const inferenceRules = parseInferenceRules(inferenceRulesUnsanitised, syntax).rules;
