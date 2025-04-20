@@ -1,11 +1,11 @@
 import React from "react";
 import { X } from "lucide-react";
 
-interface DeleteRuleIconProps {
+interface DeleteIconProps {
   onClick: React.MouseEventHandler<HTMLDivElement>;
 }
 
-export function DeleteRuleIcon({ onClick }: DeleteRuleIconProps) {
+export function DeleteIcon({ onClick }: DeleteIconProps) {
   return (
     <div
       className="rounded-full bg-gray-300 transition-colors cursor-pointer hover:bg-red-600 flex items-center justify-center h-5 w-5"

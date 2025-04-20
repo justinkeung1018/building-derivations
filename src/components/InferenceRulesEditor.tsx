@@ -9,7 +9,7 @@ import { parseInferenceRules } from "@/lib/parsers/inference";
 import { Plus } from "lucide-react";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
-import { DeleteRuleIcon } from "./DeleteRuleIcon";
+import { DeleteIcon } from "./DeleteRuleIcon";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -39,22 +39,37 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
   return (
     <div className="flex justify-center space-x-4">
       {rule.premises.map((premise, premiseIndex) => (
-        <Input
-          key={`${index.toString()}-${premiseIndex.toString()}-premise`}
-          className="w-48"
-          value={premise.unsanitised}
-          onChange={(e) => {
-            setInferenceRules((old) => {
-              const newPremise: InferenceRuleStatement = { ...premise, unsanitised: e.target.value };
-              const newRule: InferenceRule = {
-                ...rule,
-                premises: rule.premises.map((p, i) => (i === premiseIndex ? newPremise : p)),
-              };
-              return old.map((r, i) => (i === index ? newRule : r));
-            });
-          }}
-          data-cy={`premise-${index}-${premiseIndex}`}
-        />
+        <div className="relative">
+          <Input
+            key={`${index.toString()}-${premiseIndex.toString()}-premise`}
+            className="w-48 pr-8"
+            value={premise.unsanitised}
+            onChange={(e) => {
+              setInferenceRules((old) => {
+                const newPremise: InferenceRuleStatement = { ...premise, unsanitised: e.target.value };
+                const newRule: InferenceRule = {
+                  ...rule,
+                  premises: rule.premises.map((p, i) => (i === premiseIndex ? newPremise : p)),
+                };
+                return old.map((r, i) => (i === index ? newRule : r));
+              });
+            }}
+            data-cy={`premise-${index}-${premiseIndex}`}
+          />
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <DeleteIcon
+              onClick={() => {
+                setInferenceRules((old) => {
+                  const newRule: InferenceRule = {
+                    ...rule,
+                    premises: rule.premises.filter((_, i) => i !== premiseIndex),
+                  };
+                  return old.map((r, i) => (i === index ? newRule : r));
+                });
+              }}
+            />
+          </div>
+        </div>
       ))}
       <Button
         variant="secondary"
@@ -174,7 +189,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
               </TableCell>
               {editing && (
                 <TableCell>
-                  <DeleteRuleIcon
+                  <DeleteIcon
                     onClick={() => {
                       setInferenceRules((old) => old.filter((_, i) => i !== index));
                     }}

@@ -8,7 +8,7 @@ import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
-import { DeleteRuleIcon } from "./DeleteRuleIcon";
+import { DeleteIcon } from "./DeleteRuleIcon";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -79,7 +79,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
               {editing && (
                 <TableCell>
                   {index > 0 && (
-                    <DeleteRuleIcon
+                    <DeleteIcon
                       onClick={() => {
                         setSyntax((old) => old.filter((_, i) => i !== index));
                       }}
