@@ -11,6 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from "./components/shadcn/ToggleGroup";
 import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./lib/utils";
 import { parseSyntax } from "./lib/parsers/syntax";
 import { parseInferenceRules } from "./lib/parsers/inference";
+import { ConfigFileInput } from "./components/ConfigFileInput";
+import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "./lib/types/jsonrules";
 
 const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
@@ -236,24 +238,28 @@ export function App() {
               <SheetTitle>Edit syntax and inference rules</SheetTitle>
             </SheetHeader>
             <h1 className="font-medium mt-4 mb-2">Select a predefined system:</h1>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              className="justify-start mb-4"
-              onValueChange={(value) => {
-                setSystem(value);
-              }}
-            >
-              <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
-                Natural deduction
-              </ToggleGroupItem>
-              <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
-                Lambda calculus
-              </ToggleGroupItem>
-              <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
-                Sequent calculus
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <div className="flex items-center mb-4 gap-x-2">
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                className="justify-start"
+                onValueChange={(value) => {
+                  setSystem(value);
+                }}
+              >
+                <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
+                  Natural deduction
+                </ToggleGroupItem>
+                <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
+                  Lambda calculus
+                </ToggleGroupItem>
+                <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
+                  Sequent calculus
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <div>or load a configuration:</div>
+              <ConfigFileInput setSyntax={setSyntax} setInferenceRules={setInferenceRules} />
+            </div>
             <h1>or define your own:</h1>
             <div className="flex items-start mt-4 space-x-6" data-cy="editor">
               <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
@@ -262,6 +268,38 @@ export function App() {
                 inferenceRules={inferenceRules}
                 setInferenceRules={setInferenceRules}
               />
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
+                    placeholders,
+                    definition: definitionUnsanitised,
+                  }));
+                  const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
+                    ({ name, premises, conclusion }) => ({
+                      name,
+                      premises: premises.map(({ unsanitised }) => unsanitised),
+                      conclusion: conclusion.unsanitised,
+                    }),
+                  );
+                  const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
+                  const blob = new Blob([JSON.stringify(json, null, 2)], {
+                    type: "application/json",
+                  });
+                  const url = URL.createObjectURL(blob);
+
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "rules.json";
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+              >
+                Export as JSON
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
