@@ -48,6 +48,7 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
         <input
           id="config-file-input"
           type="file"
+          accept=".json"
           className="hidden"
           onChange={(e) => {
             if (e.target.files !== null && e.target.files.length > 0) {
