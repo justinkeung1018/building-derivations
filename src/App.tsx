@@ -206,6 +206,9 @@ export function App() {
     } else if (system === "sequent") {
       syntaxUnsanitised = SEQUENT_SYNTAX;
       inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
+    } else if (system === "") {
+      syntaxUnsanitised = [];
+      inferenceRulesUnsanitised = [];
     }
 
     if (syntaxUnsanitised !== undefined && inferenceRulesUnsanitised !== undefined) {
