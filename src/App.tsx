@@ -162,15 +162,7 @@ const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
 export function App() {
   const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
-  const [syntax, setSyntax] = useState<SyntaxRule[]>([
-    {
-      placeholders: [],
-      definition: [],
-      definitionSanitised: [],
-      placeholdersUnsanitised: "",
-      definitionUnsanitised: "",
-    },
-  ]);
+  const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
   function verifyInput(index: number): boolean {
@@ -209,7 +201,7 @@ export function App() {
       syntaxUnsanitised = SEQUENT_SYNTAX;
       inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
     } else if (system === "") {
-      syntaxUnsanitised = [];
+      syntaxUnsanitised = [{ ...defaultSyntaxRule }];
       inferenceRulesUnsanitised = [];
     }
 
