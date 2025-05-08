@@ -52,7 +52,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     data-cy={`syntax-placeholders-${index}`}
                   />
                 ) : (
-                  <MathJax>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
+                  <MathJax inline dynamic>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
                 )}
               </TableCell>
               <TableCell>
@@ -73,7 +73,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     data-cy={`syntax-def-${index}`}
                   />
                 ) : (
-                  <MathJax>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
+                  <MathJax inline dynamic>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
                 )}
               </TableCell>
               {editing && (

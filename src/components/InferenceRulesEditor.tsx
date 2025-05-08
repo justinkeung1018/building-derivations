@@ -130,7 +130,7 @@ function DefinitionEditor(props: DefinitionEditorProps) {
   if (!editing) {
     const premisesLaTeX = rule.premises.map((premise) => latexify(premise.sanitised)).join(" \\quad ");
     const conclusionLaTeX = latexify(rule.conclusion.sanitised);
-    return <MathJax>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>;
+    return <MathJax inline dynamic>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>;
   }
 
   return (
@@ -181,7 +181,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                     data-cy={`inference-name-${index}`}
                   />
                 ) : (
-                  <MathJax>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
+                  <MathJax inline dynamic>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
                 )}
               </TableCell>
               <TableCell>
