@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteRuleIcon";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
@@ -154,77 +155,81 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const [errors, setErrors] = useState(new ErrorMap());
 
   return (
-    <div className="space-y-2">
-      <h1 className="text-center text-lg font-semibold">Inference rules</h1>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-24">Name</TableHead>
-            <TableHead className="w-96">Definition</TableHead>
-          </TableRow>
-        </TableHeader>
-        {inferenceRules.map((rule, index) => (
-          <TableBody className="group border-b last:border-0">
-            <TableRow className="group-hover:bg-muted/50 border-0">
-              <TableCell>
-                {editing ? (
-                  <Input
-                    key={index}
-                    className="w-24"
-                    value={rule.name}
-                    onChange={(e) => {
-                      setInferenceRules((old) => {
-                        const newRule = { ...rule, name: e.target.value };
-                        return old.map((r, i) => (i === index ? newRule : r));
-                      });
-                    }}
-                    data-cy={`inference-name-${index}`}
-                  />
-                ) : (
-                  <MathJax inline dynamic>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
-                )}
-              </TableCell>
-              <TableCell>
-                <DefinitionEditor editing={editing} rule={rule} index={index} {...props} />
-              </TableCell>
-              {editing && (
-                <TableCell>
-                  <DeleteIcon
-                    onClick={() => {
-                      setInferenceRules((old) => old.filter((_, i) => i !== index));
-                    }}
-                  />
-                </TableCell>
-              )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Inference rules</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-24">Name</TableHead>
+              <TableHead className="w-96">Definition</TableHead>
             </TableRow>
-            <Errors index={index} errors={errors} />
-          </TableBody>
-        ))}
-      </Table>
-      {editing && (
-        <Button
-          className="w-full"
-          variant="secondary"
-          onClick={() => {
-            setInferenceRules((old) => [
-              ...old,
-              {
-                name: "",
-                premises: [],
-                conclusion: {
-                  structure: [],
-                  sanitised: "",
-                  unsanitised: "",
+          </TableHeader>
+          {inferenceRules.map((rule, index) => (
+            <TableBody className="group border-b last:border-0">
+              <TableRow className="group-hover:bg-muted/50 border-0">
+                <TableCell>
+                  {editing ? (
+                    <Input
+                      key={index}
+                      className="w-24"
+                      value={rule.name}
+                      onChange={(e) => {
+                        setInferenceRules((old) => {
+                          const newRule = { ...rule, name: e.target.value };
+                          return old.map((r, i) => (i === index ? newRule : r));
+                        });
+                      }}
+                      data-cy={`inference-name-${index}`}
+                    />
+                  ) : (
+                    <MathJax inline dynamic>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <DefinitionEditor editing={editing} rule={rule} index={index} {...props} />
+                </TableCell>
+                {editing && (
+                  <TableCell>
+                    <DeleteIcon
+                      onClick={() => {
+                        setInferenceRules((old) => old.filter((_, i) => i !== index));
+                      }}
+                    />
+                  </TableCell>
+                )}
+              </TableRow>
+              <Errors index={index} errors={errors} />
+            </TableBody>
+          ))}
+        </Table>
+        {editing && (
+          <Button
+            className="w-full mt-2"
+            variant="secondary"
+            onClick={() => {
+              setInferenceRules((old) => [
+                ...old,
+                {
+                  name: "",
+                  premises: [],
+                  conclusion: {
+                    structure: [],
+                    sanitised: "",
+                    unsanitised: "",
+                  },
                 },
-              },
-            ]);
-          }}
-          data-cy="add-inference-button"
-        >
-          Add rule
-        </Button>
-      )}
-      <div className="flex justify-end">
+              ]);
+            }}
+            data-cy="add-inference-button"
+          >
+            Add rule
+          </Button>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-end">
         {editing ? (
           <Button
             className="bg-green-500 hover:bg-green-500/80"
@@ -253,7 +258,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
             Edit
           </Button>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

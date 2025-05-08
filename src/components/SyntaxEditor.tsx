@@ -9,6 +9,7 @@ import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteRuleIcon";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -20,100 +21,107 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="space-y-2">
-      <h1 className="text-center text-lg font-semibold">Syntax rules</h1>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-24">Placeholders</TableHead>
-            <TableHead>
-              <MathJax>{"\\(::=\\)"}</MathJax>
-            </TableHead>
-            <TableHead className="min-w-48">Definition</TableHead>
-          </TableRow>
-        </TableHeader>
-        {syntax.map((rule, index) => (
-          <TableBody className="group border-b last:border-0">
-            <TableRow className="group-hover:bg-muted/50 border-0">
-              <TableCell>
-                {index === 0 ? (
-                  "Statement"
-                ) : editing ? (
-                  <Input
-                    key={index}
-                    className="w-24"
-                    value={rule.placeholdersUnsanitised}
-                    onChange={(e) => {
-                      setSyntax((old) => {
-                        const newRule = { ...rule, placeholdersUnsanitised: e.target.value };
-                        return old.map((r, i) => (i === index ? newRule : r));
-                      });
-                    }}
-                    data-cy={`syntax-placeholders-${index}`}
-                  />
-                ) : (
-                  <MathJax inline dynamic>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
-                )}
-              </TableCell>
-              <TableCell>
+    <Card>
+      <CardHeader>
+        <CardTitle>Syntax rules</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-24">Placeholders</TableHead>
+              <TableHead>
                 <MathJax>{"\\(::=\\)"}</MathJax>
-              </TableCell>
-              <TableCell>
-                {editing ? (
-                  <Input
-                    key={index}
-                    className="w-full"
-                    value={rule.definitionUnsanitised}
-                    onChange={(e) => {
-                      setSyntax((old) => {
-                        const newRule = { ...rule, definitionUnsanitised: e.target.value };
-                        return old.map((r, i) => (i === index ? newRule : r));
-                      });
-                    }}
-                    data-cy={`syntax-def-${index}`}
-                  />
-                ) : (
-                  <MathJax inline dynamic>{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
-                )}
-              </TableCell>
-              {editing && (
+              </TableHead>
+              <TableHead className="min-w-48">Definition</TableHead>
+            </TableRow>
+          </TableHeader>
+          {syntax.map((rule, index) => (
+            <TableBody className="group border-b last:border-0">
+              <TableRow className="group-hover:bg-muted/50 border-0">
                 <TableCell>
-                  {index > 0 && (
-                    <DeleteIcon
-                      onClick={() => {
-                        setSyntax((old) => old.filter((_, i) => i !== index));
+                  {index === 0 ? (
+                    "Statement"
+                  ) : editing ? (
+                    <Input
+                      key={index}
+                      className="w-24"
+                      value={rule.placeholdersUnsanitised}
+                      onChange={(e) => {
+                        setSyntax((old) => {
+                          const newRule = { ...rule, placeholdersUnsanitised: e.target.value };
+                          return old.map((r, i) => (i === index ? newRule : r));
+                        });
                       }}
+                      data-cy={`syntax-placeholders-${index}`}
                     />
+                  ) : (
+                    <MathJax inline dynamic>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
                   )}
                 </TableCell>
-              )}
-            </TableRow>
-            <Errors index={index} errors={errors} />
-          </TableBody>
-        ))}
-      </Table>
-      {editing && (
-        <Button
-          className="w-full"
-          variant="secondary"
-          onClick={() => {
-            setSyntax((old) => [
-              ...old,
-              {
-                placeholders: [],
-                definition: [],
-                definitionSanitised: [],
-                placeholdersUnsanitised: "",
-                definitionUnsanitised: "",
-              },
-            ]);
-          }}
-          data-cy="add-syntax-button"
-        >
-          Add rule
-        </Button>
-      )}
-      <div className="flex justify-end">
+                <TableCell>
+                  <MathJax>{"\\(::=\\)"}</MathJax>
+                </TableCell>
+                <TableCell>
+                  {editing ? (
+                    <Input
+                      key={index}
+                      className="w-full"
+                      value={rule.definitionUnsanitised}
+                      onChange={(e) => {
+                        setSyntax((old) => {
+                          const newRule = { ...rule, definitionUnsanitised: e.target.value };
+                          return old.map((r, i) => (i === index ? newRule : r));
+                        });
+                      }}
+                      data-cy={`syntax-def-${index}`}
+                    />
+                  ) : (
+                    <MathJax
+                      inline
+                      dynamic
+                    >{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
+                  )}
+                </TableCell>
+                {editing && (
+                  <TableCell>
+                    {index > 0 && (
+                      <DeleteIcon
+                        onClick={() => {
+                          setSyntax((old) => old.filter((_, i) => i !== index));
+                        }}
+                      />
+                    )}
+                  </TableCell>
+                )}
+              </TableRow>
+              <Errors index={index} errors={errors} />
+            </TableBody>
+          ))}
+        </Table>
+        {editing && (
+          <Button
+            className="w-full mt-2"
+            variant="secondary"
+            onClick={() => {
+              setSyntax((old) => [
+                ...old,
+                {
+                  placeholders: [],
+                  definition: [],
+                  definitionSanitised: [],
+                  placeholdersUnsanitised: "",
+                  definitionUnsanitised: "",
+                },
+              ]);
+            }}
+            data-cy="add-syntax-button"
+          >
+            Add rule
+          </Button>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-end">
         {editing ? (
           <Button
             className="bg-green-500 hover:bg-green-500/80"
@@ -142,7 +150,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             Edit
           </Button>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
