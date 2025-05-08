@@ -34,6 +34,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                 <MathJax>{"\\(::=\\)"}</MathJax>
               </TableHead>
               <TableHead className="min-w-48">Definition</TableHead>
+              {editing && <TableHead>Preview</TableHead>}
             </TableRow>
           </TableHeader>
           {syntax.map((rule, index) => (
@@ -84,15 +85,20 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                   )}
                 </TableCell>
                 {editing && (
-                  <TableCell>
-                    {index > 0 && (
-                      <DeleteIcon
-                        onClick={() => {
-                          setSyntax((old) => old.filter((_, i) => i !== index));
-                        }}
-                      />
-                    )}
-                  </TableCell>
+                  <>
+                    <TableCell>
+                      <MathJax inline dynamic>{`\\(${latexify(rule.definitionUnsanitised)}\\)`}</MathJax>
+                    </TableCell>
+                    <TableCell>
+                      {index > 0 && (
+                        <DeleteIcon
+                          onClick={() => {
+                            setSyntax((old) => old.filter((_, i) => i !== index));
+                          }}
+                        />
+                      )}
+                    </TableCell>
+                  </>
                 )}
               </TableRow>
               <Errors index={index} errors={errors} />

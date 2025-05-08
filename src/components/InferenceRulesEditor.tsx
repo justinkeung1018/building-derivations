@@ -149,6 +149,16 @@ interface InferenceRulesEditorProps {
   setInferenceRules: React.Dispatch<React.SetStateAction<InferenceRule[]>>;
 }
 
+interface DefinitionPreviewProps {
+  rule: InferenceRule;
+}
+
+function DefinitionPreview({ rule }: DefinitionPreviewProps) {
+  const premisesLaTeX = rule.premises.map((premise) => latexify(premise.unsanitised)).join(" \\quad ");
+  const conclusionLaTeX = latexify(rule.conclusion.unsanitised);
+  return <MathJax inline dynamic>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>;
+}
+
 export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const { syntax, inferenceRules, setInferenceRules } = props;
   const [editing, setEditing] = useState(false);
@@ -164,7 +174,8 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-24">Name</TableHead>
-              <TableHead className="w-96">Definition</TableHead>
+              <TableHead className="w-48">Definition</TableHead>
+              {editing && <TableHead>Preview</TableHead>}
             </TableRow>
           </TableHeader>
           {inferenceRules.map((rule, index) => (
@@ -192,13 +203,18 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                   <DefinitionEditor editing={editing} rule={rule} index={index} {...props} />
                 </TableCell>
                 {editing && (
-                  <TableCell>
-                    <DeleteIcon
-                      onClick={() => {
-                        setInferenceRules((old) => old.filter((_, i) => i !== index));
-                      }}
-                    />
-                  </TableCell>
+                  <>
+                    <TableCell>
+                      <DefinitionPreview rule={rule} />
+                    </TableCell>
+                    <TableCell>
+                      <DeleteIcon
+                        onClick={() => {
+                          setInferenceRules((old) => old.filter((_, i) => i !== index));
+                        }}
+                      />
+                    </TableCell>
+                  </>
                 )}
               </TableRow>
               <Errors index={index} errors={errors} />
