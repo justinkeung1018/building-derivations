@@ -253,16 +253,17 @@ export function App() {
               <ConfigFileInput setSyntax={setSyntax} setInferenceRules={setInferenceRules} />
             </div>
             <h1>or define your own:</h1>
-            <div className="flex items-start mt-4 space-x-6" data-cy="editor">
-              <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
-              <InferenceRulesEditor
-                syntax={syntax}
-                inferenceRules={inferenceRules}
-                setInferenceRules={setInferenceRules}
-              />
-            </div>
-            <div className="flex justify-end mt-4">
+            <div>
+              <div className="flex items-start mt-4 space-x-6" data-cy="editor">
+                <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
+                <InferenceRulesEditor
+                  syntax={syntax}
+                  inferenceRules={inferenceRules}
+                  setInferenceRules={setInferenceRules}
+                />
+              </div>
               <Button
+                className="relative float-right mt-4"
                 variant="secondary"
                 onClick={() => {
                   const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
