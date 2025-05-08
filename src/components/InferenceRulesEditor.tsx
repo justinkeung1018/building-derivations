@@ -44,6 +44,7 @@ function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProp
           <Input
             key={`${index.toString()}-${premiseIndex.toString()}-premise`}
             className="w-48 pr-8"
+            maxLength={200}
             value={premise.unsanitised}
             onChange={(e) => {
               setInferenceRules((old) => {
@@ -102,6 +103,7 @@ function ConclusionEditor({ rule, index, setInferenceRules }: DefinitionEditorPr
       <Input
         key={`${index.toString()}-conclusion`}
         className="w-96"
+        maxLength={200}
         value={rule.conclusion.unsanitised}
         onChange={(e) => {
           setInferenceRules((old) => {
@@ -186,6 +188,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                     <Input
                       key={index}
                       className="w-24"
+                      maxLength={50}
                       value={rule.name}
                       onChange={(e) => {
                         setInferenceRules((old) => {

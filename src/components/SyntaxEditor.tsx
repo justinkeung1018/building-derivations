@@ -46,6 +46,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                   ) : editing ? (
                     <Input
                       key={index}
+                      maxLength={50}
                       className="w-24"
                       value={rule.placeholdersUnsanitised}
                       onChange={(e) => {
@@ -68,6 +69,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     <Input
                       key={index}
                       className="w-full"
+                      maxLength={200}
                       value={rule.definitionUnsanitised}
                       onChange={(e) => {
                         setSyntax((old) => {
