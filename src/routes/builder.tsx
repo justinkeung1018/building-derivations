@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { ArgumentInput, ArgumentInputState, getDefaultState } from "./components/ArgumentInput";
+import { ArgumentInput, ArgumentInputState, getDefaultState } from "../components/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/shadcn/Sheet";
-import { Button } from "./components/shadcn/Button";
-import { InferenceRule, SyntaxRule } from "./lib/types/rules";
-import { SyntaxEditor } from "./components/SyntaxEditor";
-import { InferenceRulesEditor } from "./components/InferenceRulesEditor";
-import { verify } from "./lib/verifier/verify";
-import { ToggleGroup, ToggleGroupItem } from "./components/shadcn/ToggleGroup";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./lib/utils";
-import { parseSyntax } from "./lib/parsers/syntax";
-import { parseInferenceRules } from "./lib/parsers/inference";
-import { ConfigFileInput } from "./components/ConfigFileInput";
-import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "./lib/types/jsonrules";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../components/shadcn/Sheet";
+import { Button } from "../components/shadcn/Button";
+import { InferenceRule, SyntaxRule } from "../lib/types/rules";
+import { SyntaxEditor } from "../components/SyntaxEditor";
+import { InferenceRulesEditor } from "../components/InferenceRulesEditor";
+import { verify } from "../lib/verifier/verify";
+import { ToggleGroup, ToggleGroupItem } from "../components/shadcn/ToggleGroup";
+import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
+import { parseSyntax } from "../lib/parsers/syntax";
+import { parseInferenceRules } from "../lib/parsers/inference";
+import { ConfigFileInput } from "../components/ConfigFileInput";
+import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "../lib/types/jsonrules";
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/builder")({
+  component: DerivationBuilder,
+});
 
 const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
@@ -159,7 +164,7 @@ const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
   },
 ];
 
-export function App() {
+export function DerivationBuilder() {
   const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
   const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
