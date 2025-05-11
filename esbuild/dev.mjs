@@ -11,6 +11,7 @@ async function watch() {
   await ctx.watch();
   await ctx.serve({
     servedir: "dist",
+    fallback: "./dist/index.html",
   });
   console.log("Watching...");
 }
