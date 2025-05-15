@@ -9,6 +9,7 @@
     "build:esbuild": "node esbuild/prod.mjs",
     "build:css": "tailwindcss -i src/styles.css -o dist/styles.css --minify",
     "start": "http-server dist/ --port 8000 -P http://localhost:8000?",
+    "predev": "rimraf dist",
     "dev": "npm run build && npm-run-all --parallel dev:*",
     "dev:tsc": "tsc -w",
     "dev:esbuild": "node esbuild/dev.mjs",
