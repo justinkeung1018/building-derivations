@@ -14,9 +14,11 @@ import { parseInferenceRules } from "../lib/parsers/inference";
 import { ConfigFileInput } from "../components/ConfigFileInput";
 import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "../lib/types/jsonrules";
 import { createFileRoute } from "@tanstack/react-router";
+import { searchSchema } from "@/lib/schemas";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
+  validateSearch: searchSchema,
 });
 
 const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
@@ -165,6 +167,8 @@ const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
 ];
 
 export function DerivationBuilder() {
+  const search = Route.useSearch();
+
   const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
   const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
@@ -191,6 +195,29 @@ export function DerivationBuilder() {
   useEffect(() => {
     setValid(verifyInput(0));
   }, [states]);
+
+  useEffect(() => {
+    if (search.mode === "json") {
+      const syntax: SyntaxRule[] = search.syntax.map(({ placeholders, definition }) => ({
+        ...defaultSyntaxRule,
+        placeholders,
+        placeholdersUnsanitised: placeholders.join(", "),
+        definitionUnsanitised: definition,
+      }));
+
+      const inferenceRules: InferenceRule[] = search.inferenceRules.map(({ name, premises, conclusion }) => ({
+        name,
+        premises: premises.map((unsanitised) => ({ ...defaultInferenceRuleStatement, unsanitised })),
+        conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
+      }));
+
+      const parsedSyntax = parseSyntax(syntax).rules;
+      setSyntax(parsedSyntax);
+      setInferenceRules(parseInferenceRules(inferenceRules, parsedSyntax).rules);
+    } else if (search.mode === "predefined") {
+      setSystem(search.system);
+    }
+  }, []);
 
   function setSystem(system: string) {
     let syntaxUnsanitised: SyntaxRule[] | undefined = undefined;

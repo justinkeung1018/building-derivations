@@ -1,38 +1,23 @@
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { parseSyntax } from "@/lib/parsers/syntax";
-import { JSONFormat } from "@/lib/types/jsonrules";
+import { jsonSchema } from "@/lib/schemas";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
+import { SearchParams } from "@/lib/types/url";
 import { cn, defaultInferenceRuleStatement, defaultSyntaxRule } from "@/lib/utils";
 import React, { useState } from "react";
-import { z } from "zod";
 
 interface ConfigFileInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
-  setInferenceRules: React.Dispatch<React.SetStateAction<InferenceRule[]>>;
+  setSyntax?: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
+  setInferenceRules?: React.Dispatch<React.SetStateAction<InferenceRule[]>>;
+  setSearch?: React.Dispatch<React.SetStateAction<SearchParams>>;
 }
 
 const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>(
-  ({ className, setSyntax, setInferenceRules }) => {
+  ({ className, setSyntax, setInferenceRules, setSearch }) => {
     const [fileName, setFileName] = useState<string | undefined>(undefined);
 
-    const schema: z.ZodType<JSONFormat> = z.object({
-      syntax: z.array(
-        z.object({
-          placeholders: z.array(z.string()),
-          definition: z.string(),
-        }),
-      ),
-      inferenceRules: z.array(
-        z.object({
-          name: z.string(),
-          premises: z.array(z.string()),
-          conclusion: z.string(),
-        }),
-      ),
-    });
-
     return (
-      <div>
+      <>
         <div className="flex items-center gap-x-2">
           <label
             htmlFor="config-file-input"
@@ -57,7 +42,7 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
                 .text()
                 .then((text) => {
                   // TODO: display parsing errors
-                  const json = schema.parse(JSON.parse(text));
+                  const json = jsonSchema.parse(JSON.parse(text));
                   const syntax: SyntaxRule[] = json.syntax.map(({ placeholders, definition }) => ({
                     ...defaultSyntaxRule,
                     placeholders,
@@ -70,9 +55,21 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
                     conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
                   }));
                   // TODO: display parsing errors
-                  const parsedSyntax = parseSyntax(syntax).rules;
-                  setSyntax(parseSyntax(syntax).rules);
-                  setInferenceRules(parseInferenceRules(inferenceRules, parsedSyntax).rules);
+                  const parsedSyntax = parseSyntax(syntax);
+                  const parsedInferenceRules = parseInferenceRules(inferenceRules, parsedSyntax.rules);
+                  if (setSyntax) {
+                    setSyntax(parsedSyntax.rules);
+                  }
+                  if (setInferenceRules) {
+                    setInferenceRules(parsedInferenceRules.rules);
+                  }
+                  if (setSearch) {
+                    if (parsedSyntax.errors.size === 0 && parsedInferenceRules.errors.size === 0) {
+                      setSearch({ mode: "json", ...json });
+                    } else {
+                      setSearch({ mode: "none" });
+                    }
+                  }
                 })
                 .catch((reason: unknown) => {
                   console.error(reason);
@@ -80,9 +77,10 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
             } else {
               setFileName(undefined);
             }
+            e.target.value = ""; // Trigger onChange even when user selects the same file multiple times
           }}
         />
-      </div>
+      </>
     );
   },
 );
