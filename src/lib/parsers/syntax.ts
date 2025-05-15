@@ -2,7 +2,7 @@ import { anyChar, letter, Parjser, string, whitespace } from "parjs";
 import { between, many, many1, manyBetween, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal, Or, Maybe } from "../types/token";
 import { ParseResult, SyntaxRule } from "../types/rules";
-import { ErrorMap, WarningMap } from "../types/messagemap";
+import { ErrorMap, MessageMap } from "../types/messagemap";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   if (placeholdersUnsanitised.trim().length === 0) {
@@ -193,7 +193,7 @@ export function factorise(alternatives: Token[][]): Token[][] {
 
 export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
   syntax = structuredClone(syntax);
-  const warnings = new WarningMap();
+  const warnings = new MessageMap();
   const errors = new ErrorMap();
 
   syntax.forEach((rule, index) => {
@@ -230,7 +230,7 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
           if (token instanceof Multiset) {
             const elements = token.tokens;
             if (elements.every((element) => element instanceof Terminal)) {
-              warnings.pushWarning(index, "Multiset contains terminals only");
+              warnings.push(index, "Multiset contains terminals only");
             }
           }
         }

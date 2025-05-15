@@ -11,7 +11,7 @@ import { InferenceRule, ParseResult, SyntaxRule } from "../types/rules";
 import { Multiset, NonTerminal, Or, Terminal, Token } from "../types/token";
 import { between, flatten, later, manySepBy, map, maybe, or, then } from "parjs/combinators";
 import { ors } from "../utils";
-import { ErrorMap, WarningMap } from "../types/messagemap";
+import { ErrorMap, MessageMap } from "../types/messagemap";
 
 function sanitise(statementName: string, unsanitised: string): string {
   const result = unsanitised.trim();
@@ -183,5 +183,5 @@ export function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]
     }
   });
 
-  return { rules, warnings: new WarningMap(), errors };
+  return { rules, warnings: new MessageMap(), errors };
 }

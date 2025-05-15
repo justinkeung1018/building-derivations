@@ -1,5 +1,5 @@
 import { Matchable } from "./matchable";
-import { ErrorMap, WarningMap } from "./messagemap";
+import { ErrorMap, MessageMap } from "./messagemap";
 import { Token } from "./token";
 
 export interface SyntaxRule {
@@ -25,6 +25,6 @@ export interface InferenceRule {
 
 export interface ParseResult<RuleType> {
   rules: RuleType[];
-  warnings: WarningMap;
+  warnings: MessageMap;
   errors: ErrorMap;
 }

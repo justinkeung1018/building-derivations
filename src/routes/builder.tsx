@@ -15,6 +15,7 @@ import { ConfigFileInput } from "../components/ConfigFileInput";
 import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "../lib/types/jsonrules";
 import { createFileRoute } from "@tanstack/react-router";
 import { searchSchema } from "@/lib/schemas";
+import { MessageMap } from "@/lib/types/messagemap";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -171,29 +172,61 @@ export function DerivationBuilder() {
 
   const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
+  const [inputErrors, setInputErrors] = useState(new MessageMap());
+  const [ruleErrors, setRuleErrors] = useState(new MessageMap());
   const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
-  function verifyInput(index: number): boolean {
-    const conclusion = states[index].conclusionInputState.value;
-
-    if (!states[index].premiseIndices.every((index) => verifyInput(index))) {
-      return false;
+  function verifyInput(index: number) {
+    for (const premiseIndex of states[index].premiseIndices) {
+      verifyInput(premiseIndex);
     }
 
+    const conclusion = states[index].conclusionInputState.value;
     const premises = states[index].premiseIndices.map((index) => states[index].conclusionInputState.value);
 
     const rule = inferenceRules.find((rule) => states[index].ruleNameInputState.value === rule.name);
 
     if (rule === undefined) {
-      return false;
+      setRuleErrors((old) => {
+        old.push(index, "Undefined rule");
+        return old;
+      });
+      return;
     }
 
-    return verify(conclusion, premises, rule, syntax);
+    const { conclusionErrors, ruleErrors: ruleErrorsList, premisesErrors } = verify(conclusion, premises, rule, syntax);
+
+    for (const message of conclusionErrors) {
+      setInputErrors((old) => {
+        old.push(index, message);
+        return old;
+      });
+    }
+
+    premisesErrors.forEach((messages, i) => {
+      const premiseIndex = states[index].premiseIndices[i];
+      for (const message of messages) {
+        setInputErrors((old) => {
+          old.push(premiseIndex, message);
+          return old;
+        });
+      }
+    });
+
+    for (const message of ruleErrorsList) {
+      setRuleErrors((old) => {
+        old.push(index, message);
+        return old;
+      });
+    }
   }
 
   useEffect(() => {
-    setValid(verifyInput(0));
+    setInputErrors(new MessageMap());
+    setRuleErrors(new MessageMap());
+    verifyInput(0);
+    setValid(inputErrors.size === 0 && ruleErrors.size === 0);
   }, [states]);
 
   useEffect(() => {

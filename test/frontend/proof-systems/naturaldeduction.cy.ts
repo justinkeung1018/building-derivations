@@ -1,7 +1,6 @@
 it("correctly verifies a basic derivation tree with natural deduction rules", () => {
-  cy.getBySel("edit-rules-button").click();
   cy.getBySel("predefined-natural-deduction").click();
-  cy.clickOutside();
+  cy.getBySel("start").click();
 
   // Construct a correct derivation tree
   cy.getBySel("tree-conclusion-0").click().type("z, (z -> y) |- (x -> y)"); // Need to .click() otherwise the text won't be typed and the test will fail
@@ -16,5 +15,6 @@ it("correctly verifies a basic derivation tree with natural deduction rules", ()
   cy.getBySel("tree-conclusion-3").type("x, z, (z -> y) |- z");
   cy.getBySel("tree-rule-3").type("Ax");
 
+  cy.clickOutside();
   cy.derivationIsCorrect();
 });

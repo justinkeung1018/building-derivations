@@ -28,7 +28,7 @@ function Landing() {
             <ToggleGroup
               type="single"
               className="flex flex-col justify-center"
-              value={search.mode === "predefined" ? search.system : undefined}
+              value={search.mode === "predefined" ? search.system : ""}
               onValueChange={(value) => {
                 if (value === "natural-deduction" || value === "lambda" || value === "sequent") {
                   setSearch({ mode: "predefined", system: value });
@@ -69,6 +69,7 @@ function Landing() {
               return { mode: "custom" };
             });
           }}
+          data-cy="custom"
         >
           <CardHeader>
             <CardTitle>Define your own</CardTitle>
@@ -76,7 +77,7 @@ function Landing() {
           <CardContent className="flex-grow flex items-center justify-center">Do it later!</CardContent>
         </Card>
       </div>
-      <Button disabled={search.mode === "none"}>
+      <Button disabled={search.mode === "none"} data-cy="start">
         <Link to="/builder" search={search}>
           Get started
         </Link>

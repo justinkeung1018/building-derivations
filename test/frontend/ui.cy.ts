@@ -1,6 +1,9 @@
 describe("Inputs", () => {
   it("switches to displaying LaTeX after clicking away", () => {
     cy.visit("/");
+    cy.getBySel("custom").click();
+    cy.getBySel("start").click();
+
     cy.getBySel("tree-conclusion-0").type("abcde");
     cy.getBySel("tree-rule-0").type("abcde");
     // We have clicked away from the conclusion

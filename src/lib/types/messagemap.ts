@@ -20,18 +20,16 @@ export class MessageMap extends Map<number, string[]> {
     return super.size + this.overallMessages.length;
   }
 
+  push(index: number, message: string) {
+    this.get(index).push(message);
+  }
+
   pushOverall(message: string) {
     this.overallMessages.push(message);
   }
 
   getOverall(): string[] {
     return this.overallMessages;
-  }
-}
-
-export class WarningMap extends MessageMap {
-  pushWarning(index: number, message: string) {
-    this.get(index).push(message);
   }
 }
 
@@ -43,3 +41,45 @@ export class ErrorMap extends MessageMap {
     this.get(index).push(error.message);
   }
 }
+
+// export class InputErrorMap extends ErrorMap {
+//   private conclusionMessages: string[];
+//   private ruleMessages: string[];
+
+//   constructor() {
+//     super();
+//     this.conclusionMessages = [];
+//     this.ruleMessages = [];
+//   }
+
+//   #pushErrorToList(messages: string[], error: unknown) {
+//     if (!(error instanceof Error)) {
+//       throw error;
+//     }
+//     messages.push(error.message);
+//   }
+
+//   pushConclusionError(error: unknown) {
+//     this.#pushErrorToList(this.conclusionMessages, error);
+//   }
+
+//   getConclusionMessages() {
+//     return this.conclusionMessages;
+//   }
+
+//   pushRuleError(error: unknown) {
+//     this.#pushErrorToList(this.ruleMessages, error);
+//   }
+
+//   getRuleMessages() {
+//     return this.ruleMessages;
+//   }
+
+//   pushPremiseError(index: number, error: unknown) {
+//     this.pushError(index, error);
+//   }
+
+//   getPremiseMessages(index: number) {
+//     return this.get(index);
+//   }
+// }
