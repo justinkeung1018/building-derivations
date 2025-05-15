@@ -13,7 +13,7 @@ interface ConfigFileInputProps extends React.InputHTMLAttributes<HTMLInputElemen
 }
 
 const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>(
-  ({ className, setSyntax, setInferenceRules, setSearch }) => {
+  ({ className, setSyntax, setInferenceRules, setSearch }, ref) => {
     const [fileName, setFileName] = useState<string | undefined>(undefined);
 
     return (
@@ -32,6 +32,7 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
         </div>
         <input
           id="config-file-input"
+          ref={ref}
           type="file"
           accept=".json"
           className="hidden"
