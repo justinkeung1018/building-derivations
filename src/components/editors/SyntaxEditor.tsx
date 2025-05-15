@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { MathJax } from "better-react-mathjax";
-import { Button } from "./shadcn/Button";
-import { Input } from "./shadcn/Input";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
+import { Button } from "../shadcn/Button";
+import { Input } from "../shadcn/Input";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../shadcn/Table";
 import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteIcon";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];

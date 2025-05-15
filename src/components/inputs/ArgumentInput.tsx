@@ -4,12 +4,15 @@ import { Plus } from "lucide-react";
 import { RuleNameInput } from "./RuleNameInput";
 import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { ConclusionInput } from "./ConclusionInput";
+import { MessageMap } from "@/lib/types/messagemap";
 
 export interface ArgumentInputProps {
   index: number;
   valid: boolean;
   states: Record<number, ArgumentInputState>;
   setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
+  inputErrors: MessageMap;
+  ruleErrors: MessageMap;
 }
 
 export function ArgumentInput(props: ArgumentInputProps) {
@@ -26,7 +29,7 @@ export function ArgumentInput(props: ArgumentInputProps) {
           <div className="w-full">
             <div className="flex space-x-4 items-end justify-center">
               {states[index].premiseIndices.map((index) => (
-                <ArgumentInput index={index} valid={valid} states={states} setStates={setStates} />
+                <ArgumentInput {...props} index={index} />
               ))}
               {!valid && (
                 <Button

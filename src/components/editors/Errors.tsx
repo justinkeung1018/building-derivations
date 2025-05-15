@@ -1,6 +1,6 @@
 import React from "react";
 import { ErrorMap } from "@/lib/types/messagemap";
-import { TableCell, TableRow } from "./shadcn/Table";
+import { TableCell, TableRow } from "../shadcn/Table";
 import { CircleAlert } from "lucide-react";
 
 interface ErrorsProps {

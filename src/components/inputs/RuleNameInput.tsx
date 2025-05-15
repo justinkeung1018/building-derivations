@@ -3,8 +3,9 @@ import { latexify } from "@/lib/latexify";
 import { ArgumentInputProps } from "./ArgumentInput";
 import { FocusingInput } from "./FocusingInput";
 import { MathJax } from "better-react-mathjax";
+import { ErrorsTooltip } from "./ErrorsTooltip";
 
-export function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
+export function RuleNameInput({ index, states, setStates, ruleErrors }: ArgumentInputProps) {
   const showInput = states[index].ruleNameInputState.isEditing || states[index].ruleNameInputState.value.length == 0;
 
   if (showInput) {
@@ -50,7 +51,7 @@ export function RuleNameInput({ index, states, setStates }: ArgumentInputProps) 
   }
 
   return (
-    <div className="px-4">
+    <div className="px-4 flex items-start gap-x-1">
       <MathJax
         onClick={() => {
           setStates((old) => ({
@@ -65,6 +66,7 @@ export function RuleNameInput({ index, states, setStates }: ArgumentInputProps) 
       >
         {states[index].ruleNameInputState.latex}
       </MathJax>
+      {ruleErrors.get(index).length > 0 && <ErrorsTooltip errors={ruleErrors.get(index)} />}
     </div>
   );
 }

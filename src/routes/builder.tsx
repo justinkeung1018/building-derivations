@@ -4,8 +4,8 @@ import { MathJaxContext } from "better-react-mathjax";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../components/shadcn/Sheet";
 import { Button } from "../components/shadcn/Button";
 import { InferenceRule, SyntaxRule } from "../lib/types/rules";
-import { SyntaxEditor } from "../components/SyntaxEditor";
-import { InferenceRulesEditor } from "../components/InferenceRulesEditor";
+import { SyntaxEditor } from "../components/editors/SyntaxEditor";
+import { InferenceRulesEditor } from "../components/editors/InferenceRulesEditor";
 import { verify } from "../lib/verifier/verify";
 import { ToggleGroup, ToggleGroupItem } from "../components/shadcn/ToggleGroup";
 import { defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
@@ -227,7 +227,14 @@ export function DerivationBuilder() {
             </div>
           </SheetContent>
         </Sheet>
-        <ArgumentInput index={0} valid={valid} states={states} setStates={setStates} />
+        <ArgumentInput
+          index={0}
+          valid={valid}
+          states={states}
+          setStates={setStates}
+          inputErrors={inputErrors}
+          ruleErrors={ruleErrors}
+        />
       </div>
     </MathJaxContext>
   );

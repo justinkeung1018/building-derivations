@@ -25,7 +25,9 @@ export function verify(conclusion: string, premises: string[], rule: InferenceRu
   };
 
   if (premises.length !== rule.premises.length) {
-    errors.ruleErrors.push(`Rule needs ${rule.premises.length} premises, but ${premises.length} premises are given`);
+    errors.ruleErrors.push(
+      `Rule needs ${rule.premises.length} premise${rule.premises.length === 1 ? "" : "s"}, but ${premises.length} premise${premises.length === 1 ? " is" : "s are"} given`,
+    );
     return errors;
   }
 

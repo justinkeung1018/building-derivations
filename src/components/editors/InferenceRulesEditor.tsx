@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { MathJax } from "better-react-mathjax";
-import { Button } from "./shadcn/Button";
-import { Input } from "./shadcn/Input";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./shadcn/Table";
+import { Button } from "../shadcn/Button";
+import { Input } from "../shadcn/Input";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../shadcn/Table";
 import { InferenceRule, InferenceRuleStatement, SyntaxRule } from "@/lib/types/rules";
 import { latexify } from "@/lib/latexify";
 import { parseInferenceRules } from "@/lib/parsers/inference";
@@ -10,7 +10,7 @@ import { Plus } from "lucide-react";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteIcon";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
