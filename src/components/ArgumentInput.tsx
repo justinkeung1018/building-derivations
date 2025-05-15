@@ -28,6 +28,7 @@ function RuleNameInput({ index, states, setStates }: ArgumentInputProps) {
   if (showInput) {
     return (
       <FocusingInput
+        placeholder={index === 0 ? "Rule" : ""}
         className="w-full"
         value={states[index].ruleNameInputState.value}
         edited={states[index].ruleNameInputState.edited}
@@ -122,6 +123,7 @@ function ConclusionInput({ index, states, setStates }: ArgumentInputProps) {
 
     return (
       <FocusingInput
+        placeholder={index === 0 ? "Type the conclusion you want to prove" : ""}
         value={states[index].conclusionInputState.value}
         edited={states[index].conclusionInputState.edited}
         autoFocus={states[index].autofocus}
