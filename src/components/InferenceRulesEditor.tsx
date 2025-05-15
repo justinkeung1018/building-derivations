@@ -9,7 +9,7 @@ import { parseInferenceRules } from "@/lib/parsers/inference";
 import { Plus } from "lucide-react";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
-import { DeleteIcon } from "./DeleteRuleIcon";
+import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
 
 function PremisesEditor({ rule, index, setInferenceRules }: DefinitionEditorProps) {

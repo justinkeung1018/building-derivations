@@ -8,7 +8,7 @@ import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
-import { DeleteIcon } from "./DeleteRuleIcon";
+import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./shadcn/Card";
 
 interface SyntaxEditorProps {
