@@ -294,37 +294,38 @@ export function DerivationBuilder() {
                   setInferenceRules={setInferenceRules}
                 />
               </div>
-              <Button
-                className="relative float-right mt-4"
-                variant="secondary"
-                onClick={() => {
-                  const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
-                    placeholders,
-                    definition: definitionUnsanitised,
-                  }));
-                  const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
-                    ({ name, premises, conclusion }) => ({
-                      name,
-                      premises: premises.map(({ unsanitised }) => unsanitised),
-                      conclusion: conclusion.unsanitised,
-                    }),
-                  );
-                  const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
-                  const blob = new Blob([JSON.stringify(json, null, 2)], {
-                    type: "application/json",
-                  });
-                  const url = URL.createObjectURL(blob);
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
+                      placeholders,
+                      definition: definitionUnsanitised,
+                    }));
+                    const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
+                      ({ name, premises, conclusion }) => ({
+                        name,
+                        premises: premises.map(({ unsanitised }) => unsanitised),
+                        conclusion: conclusion.unsanitised,
+                      }),
+                    );
+                    const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
+                    const blob = new Blob([JSON.stringify(json, null, 2)], {
+                      type: "application/json",
+                    });
+                    const url = URL.createObjectURL(blob);
 
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "rules.json";
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                }}
-              >
-                Export as JSON
-              </Button>
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "rules.json";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }}
+                >
+                  Export as JSON
+                </Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
