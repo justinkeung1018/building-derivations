@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArgumentInput, ArgumentInputState, getDefaultState } from "../components/ArgumentInput";
+import { ArgumentInput } from "../components/inputs/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../components/shadcn/Sheet";
 import { Button } from "../components/shadcn/Button";
@@ -8,174 +8,39 @@ import { SyntaxEditor } from "../components/SyntaxEditor";
 import { InferenceRulesEditor } from "../components/InferenceRulesEditor";
 import { verify } from "../lib/verifier/verify";
 import { ToggleGroup, ToggleGroupItem } from "../components/shadcn/ToggleGroup";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
+import { defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
 import { parseSyntax } from "../lib/parsers/syntax";
 import { parseInferenceRules } from "../lib/parsers/inference";
-import { ConfigFileInput } from "../components/ConfigFileInput";
+import { ConfigFileInput } from "../components/inputs/ConfigFileInput";
 import { JSONFormat, JSONInferenceRule, JSONSyntaxRule } from "../lib/types/jsonrules";
 import { createFileRoute } from "@tanstack/react-router";
 import { searchSchema } from "@/lib/schemas";
 import { MessageMap } from "@/lib/types/messagemap";
+import {
+  LAMBDA_INFERENCE_RULES,
+  LAMBDA_SYNTAX,
+  NATURAL_DEDUCTION_INFERENCE_RULES,
+  NATURAL_DEDUCTION_SYNTAX,
+  SEQUENT_INFERENCE_RULES,
+  SEQUENT_SYNTAX,
+} from "@/lib/proof-systems";
+import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
   validateSearch: searchSchema,
 });
 
-const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "var | (A -> B)" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
-];
-const NATURAL_DEDUCTION_INFERENCE_RULES: InferenceRule[] = [
-  {
-    ...defaultInferenceRule,
-    name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- A" },
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to I",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to E",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B" },
-    premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A" },
-    ],
-  },
-];
-const LAMBDA_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- M: A" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ var: A }" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "1 | 2 | 3" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "M, N", definitionUnsanitised: "var | (\\lambda var. M) | (MN)" },
-];
-const LAMBDA_INFERENCE_RULES: InferenceRule[] = [
-  {
-    ...defaultInferenceRule,
-    name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- var: A" },
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to I",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- M: B" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to E",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (MN): B" },
-    premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- M: (A -> B)" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: A" },
-    ],
-  },
-];
-const SEQUENT_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- \\Delta" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma, \\Delta, \\Sigma, \\Pi", definitionUnsanitised: "{ A }" },
-  {
-    ...defaultSyntaxRule,
-    placeholdersUnsanitised: "A, B",
-    definitionUnsanitised: "var | (A \\to B) | (A \\land B) | (A \\lor B) | (\\lnot A)",
-  },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
-];
-const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
-  {
-    ...defaultInferenceRule,
-    name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta, A" },
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\land L_1",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\land L_2",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\lor L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\lor B) |- \\Delta" },
-    premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" },
-    ],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, \\Sigma, (A \\to B) |- \\Delta, \\Pi" },
-    premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Sigma, B |- \\Pi" },
-    ],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\lnot L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (\\lnot A) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\lor R_1",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\lor R_2",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\land R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\land B), \\Delta" },
-    premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" },
-    ],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\to R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\to B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B, \\Delta" }],
-  },
-  {
-    ...defaultInferenceRule,
-    name: "\\lnot R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lnot A), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
-  },
-];
-
 export function DerivationBuilder() {
   const search = Route.useSearch();
 
-  const [valid, setValid] = useState(false);
   const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
   const [inputErrors, setInputErrors] = useState(new MessageMap());
   const [ruleErrors, setRuleErrors] = useState(new MessageMap());
   const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
+
+  const valid = inputErrors.size === 0 && ruleErrors.size === 0;
 
   function verifyInput(index: number) {
     for (const premiseIndex of states[index].premiseIndices) {
@@ -226,7 +91,6 @@ export function DerivationBuilder() {
     setInputErrors(new MessageMap());
     setRuleErrors(new MessageMap());
     verifyInput(0);
-    setValid(inputErrors.size === 0 && ruleErrors.size === 0);
   }, [states]);
 
   useEffect(() => {

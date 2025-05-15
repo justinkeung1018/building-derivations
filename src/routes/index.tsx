@@ -1,4 +1,4 @@
-import { ConfigFileInput } from "@/components/ConfigFileInput";
+import { ConfigFileInput } from "@/components/inputs/ConfigFileInput";
 import { Button } from "@/components/shadcn/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/Card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/shadcn/ToggleGroup";
