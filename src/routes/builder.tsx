@@ -40,6 +40,7 @@ export function DerivationBuilder() {
   const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
+  // TODO: can we make valid stay false throughout initialisation?
   const valid = inputErrors.size === 0 && ruleErrors.size === 0;
 
   function verifyInput(index: number) {
