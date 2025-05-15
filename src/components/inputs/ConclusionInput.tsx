@@ -1,3 +1,4 @@
+import React from "react";
 import { ArgumentInputState } from "@/lib/types/argumentinput";
 import { ArgumentInputProps } from "./ArgumentInput";
 import { latexify } from "@/lib/latexify";

@@ -1,3 +1,4 @@
+import React from "react";
 import { latexify } from "@/lib/latexify";
 import { ArgumentInputProps } from "./ArgumentInput";
 import { FocusingInput } from "./FocusingInput";
