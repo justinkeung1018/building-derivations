@@ -4,15 +4,20 @@ import { ArgumentInputProps } from "./ArgumentInput";
 import { FocusingInput } from "./FocusingInput";
 import { MathJax } from "better-react-mathjax";
 import { ErrorsTooltip } from "./ErrorsTooltip";
+import { cn } from "@/lib/utils";
 
-export function RuleNameInput({ index, states, setStates, ruleErrors }: ArgumentInputProps) {
+interface RuleNameInputProps extends ArgumentInputProps {
+  latexRef: React.RefObject<HTMLDivElement | null>;
+}
+
+export function RuleNameInput({ index, states, setStates, ruleErrors, className, latexRef }: RuleNameInputProps) {
   const showInput = states[index].ruleNameInputState.isEditing || states[index].ruleNameInputState.value.length == 0;
 
   if (showInput) {
     return (
       <FocusingInput
         placeholder={index === 0 ? "Rule" : ""}
-        className="w-full"
+        className={cn("w-20", className)}
         value={states[index].ruleNameInputState.value}
         edited={states[index].ruleNameInputState.edited}
         autoFocus={false}
@@ -51,7 +56,7 @@ export function RuleNameInput({ index, states, setStates, ruleErrors }: Argument
   }
 
   return (
-    <div className="px-4 flex items-start gap-x-1">
+    <div className={cn("flex items-start gap-x-1 justify-self-start", className)} ref={latexRef}>
       <MathJax
         onClick={() => {
           setStates((old) => ({
