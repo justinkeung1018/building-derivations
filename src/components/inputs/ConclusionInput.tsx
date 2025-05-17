@@ -88,7 +88,9 @@ export function ConclusionInput({ index, states, setStates, className, inputErro
       >
         {states[index].conclusionInputState.latex}
       </MathJax>
-      {inputErrors.get(index).length > 0 && <ErrorsTooltip errors={inputErrors.get(index)} />}
+      {inputErrors.get(index).length > 0 && (
+        <ErrorsTooltip errors={inputErrors.get(index)} data-cy={`errors-conclusion-${index}`} />
+      )}
     </div>
   );
 }

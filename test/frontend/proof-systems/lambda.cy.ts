@@ -1,6 +1,6 @@
 it("correctly verifies a basic derivation tree with Curry type assignment", () => {
   cy.getBySel("predefined-lambda").click();
-  cy.getBySel("start").click();
+  cy.start();
 
   cy.getBySel("tree-conclusion-0").click().type("z: 1 |- ((\\lambda x. (\\lambda y. x))z): (2 -> 1)");
   cy.getBySel("tree-rule-0").type("\\to E");

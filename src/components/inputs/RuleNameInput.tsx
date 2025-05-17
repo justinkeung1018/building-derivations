@@ -68,7 +68,9 @@ export function RuleNameInput({ index, states, setStates, className, ruleErrors 
         >
           {states[index].ruleNameInputState.latex}
         </MathJax>
-        {ruleErrors.get(index).length > 0 && <ErrorsTooltip errors={ruleErrors.get(index)} />}
+        {ruleErrors.get(index).length > 0 && (
+          <ErrorsTooltip errors={ruleErrors.get(index)} data-cy={`errors-rule-${index}`} />
+        )}
       </div>
     </div>
   );

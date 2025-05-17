@@ -6,5 +6,6 @@ declare namespace Cypress {
     ): Chainable<JQuery>;
     clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
     derivationIsCorrect(): Chainable<JQuery>;
+    start(): Chainable<JQuery>;
   }
 }

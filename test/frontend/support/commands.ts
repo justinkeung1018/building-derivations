@@ -9,3 +9,7 @@ Cypress.Commands.add("clickOutside", () => {
 Cypress.Commands.add("derivationIsCorrect", () => {
   return cy.getBySel("container").should("have.css", "background-color", "rgb(236, 252, 203)");
 });
+
+Cypress.Commands.add("start", () => {
+  return cy.getBySel("start").click();
+});

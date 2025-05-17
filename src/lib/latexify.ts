@@ -25,6 +25,12 @@ export function normalise(text: string): string {
     }
   }
 
+  for (const string of Object.keys(aliasMap)) {
+    text = text.replaceAll(string, " " + string + " ");
+  }
+
+  text = text.replace(/\s+/g, " ");
+
   return text.trim();
 }
 

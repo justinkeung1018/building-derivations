@@ -1,6 +1,6 @@
 it("correctly verifies a basic derivation tree with natural deduction rules", () => {
   cy.getBySel("predefined-natural-deduction").click();
-  cy.getBySel("start").click();
+  cy.start();
 
   // Construct a correct derivation tree
   cy.getBySel("tree-conclusion-0").click().type("z, (z -> y) |- (x -> y)"); // Need to .click() otherwise the text won't be typed and the test will fail
