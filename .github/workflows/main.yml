@@ -86,7 +86,7 @@ jobs:
         with:
           build: npm run cov:build
           start: npm start
-          config: baseUrl=http://localhost:8080
+          config: baseUrl=http://localhost:8000
           config-file: cypress.config.ts
 
       - name: Upload artifacts for code coverage
