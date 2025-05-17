@@ -106,7 +106,7 @@ export const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
     name: "\\to L",
     conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, \\Sigma, (A \\to B) |- \\Delta, \\Pi" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
+      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
       { ...defaultInferenceRuleStatement, unsanitised: "\\Sigma, B |- \\Pi" },
     ],
   },
