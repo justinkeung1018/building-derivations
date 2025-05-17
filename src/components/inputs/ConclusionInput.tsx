@@ -5,8 +5,9 @@ import { latexify } from "@/lib/latexify";
 import { MathJax } from "better-react-mathjax";
 import { FocusingInput } from "./FocusingInput";
 import { ErrorsTooltip } from "./ErrorsTooltip";
+import { cn } from "@/lib/utils";
 
-export function ConclusionInput({ index, states, setStates, inputErrors }: ArgumentInputProps) {
+export function ConclusionInput({ index, states, setStates, className, inputErrors }: ArgumentInputProps) {
   const showInput =
     states[index].conclusionInputState.isEditing || states[index].conclusionInputState.value.length == 0;
 
@@ -42,6 +43,7 @@ export function ConclusionInput({ index, states, setStates, inputErrors }: Argum
 
     return (
       <FocusingInput
+        className={className}
         placeholder={index === 0 ? "Type the conclusion you want to prove" : ""}
         value={states[index].conclusionInputState.value}
         edited={states[index].conclusionInputState.edited}
@@ -71,7 +73,7 @@ export function ConclusionInput({ index, states, setStates, inputErrors }: Argum
   }
 
   return (
-    <div className="px-4 flex items-start gap-x-1">
+    <div className={cn("px-4 flex items-start gap-x-1", className)}>
       <MathJax
         onClick={() => {
           setStates((old) => ({

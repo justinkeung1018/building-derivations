@@ -6,11 +6,7 @@ import { MathJax } from "better-react-mathjax";
 import { ErrorsTooltip } from "./ErrorsTooltip";
 import { cn } from "@/lib/utils";
 
-interface RuleNameInputProps extends ArgumentInputProps {
-  latexRef: React.RefObject<HTMLDivElement | null>;
-}
-
-export function RuleNameInput({ index, states, setStates, ruleErrors, className, latexRef }: RuleNameInputProps) {
+export function RuleNameInput({ index, states, setStates, className, ruleErrors }: ArgumentInputProps) {
   const showInput = states[index].ruleNameInputState.isEditing || states[index].ruleNameInputState.value.length == 0;
 
   if (showInput) {
@@ -56,22 +52,24 @@ export function RuleNameInput({ index, states, setStates, ruleErrors, className,
   }
 
   return (
-    <div className={cn("flex items-start gap-x-1 justify-self-start", className)} ref={latexRef}>
-      <MathJax
-        onClick={() => {
-          setStates((old) => ({
-            ...old,
-            [index]: {
-              ...old[index],
-              ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true },
-            },
-          }));
-        }}
-        data-cy={`tree-rule-latex-${index}`}
-      >
-        {states[index].ruleNameInputState.latex}
-      </MathJax>
-      {ruleErrors.get(index).length > 0 && <ErrorsTooltip errors={ruleErrors.get(index)} />}
+    <div className={cn("flex items-center h-9", className)}>
+      <div className="flex items-start gap-x-1">
+        <MathJax
+          onClick={() => {
+            setStates((old) => ({
+              ...old,
+              [index]: {
+                ...old[index],
+                ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true },
+              },
+            }));
+          }}
+          data-cy={`tree-rule-latex-${index}`}
+        >
+          {states[index].ruleNameInputState.latex}
+        </MathJax>
+        {ruleErrors.get(index).length > 0 && <ErrorsTooltip errors={ruleErrors.get(index)} />}
+      </div>
     </div>
   );
 }

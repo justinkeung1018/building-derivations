@@ -5,8 +5,6 @@ import { RuleNameInput } from "./RuleNameInput";
 import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { ConclusionInput } from "./ConclusionInput";
 import { MessageMap } from "@/lib/types/messagemap";
-import { useMeasure } from "@react-hookz/web";
-import { cn } from "@/lib/utils";
 
 export interface ArgumentInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   index: number;
@@ -17,22 +15,18 @@ export interface ArgumentInputProps extends React.InputHTMLAttributes<HTMLInputE
   ruleErrors: MessageMap;
 }
 
-export const ArgumentInput = React.forwardRef<HTMLInputElement, ArgumentInputProps>((props) => {
+export function ArgumentInput(props: ArgumentInputProps) {
   const { index, valid, states, setStates } = props;
-  const [latexMeasurements, latexRef] = useMeasure<HTMLDivElement>();
 
   const showPremises =
     states[index].conclusionInputState.edited &&
     (states[index].conclusionInputState.value.length > 0 || states[index].premiseIndices.length > 0);
 
   return (
-    <div
-      className={cn("flex flex-col items-center", latexRef.current === null ? "mr-24" : "")}
-      style={latexRef.current !== null && latexMeasurements ? { marginRight: latexMeasurements.width + 20 } : undefined}
-    >
-      <div className="w-full flex flex-col gap-y-2 items-center">
+    <div className="flex flex-col items-center">
+      <div className="w-full grid grid-cols-[1fr_min-content] place-items-center gap-x-2">
         {showPremises && (
-          <div className="flex items-end justify-center">
+          <div className="flex space-x-4 items-end justify-center -mb-2">
             {states[index].premiseIndices.map((index) => (
               <ArgumentInput {...props} index={index} />
             ))}
@@ -57,16 +51,10 @@ export const ArgumentInput = React.forwardRef<HTMLInputElement, ArgumentInputPro
             )}
           </div>
         )}
-        <div className="relative w-full">
-          <hr className="w-full h-px border-black text-black bg-black" />
-          <RuleNameInput
-            {...props}
-            className="absolute ml-2 left-full translate -translate-y-1/2"
-            latexRef={latexRef}
-          />
-        </div>
-        <ConclusionInput {...props} />
+        <hr className="col-start-1 w-full h-px border-black text-black bg-black" />
+        <RuleNameInput {...props} />
+        <ConclusionInput {...props} className="-mt-2" />
       </div>
     </div>
   );
-});
+}
