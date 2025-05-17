@@ -3,6 +3,7 @@ import { between, many, many1, manyBetween, map, or, then } from "parjs/combinat
 import { NonTerminal, Multiset, Token, Terminal, Or, Maybe } from "../types/token";
 import { ParseResult, SyntaxRule } from "../types/rules";
 import { ErrorMap, MessageMap } from "../types/messagemap";
+import { normalise } from "../latexify";
 
 function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   if (placeholdersUnsanitised.trim().length === 0) {
@@ -12,7 +13,7 @@ function sanitisePlaceholders(placeholdersUnsanitised: string): string[] {
   if (split.some((x) => x.length === 0)) {
     throw new Error("Empty placeholder supplied");
   }
-  return split.sort((a, b) => b.length - a.length);
+  return split.sort((a, b) => b.length - a.length).map(normalise);
 }
 
 function sanitiseDefinition(definitionUnsanitised: string): string[] {
@@ -20,7 +21,7 @@ function sanitiseDefinition(definitionUnsanitised: string): string[] {
     throw new Error("Rule definition cannot be empty");
   }
   const turnstile = definitionUnsanitised.replaceAll("|-", "\\vdash"); // Avoid split("|") breaking up the turnstile
-  const result = turnstile.split("|").map((x) => x.trim().replaceAll("\\vdash", "|-"));
+  const result = turnstile.split("|").map((x) => normalise(x));
   if (result.some((x) => x.length === 0)) {
     throw new Error(`All alternative definitions must be non-empty`);
   }
@@ -59,9 +60,8 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
     map((x) => x.join("")),
   );
   const terminal = command.pipe(
-    or(string("|-")),
-    or(string("->")),
-    or(string("→")),
+    or("|-"),
+    or("->"),
     or(anyChar()),
     map((x) => new Terminal(x)),
   );

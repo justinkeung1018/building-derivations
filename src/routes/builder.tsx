@@ -25,6 +25,7 @@ import {
   SEQUENT_SYNTAX,
 } from "@/lib/proof-systems";
 import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
+import { normalise } from "@/lib/latexify";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -56,7 +57,7 @@ export function DerivationBuilder() {
     const conclusion = states[index].conclusionInputState.value;
     const premises = states[index].premiseIndices.map((index) => states[index].conclusionInputState.value);
 
-    const rule = inferenceRules.find((rule) => states[index].ruleNameInputState.value === rule.name);
+    const rule = inferenceRules.find((rule) => normalise(states[index].ruleNameInputState.value) === rule.name);
 
     if (rule === undefined) {
       ruleErrors.push(index, "Undefined rule");
@@ -65,7 +66,7 @@ export function DerivationBuilder() {
         conclusionErrors,
         ruleErrors: ruleErrorsList,
         premisesErrors,
-      } = verify(conclusion, premises, rule, syntax);
+      } = verify(normalise(conclusion), premises.map(normalise), rule, syntax);
 
       for (const message of conclusionErrors) {
         inputErrors.push(index, message);

@@ -12,13 +12,14 @@ import { Multiset, NonTerminal, Or, Terminal, Token } from "../types/token";
 import { between, flatten, later, manySepBy, map, maybe, or, then } from "parjs/combinators";
 import { ors } from "../utils";
 import { ErrorMap, MessageMap } from "../types/messagemap";
+import { normalise } from "../latexify";
 
 function sanitise(statementName: string, unsanitised: string): string {
   const result = unsanitised.trim();
   if (result.length === 0) {
     throw new Error(`${statementName} cannot be empty`);
   }
-  return result;
+  return normalise(result);
 }
 
 function getTokenParser(
@@ -151,6 +152,8 @@ export function parseInferenceRules(rules: InferenceRule[], syntax: SyntaxRule[]
     if (rule.name.trim().length === 0) {
       errors.pushError(index, new Error("Rule name cannot be empty"));
     }
+    rule.name = normalise(rule.name);
+
     rule.premises.forEach((premise, premiseIndex) => {
       try {
         premise.sanitised = sanitise(`Premise ${premiseIndex + 1}`, premise.unsanitised);

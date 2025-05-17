@@ -142,6 +142,35 @@ it("matches arrows", () => {
   });
 });
 
+it("matches when there is only one multiset element to match and one actual element in the given multiset", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
+    placeholders: ["A"],
+  };
+
+  const input = "x";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
+    ]),
+  ];
+
+  expect(match(input, structure, [statement, context, type], {})).toEqual({
+    "\\Gamma": new MultisetAST([]),
+    A: new NonTerminalAST(2, [new TerminalAST("x")]),
+  });
+});
+
 it("matches multisets with unique elements that do not need to be inferred", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,

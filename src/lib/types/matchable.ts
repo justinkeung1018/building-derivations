@@ -26,7 +26,13 @@ export class MatchableMultiset {
   constructor(
     readonly index: number,
     readonly elements: (Name | MultisetElement)[],
-  ) {}
+  ) {
+    for (const element of elements) {
+      if (element instanceof Name && element.index !== index) {
+        throw new Error("Cannot match multisets belonging to different rules");
+      }
+    }
+  }
 }
 
 export type Matchable = MatchableTerminal | Name | MatchableNonTerminal | MatchableMultiset;

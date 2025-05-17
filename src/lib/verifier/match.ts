@@ -74,6 +74,14 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
     }
   }
 
+  if (unmatchedNames.length > 0 && multisetElementsToMatch.length === 1 && ast.elements.length === 1) {
+    matchMultisetElement(ast, multisetElementsToMatch[0], names, matched, false);
+    for (const unmatchedName of unmatchedNames) {
+      names[unmatchedName] = new MultisetAST([]);
+    }
+    return;
+  }
+
   let numUnmatchedMultisetElements = 0;
   for (const multisetElement of multisetElementsToMatch) {
     const conservative = unmatchedNames.length > 0;

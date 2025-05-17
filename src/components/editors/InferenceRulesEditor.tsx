@@ -199,7 +199,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                       data-cy={`inference-name-${index}`}
                     />
                   ) : (
-                    <MathJax inline dynamic>{`\\((\\mathit{${rule.name}})\\)`}</MathJax>
+                    <MathJax inline dynamic>{`\\((\\mathit{${latexify(rule.name)}})\\)`}</MathJax>
                   )}
                 </TableCell>
                 <TableCell>

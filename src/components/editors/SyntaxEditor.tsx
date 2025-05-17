@@ -58,7 +58,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                       data-cy={`syntax-placeholders-${index}`}
                     />
                   ) : (
-                    <MathJax inline dynamic>{`\\(${rule.placeholders.join(",")}\\)`}</MathJax>
+                    <MathJax inline dynamic>{`\\(${latexify(rule.placeholders.join(","))}\\)`}</MathJax>
                   )}
                 </TableCell>
                 <TableCell>
