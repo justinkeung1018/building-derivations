@@ -19,6 +19,7 @@
     "test": "start-server-and-test 'npm run start' http://localhost:8080 cov",
     "posttest": "npm run report:combined",
     "cov": "npm-run-all --parallel cov:frontend cov:backend",
+    "precov:build": "rimraf dist && tsr generate",
     "cov:build": "npm-run-all --parallel cov:build:*",
     "cov:build:esbuild": "node esbuild/coverage.mjs",
     "cov:build:css": "tailwindcss -i src/styles.css -o dist/styles.css",
