@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/Card";
 import { SyntaxRule } from "@/lib/types/rules";
 import { latexify } from "@/lib/latexify";
@@ -9,7 +9,7 @@ interface SyntaxViewerProps {
   syntax: SyntaxRule[];
 }
 
-export function SyntaxViewer({ syntax }: SyntaxViewerProps) {
+export const SyntaxViewer = memo(function SyntaxViewer({ syntax }: SyntaxViewerProps) {
   return (
     <Card className="h-fit max-h-full verflow-y-auto">
       <CardHeader>
@@ -49,4 +49,4 @@ export function SyntaxViewer({ syntax }: SyntaxViewerProps) {
       </CardContent>
     </Card>
   );
-}
+});

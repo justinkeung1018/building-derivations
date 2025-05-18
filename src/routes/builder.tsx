@@ -114,8 +114,10 @@ export function DerivationBuilder() {
           <AppSidebar
             syntax={syntax}
             inferenceRules={inferenceRules}
+            states={states}
             setSyntax={setSyntax}
             setInferenceRules={setInferenceRules}
+            setStates={setStates}
           />
           <SidebarTrigger className="mt-2 ml-2" />
           <div

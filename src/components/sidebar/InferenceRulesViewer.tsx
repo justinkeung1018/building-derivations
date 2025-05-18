@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/Card";
 import { InferenceRule } from "@/lib/types/rules";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../shadcn/Table";
@@ -9,7 +9,7 @@ interface InferenceRulesViewerProps {
   inferenceRules: InferenceRule[];
 }
 
-export function InferenceRulesViewer({ inferenceRules }: InferenceRulesViewerProps) {
+export const InferenceRulesViewer = memo(function InferenceRulesViewer({ inferenceRules }: InferenceRulesViewerProps) {
   return (
     <Card className="h-fit max-h-full overflow-y-auto">
       <CardHeader>
@@ -44,4 +44,4 @@ export function InferenceRulesViewer({ inferenceRules }: InferenceRulesViewerPro
       </CardContent>
     </Card>
   );
-}
+});

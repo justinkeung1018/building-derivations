@@ -12,17 +12,29 @@ import {
   SidebarMenuToggle,
   SidebarSeparator,
 } from "../shadcn/Sidebar";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Upload } from "lucide-react";
 import { EditorSheet } from "../editors/EditorSheet";
 import { SyntaxRule, InferenceRule } from "@/lib/types/rules";
 import { SyntaxViewer } from "./SyntaxViewer";
 import { InferenceRulesViewer } from "./InferenceRulesViewer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../shadcn/DropdownMenu";
+import { exportDerivation, importDerivation } from "@/lib/io/derivation";
+import { ArgumentInputState } from "@/lib/types/argumentinput";
 
 interface AppSidebarProps {
   syntax: SyntaxRule[];
   inferenceRules: InferenceRule[];
+  states: Record<number, ArgumentInputState>;
   setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
   setInferenceRules: React.Dispatch<React.SetStateAction<InferenceRule[]>>;
+  setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
 }
 
 export function AppSidebar(props: AppSidebarProps) {
@@ -41,9 +53,66 @@ export function AppSidebar(props: AppSidebarProps) {
                   <EditorSheet {...props} />
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      const input = document.getElementById("derivation-upload-input");
+                      if (input !== null) {
+                        input.click();
+                      }
+                    }}
+                    tooltip="Upload derivation"
+                  >
+                    <Upload />
+                    <span>Import derivation (JSON only)</span>
+                  </SidebarMenuButton>
+                  <input
+                    id="derivation-upload-input"
+                    type="file"
+                    className="hidden"
+                    accept=".json"
+                    onChange={(e) => {
+                      if (e.target.files !== null && e.target.files.length > 0) {
+                        e.target.files[0]
+                          .text()
+                          .then((text) => {
+                            // TODO: display parsing errors
+                            const states = importDerivation(text);
+                            props.setStates(states);
+                          })
+                          .catch((reason: unknown) => {
+                            console.error(reason);
+                          });
+                      }
+                      e.target.value = ""; // Trigger onChange even when user selects the same file multiple times
+                    }}
+                  />
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton tooltip="Export derivation">
+                        <Download />
+                        <span>Export derivation</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start">
+                      <DropdownMenuLabel>File format</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>LaTeX</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          exportDerivation(props.states);
+                        }}
+                      >
+                        JSON
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Export rule definitions">
                     <Download />
-                    <span>Export derivation</span>
+                    <span>Export rule definitions</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -59,6 +128,7 @@ export function AppSidebar(props: AppSidebarProps) {
                   onPressedChange={(pressed) => {
                     setShowSyntax(pressed);
                   }}
+                  tooltip="Show syntax rules"
                 >
                   <Eye />
                   <span>Show syntax rules</span>
@@ -70,6 +140,7 @@ export function AppSidebar(props: AppSidebarProps) {
                   onPressedChange={(pressed) => {
                     setShowInferenceRules(pressed);
                   }}
+                  tooltip="Show inference rules"
                 >
                   <Eye />
                   <span>Show inference rules</span>

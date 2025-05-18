@@ -1,0 +1,65 @@
+import { z } from "zod";
+import { parseInferenceRules } from "../parsers/inference";
+import { parseSyntax } from "../parsers/syntax";
+import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "../types/io/rules";
+import { SyntaxRule, InferenceRule, ParseResult } from "../types/rules";
+import { defaultSyntaxRule, defaultInferenceRuleStatement } from "../utils";
+import { downloadJSON } from "./utils";
+
+const jsonFields = {
+  syntax: z.array(
+    z.object({
+      placeholders: z.array(z.string()),
+      definition: z.string(),
+    }),
+  ),
+  inferenceRules: z.array(
+    z.object({
+      name: z.string(),
+      premises: z.array(z.string()),
+      conclusion: z.string(),
+    }),
+  ),
+};
+
+const schema: z.ZodType<JSONFormat> = z.object(jsonFields);
+
+interface ImportResult {
+  json: JSONFormat;
+  parsedSyntax: ParseResult<SyntaxRule>;
+  parsedInferenceRules: ParseResult<InferenceRule>;
+}
+
+export function importRules(text: string): ImportResult {
+  // TODO: display parsing errors
+  const json = schema.parse(JSON.parse(text));
+  const syntax: SyntaxRule[] = json.syntax.map(({ placeholders, definition }) => ({
+    ...defaultSyntaxRule,
+    placeholders,
+    placeholdersUnsanitised: placeholders.join(", "),
+    definitionUnsanitised: definition,
+  }));
+  const inferenceRules: InferenceRule[] = json.inferenceRules.map(({ name, premises, conclusion }) => ({
+    name,
+    premises: premises.map((unsanitised) => ({ ...defaultInferenceRuleStatement, unsanitised })),
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
+  }));
+  // TODO: display parsing errors
+  const parsedSyntax = parseSyntax(syntax);
+  const parsedInferenceRules = parseInferenceRules(inferenceRules, parsedSyntax.rules);
+  return { json, parsedSyntax, parsedInferenceRules };
+}
+
+export function exportRules(syntax: SyntaxRule[], inferenceRules: InferenceRule[]) {
+  const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
+    placeholders,
+    definition: definitionUnsanitised,
+  }));
+  const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(({ name, premises, conclusion }) => ({
+    name,
+    premises: premises.map(({ unsanitised }) => unsanitised),
+    conclusion: conclusion.unsanitised,
+  }));
+  const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
+  downloadJSON(json, "rules.json");
+}

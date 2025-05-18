@@ -2,7 +2,6 @@ import React from "react";
 import { SquarePen } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../shadcn/Sheet";
 import { SidebarMenuButton } from "../shadcn/Sidebar";
-import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "@/lib/types/jsonrules";
 import { ConfigFileInput } from "../inputs/ConfigFileInput";
 import { Button } from "../shadcn/Button";
 import { InferenceRulesEditor } from "./InferenceRulesEditor";
@@ -10,6 +9,7 @@ import { SyntaxEditor } from "./SyntaxEditor";
 import { ToggleGroup, ToggleGroupItem } from "../shadcn/ToggleGroup";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
 import { getParsedSystem } from "@/lib/proof-systems";
+import { exportRules } from "@/lib/io/rules";
 
 interface EditorSheetProps {
   syntax: SyntaxRule[];
@@ -22,7 +22,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <SidebarMenuButton>
+        <SidebarMenuButton tooltip="Edit syntax and inference rules">
           <SquarePen />
           <span>Edit syntax and inference rules</span>
         </SidebarMenuButton>
@@ -70,29 +70,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
             <Button
               variant="secondary"
               onClick={() => {
-                const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
-                  placeholders,
-                  definition: definitionUnsanitised,
-                }));
-                const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
-                  ({ name, premises, conclusion }) => ({
-                    name,
-                    premises: premises.map(({ unsanitised }) => unsanitised),
-                    conclusion: conclusion.unsanitised,
-                  }),
-                );
-                const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
-                const blob = new Blob([JSON.stringify(json, null, 2)], {
-                  type: "application/json",
-                });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "rules.json";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                exportRules(syntax, inferenceRules);
               }}
             >
               Export as JSON

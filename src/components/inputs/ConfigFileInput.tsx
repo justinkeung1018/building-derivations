@@ -1,9 +1,7 @@
-import { parseInferenceRules } from "@/lib/parsers/inference";
-import { parseSyntax } from "@/lib/parsers/syntax";
-import { jsonSchema } from "@/lib/schemas";
+import { importRules } from "@/lib/io/rules";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
 import { SearchParams } from "@/lib/types/url";
-import { cn, defaultInferenceRuleStatement, defaultSyntaxRule } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 
 interface ConfigFileInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -43,21 +41,7 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
                 .text()
                 .then((text) => {
                   // TODO: display parsing errors
-                  const json = jsonSchema.parse(JSON.parse(text));
-                  const syntax: SyntaxRule[] = json.syntax.map(({ placeholders, definition }) => ({
-                    ...defaultSyntaxRule,
-                    placeholders,
-                    placeholdersUnsanitised: placeholders.join(", "),
-                    definitionUnsanitised: definition,
-                  }));
-                  const inferenceRules: InferenceRule[] = json.inferenceRules.map(({ name, premises, conclusion }) => ({
-                    name,
-                    premises: premises.map((unsanitised) => ({ ...defaultInferenceRuleStatement, unsanitised })),
-                    conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
-                  }));
-                  // TODO: display parsing errors
-                  const parsedSyntax = parseSyntax(syntax);
-                  const parsedInferenceRules = parseInferenceRules(inferenceRules, parsedSyntax.rules);
+                  const { json, parsedSyntax, parsedInferenceRules } = importRules(text);
                   if (setSyntax) {
                     setSyntax(parsedSyntax.rules);
                   }

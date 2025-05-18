@@ -1,4 +1,4 @@
-import { JSONInferenceRule, JSONSyntaxRule } from "./jsonrules";
+import { JSONInferenceRule, JSONSyntaxRule } from "./io/rules";
 
 export interface PredefinedSearchParams {
   mode: "predefined";

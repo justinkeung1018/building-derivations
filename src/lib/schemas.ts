@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { CustomSearchParams, JSONSearchParams, PredefinedSearchParams, SearchParams } from "./types/url";
-import { JSONFormat } from "./types/jsonrules";
 
 const jsonFields = {
   syntax: z.array(
@@ -17,8 +16,6 @@ const jsonFields = {
     }),
   ),
 };
-
-export const jsonSchema: z.ZodType<JSONFormat> = z.object(jsonFields);
 
 const predefinedSearchSchema: z.ZodType<PredefinedSearchParams> = z.object({
   mode: z.literal("predefined"),
