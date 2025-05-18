@@ -112,6 +112,7 @@ export function DerivationBuilder() {
       <TooltipProvider>
         <MathJaxContext>
           <AppSidebar
+            valid={valid}
             syntax={syntax}
             inferenceRules={inferenceRules}
             states={states}
@@ -119,7 +120,9 @@ export function DerivationBuilder() {
             setInferenceRules={setInferenceRules}
             setStates={setStates}
           />
-          <SidebarTrigger className="mt-2 ml-2" />
+          <div className={valid ? "bg-lime-100" : ""}>
+            <SidebarTrigger className="mt-2 ml-2" />
+          </div>
           <div
             className={`px-auto w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
             data-cy="container"

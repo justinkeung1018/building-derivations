@@ -27,8 +27,10 @@ import {
 } from "../shadcn/DropdownMenu";
 import { exportDerivation, importDerivation } from "@/lib/io/derivation";
 import { ArgumentInputState } from "@/lib/types/argumentinput";
+import { cn } from "@/lib/utils";
 
 interface AppSidebarProps {
+  valid: boolean;
   syntax: SyntaxRule[];
   inferenceRules: InferenceRule[];
   states: Record<number, ArgumentInputState>;
@@ -42,7 +44,7 @@ export function AppSidebar(props: AppSidebarProps) {
   const [showInferenceRules, setShowInferenceRules] = useState(false);
 
   return (
-    <div className="flex">
+    <div className={cn("flex", props.valid ? "bg-lime-100" : "")}>
       <Sidebar collapsible="icon">
         <SidebarContent>
           <SidebarGroup>
