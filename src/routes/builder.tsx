@@ -121,7 +121,7 @@ export function DerivationBuilder() {
             setStates={setStates}
           />
           <div className={valid ? "bg-lime-100" : ""}>
-            <SidebarTrigger className="mt-2 ml-2" />
+            <SidebarTrigger className="mt-2" />
           </div>
           <div
             className={`px-auto w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}

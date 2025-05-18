@@ -44,7 +44,7 @@ export function AppSidebar(props: AppSidebarProps) {
   const [showInferenceRules, setShowInferenceRules] = useState(false);
 
   return (
-    <div className={cn("flex", props.valid ? "bg-lime-100" : "")}>
+    <div className={cn("flex mr-2", props.valid ? "bg-lime-100" : "")}>
       <Sidebar collapsible="icon">
         <SidebarContent>
           <SidebarGroup>
@@ -154,7 +154,7 @@ export function AppSidebar(props: AppSidebarProps) {
         <SidebarFooter />
       </Sidebar>
       {(showSyntax || showInferenceRules) && (
-        <div className="mx-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
+        <div className="ml-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
           {showSyntax && <SyntaxViewer syntax={props.syntax} />}
           {showInferenceRules && <InferenceRulesViewer inferenceRules={props.inferenceRules} />}
         </div>
