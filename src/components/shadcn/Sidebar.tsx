@@ -257,14 +257,14 @@ const SidebarTrigger = React.forwardRef<React.ComponentRef<typeof Button>, React
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
-        className={cn("h-10 w-10", className)}
+        className={cn("h-8 w-8 min-h-8 min-w-8", className)} // I don't know why w-8 alone is not enough to stop the trigger from shrinking horizontally
         onClick={(event) => {
           onClick?.(event);
           toggleSidebar();
         }}
         {...props}
       >
-        <PanelLeft size="40px" />
+        <PanelLeft />
         <span className="sr-only">Toggle Sidebar</span>
       </Button>
     );

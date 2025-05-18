@@ -117,7 +117,7 @@ export function DerivationBuilder() {
             setSyntax={setSyntax}
             setInferenceRules={setInferenceRules}
           />
-          <SidebarTrigger />
+          <SidebarTrigger className="mt-2 ml-2" />
           <div
             className={`px-auto w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
             data-cy="container"
