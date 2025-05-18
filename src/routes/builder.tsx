@@ -55,7 +55,7 @@ export function DerivationBuilder() {
         conclusionErrors,
         ruleErrors: ruleErrorsList,
         premisesErrors,
-      } = verify(normalise(conclusion), premises.map(normalise), rule, syntax);
+      } = verify(conclusion, premises, rule, syntax);
 
       for (const message of conclusionErrors) {
         inputErrors.push(index, message);

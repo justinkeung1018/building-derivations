@@ -75,7 +75,11 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
   }
 
   if (unmatchedNames.length > 0 && multisetElementsToMatch.length === 1 && ast.elements.length === 1) {
-    matchMultisetElement(ast, multisetElementsToMatch[0], names, matched, false);
+    if (!matchMultisetElement(ast, multisetElementsToMatch[0], names, matched, false)) {
+      throw new Error(
+        `Failed to match ${multisetElementToString(multisetElementsToMatch[0])} with ${astToString(ast)}`,
+      );
+    }
     for (const unmatchedName of unmatchedNames) {
       names[unmatchedName] = new MultisetAST([]);
     }

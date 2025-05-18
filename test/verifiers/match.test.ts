@@ -171,6 +171,34 @@ it("matches when there is only one multiset element to match and one actual elem
   });
 });
 
+it("fails when there is only one multiset element to match and one actual element in the given multiset, but the element is incompatible with the given names", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
+    placeholders: ["A"],
+  };
+
+  const input = "x";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [new Name(1, "\\Gamma"), new MultisetElement([new Name(2, "A")])]),
+    ]),
+  ];
+
+  expect(() =>
+    match(input, structure, [statement, context, type], { A: new NonTerminalAST(2, [new TerminalAST("y")]) }),
+  ).toThrow("Failed to match");
+});
+
 it("matches multisets with unique elements that do not need to be inferred", () => {
   const statement: SyntaxRule = {
     ...defaultSyntaxRule,
