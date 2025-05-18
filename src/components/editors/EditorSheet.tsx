@@ -22,7 +22,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <SidebarMenuButton tooltip="Edit syntax and inference rules">
+        <SidebarMenuButton tooltip="Edit syntax and inference rules" data-cy="edit-rules-button">
           <SquarePen />
           <span>Edit syntax and inference rules</span>
         </SidebarMenuButton>
