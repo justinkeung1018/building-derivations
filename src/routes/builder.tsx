@@ -26,6 +26,7 @@ import {
 } from "@/lib/proof-systems";
 import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { normalise } from "@/lib/latexify";
+import { TooltipProvider } from "@/components/shadcn/Tooltip";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -143,98 +144,100 @@ export function DerivationBuilder() {
   }
 
   return (
-    <MathJaxContext>
-      <div
-        className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
-        data-cy="container"
-      >
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button className="absolute top-4 left-4" variant="outline" data-cy="edit-rules-button">
-              Edit syntax and rules
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="overflow-auto">
-            <SheetHeader>
-              <SheetTitle>Edit syntax and inference rules</SheetTitle>
-            </SheetHeader>
-            <h1 className="font-medium mt-4 mb-2">Select a predefined system:</h1>
-            <div className="flex items-center mb-4 gap-x-2">
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                className="justify-start"
-                onValueChange={(value) => {
-                  setSystem(value);
-                }}
-              >
-                <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
-                  Natural deduction
-                </ToggleGroupItem>
-                <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
-                  Lambda calculus
-                </ToggleGroupItem>
-                <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
-                  Sequent calculus
-                </ToggleGroupItem>
-              </ToggleGroup>
-              <div>or load a configuration:</div>
-              <ConfigFileInput setSyntax={setSyntax} setInferenceRules={setInferenceRules} />
-            </div>
-            <h1>or define your own:</h1>
-            <div>
-              <div className="flex items-start mt-4 space-x-6" data-cy="editor">
-                <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
-                <InferenceRulesEditor
-                  syntax={syntax}
-                  inferenceRules={inferenceRules}
-                  setInferenceRules={setInferenceRules}
-                />
-              </div>
-              <div className="flex justify-end mt-4">
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
-                      placeholders,
-                      definition: definitionUnsanitised,
-                    }));
-                    const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
-                      ({ name, premises, conclusion }) => ({
-                        name,
-                        premises: premises.map(({ unsanitised }) => unsanitised),
-                        conclusion: conclusion.unsanitised,
-                      }),
-                    );
-                    const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
-                    const blob = new Blob([JSON.stringify(json, null, 2)], {
-                      type: "application/json",
-                    });
-                    const url = URL.createObjectURL(blob);
-
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "rules.json";
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+    <TooltipProvider>
+      <MathJaxContext>
+        <div
+          className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
+          data-cy="container"
+        >
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="absolute top-4 left-4" variant="outline" data-cy="edit-rules-button">
+                Edit syntax and rules
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="overflow-auto">
+              <SheetHeader>
+                <SheetTitle>Edit syntax and inference rules</SheetTitle>
+              </SheetHeader>
+              <h1 className="font-medium mt-4 mb-2">Select a predefined system:</h1>
+              <div className="flex items-center mb-4 gap-x-2">
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  className="justify-start"
+                  onValueChange={(value) => {
+                    setSystem(value);
                   }}
                 >
-                  Export as JSON
-                </Button>
+                  <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
+                    Natural deduction
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
+                    Lambda calculus
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
+                    Sequent calculus
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                <div>or load a configuration:</div>
+                <ConfigFileInput setSyntax={setSyntax} setInferenceRules={setInferenceRules} />
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
-        <ArgumentInput
-          index={0}
-          valid={valid}
-          states={states}
-          setStates={setStates}
-          inputErrors={inputErrors}
-          ruleErrors={ruleErrors}
-        />
-      </div>
-    </MathJaxContext>
+              <h1>or define your own:</h1>
+              <div>
+                <div className="flex items-start mt-4 space-x-6" data-cy="editor">
+                  <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
+                  <InferenceRulesEditor
+                    syntax={syntax}
+                    inferenceRules={inferenceRules}
+                    setInferenceRules={setInferenceRules}
+                  />
+                </div>
+                <div className="flex justify-end mt-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
+                        placeholders,
+                        definition: definitionUnsanitised,
+                      }));
+                      const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(
+                        ({ name, premises, conclusion }) => ({
+                          name,
+                          premises: premises.map(({ unsanitised }) => unsanitised),
+                          conclusion: conclusion.unsanitised,
+                        }),
+                      );
+                      const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
+                      const blob = new Blob([JSON.stringify(json, null, 2)], {
+                        type: "application/json",
+                      });
+                      const url = URL.createObjectURL(blob);
+
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "rules.json";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                  >
+                    Export as JSON
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <ArgumentInput
+            index={0}
+            valid={valid}
+            states={states}
+            setStates={setStates}
+            inputErrors={inputErrors}
+            ruleErrors={ruleErrors}
+          />
+        </div>
+      </MathJaxContext>
+    </TooltipProvider>
   );
 }
