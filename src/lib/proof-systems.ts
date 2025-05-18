@@ -1,3 +1,5 @@
+import { parseInferenceRules } from "./parsers/inference";
+import { parseSyntax } from "./parsers/syntax";
 import { SyntaxRule, InferenceRule } from "./types/rules";
 import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./utils";
 
@@ -150,3 +152,31 @@ export const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
     premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
   },
 ];
+
+export function getParsedSystem(system: string) {
+  let syntaxUnsanitised: SyntaxRule[] | undefined = undefined;
+  let inferenceRulesUnsanitised: InferenceRule[] | undefined = undefined;
+
+  if (system === "natural-deduction") {
+    syntaxUnsanitised = NATURAL_DEDUCTION_SYNTAX;
+    inferenceRulesUnsanitised = NATURAL_DEDUCTION_INFERENCE_RULES;
+  } else if (system === "lambda") {
+    syntaxUnsanitised = LAMBDA_SYNTAX;
+    inferenceRulesUnsanitised = LAMBDA_INFERENCE_RULES;
+  } else if (system === "sequent") {
+    syntaxUnsanitised = SEQUENT_SYNTAX;
+    inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
+  } else if (system === "") {
+    syntaxUnsanitised = [{ ...defaultSyntaxRule }];
+    inferenceRulesUnsanitised = [];
+  }
+
+  if (syntaxUnsanitised === undefined || inferenceRulesUnsanitised === undefined) {
+    throw new Error(`Invalid proof system: ${system}`);
+  }
+
+  const syntax = parseSyntax(syntaxUnsanitised).rules;
+  const inferenceRules = parseInferenceRules(inferenceRulesUnsanitised, syntax).rules;
+
+  return { syntax, inferenceRules };
+}
