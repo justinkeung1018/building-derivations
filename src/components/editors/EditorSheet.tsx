@@ -1,7 +1,7 @@
 import React from "react";
 import { SquarePen } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../shadcn/Sheet";
-import { SidebarMenuButton } from "../shadcn/SideBar";
+import { SidebarMenuButton } from "../shadcn/Sidebar";
 import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "@/lib/types/jsonrules";
 import { ConfigFileInput } from "../inputs/ConfigFileInput";
 import { Button } from "../shadcn/Button";

@@ -12,8 +12,8 @@ import { MessageMap } from "@/lib/types/messagemap";
 import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { normalise } from "@/lib/latexify";
 import { TooltipProvider } from "@/components/shadcn/Tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/shadcn/SideBar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/shadcn/Sidebar";
+import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { getParsedSystem } from "@/lib/proof-systems";
 
 export const Route = createFileRoute("/builder")({
@@ -117,9 +117,9 @@ export function DerivationBuilder() {
             setSyntax={setSyntax}
             setInferenceRules={setInferenceRules}
           />
-          <SidebarTrigger className="mt-2 ml-2" />
+          <SidebarTrigger />
           <div
-            className={`px-20 w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
+            className={`px-auto w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
             data-cy="container"
           >
             <ArgumentInput
