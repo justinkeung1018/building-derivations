@@ -84,7 +84,7 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
       } else if (matches.length === 1) {
         const match = ast.elements[matches[0]];
         for (let i = 0; i < element.tokens.length; i++) {
-          matchASTWithToken(match[i], element.tokens[i], names, false);
+          matchASTWithToken(match[i], element.tokens[i], names);
         }
         matchedNewElements = true;
         matched[matches[0]] = true;
@@ -224,7 +224,7 @@ export function match(
   do {
     numNames = Object.keys(names).length;
     parseResult.value.forEach((ast, index) => {
-      matchASTWithToken(ast, structure[index], names, false);
+      matchASTWithToken(ast, structure[index], names);
     });
   } while (numNames !== Object.keys(names).length);
 
