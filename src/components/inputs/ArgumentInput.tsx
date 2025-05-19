@@ -6,7 +6,7 @@ import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { ConclusionInput } from "./ConclusionInput";
 import { MessageMap } from "@/lib/types/messagemap";
 
-export interface ArgumentInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface ArgumentInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   index: number;
   valid: boolean;
   states: Record<number, ArgumentInputState>;
@@ -16,7 +16,8 @@ export interface ArgumentInputProps extends React.InputHTMLAttributes<HTMLInputE
 }
 
 export function ArgumentInput(props: ArgumentInputProps) {
-  const { index, valid, states, setStates } = props;
+  const { states, ...childProps } = props;
+  const { index, valid, setStates } = childProps;
 
   const showPremises =
     states[index].conclusionInputState.edited &&
@@ -52,8 +53,8 @@ export function ArgumentInput(props: ArgumentInputProps) {
           </div>
         )}
         <hr className="col-start-1 w-full h-px border-black text-black bg-black" />
-        <RuleNameInput {...props} />
-        <ConclusionInput {...props} className="-mt-2" />
+        <RuleNameInput {...childProps} state={states[index]} />
+        <ConclusionInput {...childProps} state={states[index]} className="-mt-2" />
       </div>
     </div>
   );

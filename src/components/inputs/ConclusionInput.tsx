@@ -1,53 +1,68 @@
-import React from "react";
+import React, { memo } from "react";
 import { ArgumentInputState } from "@/lib/types/argumentinput";
-import { ArgumentInputProps } from "./ArgumentInput";
 import { latexify } from "@/lib/latexify";
 import { MathJax } from "better-react-mathjax";
 import { FocusingInput } from "./FocusingInput";
 import { ErrorsTooltip } from "./ErrorsTooltip";
 import { cn } from "@/lib/utils";
+import { MessageMap } from "@/lib/types/messagemap";
 
-export function ConclusionInput({ index, states, setStates, className, inputErrors }: ArgumentInputProps) {
-  const showInput =
-    states[index].conclusionInputState.isEditing || states[index].conclusionInputState.value.length == 0;
+export interface ConclusionInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  index: number;
+  valid: boolean;
+  state: ArgumentInputState;
+  setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
+  inputErrors: MessageMap;
+  ruleErrors: MessageMap;
+}
+
+export const ConclusionInput = memo(function ConclusionInput({
+  index,
+  state,
+  setStates,
+  className,
+  inputErrors,
+}: ConclusionInputProps) {
+  const showInput = state.conclusionInputState.isEditing || state.conclusionInputState.value.length == 0;
 
   if (showInput) {
     const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       const value = e.target.value.trim();
 
-      if (!value && states[index].conclusionIndex !== null && states[index].premiseIndices.length === 0) {
-        // Delete newly added input (i.e. no premises) if it is empty
-        const rest: Record<number, ArgumentInputState> = {};
-        for (const key in states) {
-          if (+key !== index) {
-            rest[key] = states[key];
+      setStates((old) => {
+        if (!value && old[index].conclusionIndex !== null && old[index].premiseIndices.length === 0) {
+          // Delete newly added input (i.e. no premises) if it is empty
+          const rest: Record<number, ArgumentInputState> = {};
+          for (const key in old) {
+            if (+key !== index) {
+              rest[key] = old[key];
+            }
           }
+
+          // Remove premise from conclusion input
+          const conclusionIndex = old[index].conclusionIndex;
+          rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
+          return rest;
         }
 
-        // Remove premise from conclusion input
-        const conclusionIndex = states[index].conclusionIndex;
-        rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
-        setStates(rest);
-        return;
-      }
+        const newState = {
+          ...old[index].conclusionInputState,
+          edited: true,
+          isEditing: false,
+          latex: `\\(${latexify(value)}\\)`,
+        };
 
-      const newState = {
-        ...states[index].conclusionInputState,
-        edited: true,
-        isEditing: false,
-        latex: `\\(${latexify(value)}\\)`,
-      };
-
-      setStates((old) => ({ ...old, [index]: { ...old[index], conclusionInputState: newState } }));
+        return { ...old, [index]: { ...old[index], conclusionInputState: newState } };
+      });
     };
 
     return (
       <FocusingInput
         className={className}
         placeholder={index === 0 ? "Type the conclusion you want to prove" : ""}
-        value={states[index].conclusionInputState.value}
-        edited={states[index].conclusionInputState.edited}
-        autoFocus={states[index].autofocus}
+        value={state.conclusionInputState.value}
+        edited={state.conclusionInputState.edited}
+        autoFocus={state.autofocus}
         onBlur={onBlur}
         onFocus={() => {
           setStates((old) => ({
@@ -88,11 +103,11 @@ export function ConclusionInput({ index, states, setStates, className, inputErro
         inline
         dynamic
       >
-        {states[index].conclusionInputState.latex}
+        {state.conclusionInputState.latex}
       </MathJax>
       {inputErrors.get(index).length > 0 && (
         <ErrorsTooltip errors={inputErrors.get(index)} data-cy={`errors-conclusion-${index}`} />
       )}
     </div>
   );
-}
+});
