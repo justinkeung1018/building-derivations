@@ -2,9 +2,10 @@ import { z } from "zod";
 import { ArgumentInputState, getDefaultState } from "../types/argumentinput";
 import { JSONArgumentInputState } from "../types/io/derivation";
 import { downloadJSON } from "./utils";
+import { latexify } from "../latexify";
 
 const schema: z.ZodType<Record<number, JSONArgumentInputState>> = z.record(
-  z.number(),
+  z.coerce.number(), // JSON stores the numerical keys as strings so we want to accept numerical strings instead of numbers
   z.object({
     ruleName: z.string(),
     conclusion: z.string(),
@@ -20,8 +21,18 @@ export function importDerivation(text: string): Record<number, ArgumentInputStat
 
   for (const [index, jsonState] of Object.entries(json)) {
     const state = getDefaultState(Number(index), null);
-    state.ruleNameInputState.value = jsonState.ruleName;
-    state.conclusionInputState.value = jsonState.conclusion;
+    state.ruleNameInputState = {
+      isEditing: false,
+      edited: true,
+      value: jsonState.ruleName,
+      latex: `\\((\\mathit{${latexify(jsonState.ruleName)}})\\)`,
+    };
+    state.conclusionInputState = {
+      isEditing: false,
+      edited: true,
+      value: jsonState.conclusion,
+      latex: `\\(${latexify(jsonState.conclusion)}\\)`,
+    };
     state.premiseIndices = jsonState.premiseIndices;
     states[Number(index)] = state;
   }

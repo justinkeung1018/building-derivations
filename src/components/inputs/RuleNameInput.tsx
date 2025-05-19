@@ -65,6 +65,8 @@ export function RuleNameInput({ index, states, setStates, className, ruleErrors 
             }));
           }}
           data-cy={`tree-rule-latex-${index}`}
+          inline
+          dynamic
         >
           {states[index].ruleNameInputState.latex}
         </MathJax>

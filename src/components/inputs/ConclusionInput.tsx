@@ -85,6 +85,8 @@ export function ConclusionInput({ index, states, setStates, className, inputErro
           }));
         }}
         data-cy={`tree-conclusion-latex-${index}`}
+        inline
+        dynamic
       >
         {states[index].conclusionInputState.latex}
       </MathJax>
