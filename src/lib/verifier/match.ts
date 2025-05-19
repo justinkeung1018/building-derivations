@@ -21,16 +21,13 @@ function matchTerminal(ast: TerminalAST, token: Matchable) {
   }
 }
 
-function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<string, AST>, conservative: boolean) {
+function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<string, AST>) {
   if (token instanceof Name) {
     if (token.name in names && !_.isEqual(names[token.name], ast)) {
       throw new Error(
         `Incompatible names: cannot assign ${astToString(names[token.name])} and ${astToString(ast)} to ${token.name}`,
       );
     } else if (!(token.name in names)) {
-      if (conservative) {
-        throw new Error("Cannot assign new names when matching conservatively");
-      }
       names[token.name] = ast;
     }
   } else if (token instanceof MatchableNonTerminal) {
@@ -41,7 +38,7 @@ function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<s
       throw new Error("Malformed non-terminal children structure");
     }
     ast.children.forEach((child, index) => {
-      matchASTWithToken(child, token.children[index], names, conservative);
+      matchASTWithToken(child, token.children[index], names);
     });
   } else {
     throw new Error("Malformed input");
@@ -55,11 +52,11 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
   const matched: boolean[] = Array<boolean>(ast.elements.length).fill(false);
 
   const namesToMatch: string[] = token.elements.filter((x) => x instanceof Name).map((x) => x.name);
-  const multisetElementsToMatch: MultisetElement[] = token.elements.filter((x) => x instanceof MultisetElement);
 
   const unmatchedNames: string[] = [];
   for (const name of namesToMatch) {
     if (name in names) {
+      // Compute the set difference: ast.elements - name.elements
       const matchedMultiset = names[name];
       if (!(matchedMultiset instanceof MultisetAST)) {
         throw new Error("Cannot match a multiset against a non-multiset");
@@ -74,27 +71,32 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
     }
   }
 
-  if (unmatchedNames.length > 0 && multisetElementsToMatch.length === 1 && ast.elements.length === 1) {
-    if (!matchMultisetElement(ast, multisetElementsToMatch[0], names, matched, false)) {
-      throw new Error(
-        `Failed to match ${multisetElementToString(multisetElementsToMatch[0])} with ${astToString(ast)}`,
-      );
-    }
-    for (const unmatchedName of unmatchedNames) {
-      names[unmatchedName] = new MultisetAST([]);
-    }
-    return;
-  }
+  let multisetElementsToMatch: MultisetElement[] = token.elements.filter((x) => x instanceof MultisetElement);
+  let matchedNewElements;
 
-  let numUnmatchedMultisetElements = 0;
-  for (const multisetElement of multisetElementsToMatch) {
-    const conservative = unmatchedNames.length > 0;
-    if (!matchMultisetElement(ast, multisetElement, names, matched, conservative)) {
-      numUnmatchedMultisetElements++;
+  do {
+    matchedNewElements = false;
+    const unmatched: MultisetElement[] = [];
+    for (const element of multisetElementsToMatch) {
+      const matches = getMultisetElementMatches(ast.elements, element, names, matched);
+      if (matches.length === 0) {
+        throw new Error(`Failed to match placeholder for multiset element: ${multisetElementToString(element)}`);
+      } else if (matches.length === 1) {
+        const match = ast.elements[matches[0]];
+        for (let i = 0; i < element.tokens.length; i++) {
+          matchASTWithToken(match[i], element.tokens[i], names, false);
+        }
+        matchedNewElements = true;
+        matched[matches[0]] = true;
+      } else {
+        // There are multiple possible matches, postpone the matching
+        unmatched.push(element);
+      }
     }
-  }
+    multisetElementsToMatch = unmatched;
+  } while (matchedNewElements);
 
-  if (unmatchedNames.length === 0 && numUnmatchedMultisetElements === 0 && !matched.every((x) => x)) {
+  if (unmatchedNames.length === 0 && multisetElementsToMatch.length === 0 && !matched.every((x) => x)) {
     throw new Error(
       `Unmatched multiset elements leftover: ${ast.elements
         .filter((_, i) => !matched[i])
@@ -103,38 +105,86 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
     );
   }
 
-  if (unmatchedNames.length === 1 && numUnmatchedMultisetElements === 0) {
+  if (unmatchedNames.length === 1 && multisetElementsToMatch.length === 0) {
     names[unmatchedNames[0]] = new MultisetAST(ast.elements.filter((_, i) => !matched[i]));
   }
 }
 
-function matchMultisetElement(
-  ast: MultisetAST,
-  element: MultisetElement,
-  names: Record<string, AST>,
-  matched: boolean[],
-  conservative: boolean,
-): boolean {
-  if (matched.every((x) => x)) {
-    throw new Error(`There is nothing to match ${multisetElementToString(element)} against`);
+function addNames(token: Matchable, namesToMatch: Set<string>, names: Record<string, AST>) {
+  if (token instanceof Name) {
+    if (!Object.hasOwn(names, token.name)) {
+      namesToMatch.add(token.name);
+    }
+  } else if (token instanceof MatchableNonTerminal) {
+    for (const child of token.children) {
+      addNames(child, namesToMatch, names);
+    }
+  } else if (token instanceof MatchableMultiset) {
+    for (const element of token.elements) {
+      if (element instanceof Name) {
+        addNames(element, namesToMatch, names);
+      } else {
+        for (const subToken of element.tokens) {
+          addNames(subToken, namesToMatch, names);
+        }
+      }
+    }
+  }
+}
+
+function hasUnmatchedNames(element: MultisetElement, names: Record<string, AST>) {
+  const namesToMatch = new Set<string>();
+
+  for (const token of element.tokens) {
+    addNames(token, namesToMatch, names);
   }
 
-  for (let i = 0; i < ast.elements.length; i++) {
-    const elementAST = ast.elements[i];
-    if (elementAST.length !== element.tokens.length || matched[i]) {
+  return namesToMatch.size > 0;
+}
+
+function getMultisetElementMatches(
+  actualElements: AST[][],
+  multisetElement: MultisetElement,
+  names: Record<string, AST>,
+  matched: boolean[],
+): number[] {
+  const matches: number[] = [];
+
+  if (matched.every((x) => x)) {
+    return matches;
+  }
+
+  for (let i = 0; i < actualElements.length; i++) {
+    const actualElement = actualElements[i];
+    if (actualElement.length !== multisetElement.tokens.length || matched[i]) {
       continue;
     }
     try {
-      elementAST.forEach((x, i) => {
-        matchASTWithToken(x, element.tokens[i], names, conservative);
+      const namesClone: Record<string, AST> = {};
+      for (const [name, ast] of Object.entries(names)) {
+        // matchASTWithToken should not alter existing entries in its names argument,
+        // so a shallow clone suffices
+        namesClone[name] = ast;
+      }
+
+      actualElement.forEach((x, i) => {
+        matchASTWithToken(x, multisetElement.tokens[i], namesClone);
       });
-      matched[i] = true;
-      return true;
+
+      matches.push(i);
+      if (!hasUnmatchedNames(multisetElement, names)) {
+        // As there are no unmatched names in the multisetElement, its actual value is fully determined.
+        // If there are multiple identical matches in the multiset, we want to only return one of them
+        // so we can try to match other multiset elements or names. It doesn't matter which one we match,
+        // but we can and must match multisetElement against one of the identical matches.
+        return matches;
+      }
     } catch {
-      // elementAST failed to match with element, move on to the next elementAST
+      // actualElement failed to match with multisetElement, move on to the next actualElement
     }
   }
-  return false;
+
+  return matches;
 }
 
 function markAsMatched(ast: MultisetAST, element: AST[], matched: boolean[]): boolean {
@@ -147,11 +197,11 @@ function markAsMatched(ast: MultisetAST, element: AST[], matched: boolean[]): bo
   return false;
 }
 
-function matchASTWithToken(ast: AST, token: Matchable, names: Record<string, AST>, conservative: boolean) {
+function matchASTWithToken(ast: AST, token: Matchable, names: Record<string, AST>) {
   if (ast instanceof TerminalAST) {
     matchTerminal(ast, token);
   } else if (ast instanceof NonTerminalAST) {
-    matchNonTerminal(ast, token, names, conservative);
+    matchNonTerminal(ast, token, names);
   } else {
     matchMultiset(ast, token, names);
   }

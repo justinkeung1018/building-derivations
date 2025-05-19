@@ -357,7 +357,7 @@ it("fails to match multisets that need to be inferred from the names but are inc
     ]),
   };
 
-  expect(() => match(input, structure, [statement, context, type], names)).toThrow("nothing");
+  expect(() => match(input, structure, [statement, context, type], names)).toThrow("placeholder");
 });
 
 it("leaves uninferrable multisets alone", () => {
@@ -469,5 +469,163 @@ it("matches multisets where each element consists of multiple tokens", () => {
     ]),
     var: new NonTerminalAST(2, [new TerminalAST("y")]),
     "\\varphi": new NonTerminalAST(3, [new TerminalAST("2")]),
+  });
+});
+
+it("matches multiset elements that are expanded forms of the multiset definition", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(1)])]],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("("), new NonTerminal(1), new Terminal("->"), new NonTerminal(1), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "(x -> y)";
+  const structure: Matchable[] = [
+    new MatchableMultiset(0, [
+      new MultisetElement([
+        new MatchableNonTerminal(1, [
+          new MatchableTerminal("("),
+          new Name(1, "A"),
+          new MatchableTerminal("->"),
+          new Name(1, "B"),
+          new MatchableTerminal(")"),
+        ]),
+      ]),
+    ]),
+  ];
+
+  expect(match(input, structure, [statement, type], {})).toEqual({
+    A: new NonTerminalAST(1, [new TerminalAST("x")]),
+    B: new NonTerminalAST(1, [new TerminalAST("y")]),
+  });
+});
+
+it("matches when the same name appears multiple times in a multiset element", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(1)])]],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("("), new NonTerminal(1), new Terminal("->"), new NonTerminal(1), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "(x -> x)";
+  const structure: Matchable[] = [
+    new MatchableMultiset(0, [
+      new MultisetElement([
+        new MatchableNonTerminal(1, [
+          new MatchableTerminal("("),
+          new Name(1, "A"),
+          new MatchableTerminal("->"),
+          new Name(1, "A"),
+          new MatchableTerminal(")"),
+        ]),
+      ]),
+    ]),
+  ];
+
+  expect(match(input, structure, [statement, type], {})).toEqual({
+    A: new NonTerminalAST(1, [new TerminalAST("x")]),
+  });
+});
+
+it("fails when the same name appears multiple times in a multiset element, but the actual element is incompatible", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(1)])]],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("("), new NonTerminal(1), new Terminal("->"), new NonTerminal(1), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "(x -> y)";
+  const structure: Matchable[] = [
+    new MatchableMultiset(0, [
+      new MultisetElement([
+        new MatchableNonTerminal(1, [
+          new MatchableTerminal("("),
+          new Name(1, "A"),
+          new MatchableTerminal("->"),
+          new Name(1, "A"),
+          new MatchableTerminal(")"),
+        ]),
+      ]),
+    ]),
+  ];
+
+  expect(() => match(input, structure, [statement, type], {})).toThrow("Failed to match placeholder");
+});
+
+it("matches when the same name appears multiple times in a multiset element, and there are multiple actual elements", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new NonTerminal(1)]],
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(2)])]],
+    placeholders: ["\\Gamma"],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "(x -> y), (x -> x)";
+  const structure: Matchable[] = [
+    new MatchableNonTerminal(1, [
+      new MatchableMultiset(1, [
+        new Name(1, "\\Gamma"),
+        new MultisetElement([
+          new MatchableNonTerminal(2, [
+            new MatchableTerminal("("),
+            new Name(2, "A"),
+            new MatchableTerminal("->"),
+            new Name(2, "A"),
+            new MatchableTerminal(")"),
+          ]),
+        ]),
+      ]),
+    ]),
+  ];
+
+  expect(match(input, structure, [statement, context, type], {})).toEqual({
+    A: new NonTerminalAST(2, [new TerminalAST("x")]),
+    "\\Gamma": new MultisetAST([
+      [
+        new NonTerminalAST(2, [
+          new TerminalAST("("),
+          new NonTerminalAST(2, [new TerminalAST("x")]),
+          new TerminalAST("->"),
+          new NonTerminalAST(2, [new TerminalAST("y")]),
+          new TerminalAST(")"),
+        ]),
+      ],
+    ]),
   });
 });
