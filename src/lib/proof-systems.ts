@@ -151,6 +151,30 @@ export const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
     conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lnot A), \\Delta" },
     premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
   },
+  {
+    ...defaultInferenceRule,
+    name: "WL",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "CL",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A, A |- \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "WR",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- \\Delta" }],
+  },
+  {
+    ...defaultInferenceRule,
+    name: "CR",
+    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
+    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, A, \\Delta" }],
+  },
 ];
 
 export function getParsedSystem(system: string) {
