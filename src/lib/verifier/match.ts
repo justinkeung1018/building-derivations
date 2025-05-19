@@ -110,22 +110,22 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
   }
 }
 
-function addNames(token: Matchable, namesToMatch: Set<string>, names: Record<string, AST>) {
+function addUnmatchedNames(token: Matchable, namesToMatch: Set<string>, names: Record<string, AST>) {
   if (token instanceof Name) {
     if (!Object.hasOwn(names, token.name)) {
       namesToMatch.add(token.name);
     }
   } else if (token instanceof MatchableNonTerminal) {
     for (const child of token.children) {
-      addNames(child, namesToMatch, names);
+      addUnmatchedNames(child, namesToMatch, names);
     }
   } else if (token instanceof MatchableMultiset) {
     for (const element of token.elements) {
       if (element instanceof Name) {
-        addNames(element, namesToMatch, names);
+        addUnmatchedNames(element, namesToMatch, names);
       } else {
         for (const subToken of element.tokens) {
-          addNames(subToken, namesToMatch, names);
+          addUnmatchedNames(subToken, namesToMatch, names);
         }
       }
     }
@@ -136,7 +136,7 @@ function hasUnmatchedNames(element: MultisetElement, names: Record<string, AST>)
   const namesToMatch = new Set<string>();
 
   for (const token of element.tokens) {
-    addNames(token, namesToMatch, names);
+    addUnmatchedNames(token, namesToMatch, names);
   }
 
   return namesToMatch.size > 0;
