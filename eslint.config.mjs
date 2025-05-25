@@ -21,6 +21,7 @@ export default tseslint.config(
   },
   {
     rules: {
+      "@typescript-eslint/no-dynamic-delete": "off",
       "@typescript-eslint/no-extraneous-class": [
         "error",
         {

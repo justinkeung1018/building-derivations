@@ -21,7 +21,12 @@ function matchTerminal(ast: TerminalAST, token: Matchable) {
   }
 }
 
-function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<string, AST>) {
+function matchNonTerminal(
+  ast: NonTerminalAST,
+  token: Matchable,
+  names: Record<string, AST>,
+  unmatchedPossibilities: Record<string, AST[]>,
+) {
   if (token instanceof Name) {
     if (token.name in names && !_.isEqual(names[token.name], ast)) {
       throw new Error(
@@ -38,14 +43,58 @@ function matchNonTerminal(ast: NonTerminalAST, token: Matchable, names: Record<s
       throw new Error("Malformed non-terminal children structure");
     }
     ast.children.forEach((child, index) => {
-      matchASTWithToken(child, token.children[index], names);
+      matchASTWithToken(child, token.children[index], names, unmatchedPossibilities);
     });
   } else {
     throw new Error("Malformed input");
   }
 }
 
-function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string, AST>) {
+function getPossibilities(multisetElement: MultisetElement, actualElements: AST[][]): Record<string, AST[]> {
+  const possibilities: Record<string, AST[]> = {};
+  for (const actualElement of actualElements) {
+    const names: Record<string, AST> = {};
+    actualElement.map((ast, i) => {
+      matchASTWithToken(ast, multisetElement.tokens[i], names, {});
+    });
+    for (const [name, ast] of Object.entries(names)) {
+      if (!Object.hasOwn(possibilities, name)) {
+        possibilities[name] = [];
+      }
+      possibilities[name].push(ast);
+    }
+  }
+  return possibilities;
+}
+
+function intersectPossibilities(possibilities: Record<string, AST[]>, newPossibilities: Record<string, AST[]>) {
+  for (const [name, newASTs] of Object.entries(newPossibilities)) {
+    if (Object.hasOwn(possibilities, name)) {
+      const intersection = [];
+      for (const ast of possibilities[name]) {
+        for (const newAST of newASTs) {
+          if (_.isEqual(ast, newAST)) {
+            intersection.push(ast);
+            break;
+          }
+        }
+      }
+      if (intersection.length === 0) {
+        throw new Error(`No assignment for name ${name} is possible`);
+      }
+      possibilities[name] = intersection;
+    } else {
+      possibilities[name] = newASTs;
+    }
+  }
+}
+
+function matchMultiset(
+  ast: MultisetAST,
+  token: Matchable,
+  names: Record<string, AST>,
+  unmatchedPossibilities: Record<string, AST[]>,
+) {
   if (!(token instanceof MatchableMultiset)) {
     throw new Error("Cannot match a multiset against a non-multiset");
   }
@@ -78,19 +127,24 @@ function matchMultiset(ast: MultisetAST, token: Matchable, names: Record<string,
     matchedNewElements = false;
     const unmatched: MultisetElement[] = [];
     for (const element of multisetElementsToMatch) {
-      const matches = getMultisetElementMatches(ast.elements, element, names, matched);
+      const matches = getMultisetElementMatches(ast.elements, element, names, matched, unmatchedPossibilities);
       if (matches.length === 0) {
         throw new Error(`Failed to match placeholder for multiset element: ${multisetElementToString(element)}`);
       } else if (matches.length === 1) {
         const match = ast.elements[matches[0]];
         for (let i = 0; i < element.tokens.length; i++) {
-          matchASTWithToken(match[i], element.tokens[i], names);
+          matchASTWithToken(match[i], element.tokens[i], names, unmatchedPossibilities);
         }
         matchedNewElements = true;
         matched[matches[0]] = true;
       } else {
         // There are multiple possible matches, postpone the matching
         unmatched.push(element);
+        const possibilities = getPossibilities(
+          element,
+          matches.map((i) => ast.elements[i]),
+        );
+        intersectPossibilities(unmatchedPossibilities, possibilities);
       }
     }
     multisetElementsToMatch = unmatched;
@@ -147,6 +201,7 @@ function getMultisetElementMatches(
   multisetElement: MultisetElement,
   names: Record<string, AST>,
   matched: boolean[],
+  unmatchedPossibilities: Record<string, AST[]>,
 ): number[] {
   const matches: number[] = [];
 
@@ -168,7 +223,7 @@ function getMultisetElementMatches(
       }
 
       actualElement.forEach((x, i) => {
-        matchASTWithToken(x, multisetElement.tokens[i], namesClone);
+        matchASTWithToken(x, multisetElement.tokens[i], namesClone, unmatchedPossibilities);
       });
 
       matches.push(i);
@@ -197,13 +252,18 @@ function markAsMatched(ast: MultisetAST, element: AST[], matched: boolean[]): bo
   return false;
 }
 
-function matchASTWithToken(ast: AST, token: Matchable, names: Record<string, AST>) {
+function matchASTWithToken(
+  ast: AST,
+  token: Matchable,
+  names: Record<string, AST>,
+  unmatchedPossibilities: Record<string, AST[]>,
+) {
   if (ast instanceof TerminalAST) {
     matchTerminal(ast, token);
   } else if (ast instanceof NonTerminalAST) {
-    matchNonTerminal(ast, token, names);
+    matchNonTerminal(ast, token, names, unmatchedPossibilities);
   } else {
-    matchMultiset(ast, token, names);
+    matchMultiset(ast, token, names, unmatchedPossibilities);
   }
 }
 
@@ -212,7 +272,8 @@ export function match(
   structure: Matchable[],
   syntax: SyntaxRule[],
   names: Record<string, AST>,
-): Record<string, AST> {
+  unmatchedPossibilities: Record<string, AST[]>,
+) {
   const parser = buildTermParser(syntax);
   const parseResult = parser.parse(input);
 
@@ -224,9 +285,11 @@ export function match(
   do {
     numNames = Object.keys(names).length;
     parseResult.value.forEach((ast, index) => {
-      matchASTWithToken(ast, structure[index], names);
+      matchASTWithToken(ast, structure[index], names, unmatchedPossibilities);
     });
   } while (numNames !== Object.keys(names).length);
 
-  return names;
+  for (const name of Object.keys(names)) {
+    delete unmatchedPossibilities[name];
+  }
 }

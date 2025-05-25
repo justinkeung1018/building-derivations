@@ -22,7 +22,10 @@ it("matches basic statements", () => {
   const input = "x |- x";
   const structure: Matchable[] = [new Name(1, "A"), new MatchableTerminal("|-"), new Name(1, "A")];
 
-  expect(match(input, structure, [statement, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, type], names, {});
+
+  expect(names).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
   });
 });
@@ -36,7 +39,9 @@ it("fails when the input is nonsense", () => {
   const input = "werioahjvoi";
   const structure: Matchable[] = [new MatchableTerminal("x")];
 
-  expect(() => match(input, structure, [statement], {})).toThrow("Malformed");
+  expect(() => {
+    match(input, structure, [statement], {}, {});
+  }).toThrow("Malformed");
 });
 
 it("fails when the existing value for a name mapping to a non-terminal is not compatible with the input", () => {
@@ -53,9 +58,9 @@ it("fails when the existing value for a name mapping to a non-terminal is not co
   const input = "x";
   const structure: Matchable[] = [new Name(1, "A")];
 
-  expect(() =>
-    match(input, structure, [statement, type], { A: new NonTerminalAST(1, [new TerminalAST("y")]) }),
-  ).toThrow("Incompatible");
+  expect(() => {
+    match(input, structure, [statement, type], { A: new NonTerminalAST(1, [new TerminalAST("y")]) }, {});
+  }).toThrow("Incompatible");
 });
 
 describe("fails to match a multiset to an existing value in the mapping", () => {
@@ -81,7 +86,9 @@ describe("fails to match a multiset to an existing value in the mapping", () => 
     const names: Record<string, AST> = {
       "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("a")])]]),
     };
-    expect(() => match(input, structure, [statement, context, type], names)).toThrow("leftover");
+    expect(() => {
+      match(input, structure, [statement, context, type], names, {});
+    }).toThrow("leftover");
   });
 
   it("fails when the existing multiset has more elements", () => {
@@ -93,7 +100,9 @@ describe("fails to match a multiset to an existing value in the mapping", () => 
         [new NonTerminalAST(2, [new TerminalAST("a")])],
       ]),
     };
-    expect(() => match(input, structure, [statement, context, type], names)).toThrow("not found");
+    expect(() => {
+      match(input, structure, [statement, context, type], names, {});
+    }).toThrow("not found");
   });
 
   it("fails when the existing multiset has the same number of elements but different elements", () => {
@@ -104,7 +113,9 @@ describe("fails to match a multiset to an existing value in the mapping", () => 
         [new NonTerminalAST(2, [new TerminalAST("a")])],
       ]),
     };
-    expect(() => match(input, structure, [statement, context, type], names)).toThrow("not found");
+    expect(() => {
+      match(input, structure, [statement, context, type], names, {});
+    }).toThrow("not found");
   });
 });
 
@@ -136,7 +147,10 @@ it("matches arrows", () => {
     ]),
   ];
 
-  expect(match(input, structure, [statement, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, type], names, {});
+
+  expect(names).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
     B: new NonTerminalAST(1, [new TerminalAST("y")]),
   });
@@ -165,7 +179,10 @@ it("matches when there is only one multiset element to match and one actual elem
     ]),
   ];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([]),
     A: new NonTerminalAST(2, [new TerminalAST("x")]),
   });
@@ -194,9 +211,9 @@ it("fails when there is only one multiset element to match and one actual elemen
     ]),
   ];
 
-  expect(() =>
-    match(input, structure, [statement, context, type], { A: new NonTerminalAST(2, [new TerminalAST("y")]) }),
-  ).toThrow("Failed to match");
+  expect(() => {
+    match(input, structure, [statement, context, type], { A: new NonTerminalAST(2, [new TerminalAST("y")]) }, {});
+  }).toThrow("Failed to match");
 });
 
 it("matches multisets with unique elements that do not need to be inferred", () => {
@@ -218,7 +235,10 @@ it("matches multisets with unique elements that do not need to be inferred", () 
   const input = "x, y, z";
   const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([
       [new NonTerminalAST(2, [new TerminalAST("x")])],
       [new NonTerminalAST(2, [new TerminalAST("y")])],
@@ -246,7 +266,10 @@ it("matches multisets with duplicate elements that do not need to be inferred", 
   const input = "x, y, x,x,x,y,z";
   const structure: Matchable[] = [new MatchableNonTerminal(1, [new MatchableMultiset(1, [new Name(1, "\\Gamma")])])];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([
       [new NonTerminalAST(2, [new TerminalAST("x")])],
       [new NonTerminalAST(2, [new TerminalAST("y")])],
@@ -284,7 +307,10 @@ it("matches multisets with unique elements that need to be inferred from the res
     new Name(1, "A"),
   ];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
     A: new NonTerminalAST(2, [new TerminalAST("x")]),
   });
@@ -318,8 +344,9 @@ it("matches multisets that need to be inferred from the names", () => {
   const names: Record<string, AST> = {
     "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
   };
+  match(input, structure, [statement, context, type], names, {});
 
-  expect(match(input, structure, [statement, context, type], names)).toEqual({
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([[new NonTerminalAST(2, [new TerminalAST("y")])]]),
     A: new NonTerminalAST(2, [new TerminalAST("x")]),
     B: new NonTerminalAST(2, [new TerminalAST("z")]),
@@ -357,7 +384,9 @@ it("fails to match multisets that need to be inferred from the names but are inc
     ]),
   };
 
-  expect(() => match(input, structure, [statement, context, type], names)).toThrow("placeholder");
+  expect(() => {
+    match(input, structure, [statement, context, type], names, {});
+  }).toThrow("placeholder");
 });
 
 it("leaves uninferrable multisets alone", () => {
@@ -385,7 +414,10 @@ it("leaves uninferrable multisets alone", () => {
     new Name(1, "B"),
   ];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     B: new NonTerminalAST(2, [new TerminalAST("z")]),
   });
 });
@@ -415,7 +447,10 @@ it("matches multisets with duplicate elements that need to be inferred from the 
     new Name(1, "A"),
   ];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([
       [new NonTerminalAST(2, [new TerminalAST("x")])],
       [new NonTerminalAST(2, [new TerminalAST("x")])],
@@ -459,7 +494,10 @@ it("matches multisets where each element consists of multiple tokens", () => {
     new Name(3, "\\varphi"),
   ];
 
-  expect(match(input, structure, [statement, context, variable, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, variable, type], names, {});
+
+  expect(names).toEqual({
     "\\Gamma": new MultisetAST([
       [
         new NonTerminalAST(2, [new TerminalAST("x")]),
@@ -502,7 +540,10 @@ it("matches multiset elements that are expanded forms of the multiset definition
     ]),
   ];
 
-  expect(match(input, structure, [statement, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, type], names, {});
+
+  expect(names).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
     B: new NonTerminalAST(1, [new TerminalAST("y")]),
   });
@@ -538,7 +579,10 @@ it("matches when the same name appears multiple times in a multiset element", ()
     ]),
   ];
 
-  expect(match(input, structure, [statement, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, type], names, {});
+
+  expect(names).toEqual({
     A: new NonTerminalAST(1, [new TerminalAST("x")]),
   });
 });
@@ -573,7 +617,9 @@ it("fails when the same name appears multiple times in a multiset element, but t
     ]),
   ];
 
-  expect(() => match(input, structure, [statement, type], {})).toThrow("Failed to match placeholder");
+  expect(() => {
+    match(input, structure, [statement, type], {}, {});
+  }).toThrow("Failed to match placeholder");
 });
 
 it("matches when the same name appears multiple times in a multiset element, and there are multiple actual elements", () => {
@@ -614,7 +660,10 @@ it("matches when the same name appears multiple times in a multiset element, and
     ]),
   ];
 
-  expect(match(input, structure, [statement, context, type], {})).toEqual({
+  const names: Record<string, AST> = {};
+  match(input, structure, [statement, context, type], names, {});
+
+  expect(names).toEqual({
     A: new NonTerminalAST(2, [new TerminalAST("x")]),
     "\\Gamma": new MultisetAST([
       [
@@ -627,5 +676,34 @@ it("matches when the same name appears multiple times in a multiset element, and
         ]),
       ],
     ]),
+  });
+});
+
+it("returns a map of names to ASTs when some names cannot be matched immediately", () => {
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definition: [[new Multiset([new NonTerminal(1)])]],
+  };
+  const type = {
+    ...defaultSyntaxRule,
+    definition: [
+      [new Terminal("x")],
+      [new Terminal("y")],
+      [new Terminal("("), new NonTerminal(1), new Terminal("->"), new NonTerminal(1), new Terminal(")")],
+    ],
+    placeholders: ["A", "B"],
+  };
+
+  const input = "x, y";
+  const structure: Matchable[] = [
+    new MatchableMultiset(0, [new MultisetElement([new Name(1, "A")]), new MultisetElement([new Name(1, "B")])]),
+  ];
+
+  const unmatchedPossibilities: Record<string, AST[]> = {};
+  match(input, structure, [statement, type], {}, unmatchedPossibilities);
+
+  expect(unmatchedPossibilities).toEqual({
+    A: [new NonTerminalAST(1, [new TerminalAST("x")]), new NonTerminalAST(1, [new TerminalAST("y")])],
+    B: [new NonTerminalAST(1, [new TerminalAST("x")]), new NonTerminalAST(1, [new TerminalAST("y")])],
   });
 });
