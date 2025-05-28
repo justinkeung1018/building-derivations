@@ -97,8 +97,6 @@ function explore(
     return true;
   }
 
-  unmatchedPossibilities[nameToExplore] = possibilitiesToExplore;
-
   if (
     errors.ruleErrors.length === 0 &&
     errors.conclusionErrors.length === 0 &&
