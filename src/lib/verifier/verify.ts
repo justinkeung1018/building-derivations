@@ -97,16 +97,7 @@ function explore(
     return true;
   }
 
-  for (const [name, possibilities] of Object.entries(unmatchedPossibilities)) {
-    if (name === nameToExplore) {
-      unmatchedPossibilitiesClone[name] = possibilitiesToExplore;
-      continue;
-    }
-    unmatchedPossibilitiesClone[name] = [];
-    for (const ast of possibilities) {
-      unmatchedPossibilitiesClone[name].push(ast);
-    }
-  }
+  unmatchedPossibilities[nameToExplore] = possibilitiesToExplore;
 
   if (
     errors.ruleErrors.length === 0 &&
@@ -117,7 +108,7 @@ function explore(
     return true;
   }
 
-  return explore(conclusion, premises, rule, syntax, names, unmatchedPossibilitiesClone);
+  return explore(conclusion, premises, rule, syntax, names, unmatchedPossibilities);
 }
 
 function matchRule(
