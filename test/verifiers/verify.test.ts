@@ -79,11 +79,91 @@ it("verifies the CL rule in the system LK", () => {
   const type: SyntaxRule = {
     ...defaultSyntaxRule,
     placeholdersUnsanitised: "A",
-    definitionUnsanitised: "x | y | z",
+    definitionUnsanitised: "x | y",
   };
 
   const parsedSyntax = parseSyntax([statement, context, type]).rules;
   const parsedRule = parseInferenceRules([rule], parsedSyntax).rules[0];
 
   expect(verify(conclusion, premises, parsedRule, parsedSyntax).ruleErrors).toHaveLength(0);
+});
+
+it("verifies a rule with three uncertain name assignments", () => {
+  const conclusion = "x, x, y";
+  const premises = ["x, x, y"];
+
+  const rule: InferenceRule = {
+    ...defaultInferenceRule,
+    premises: [
+      {
+        ...defaultInferenceRuleStatement,
+        unsanitised: "A, B, C",
+      },
+    ],
+    conclusion: {
+      ...defaultInferenceRuleStatement,
+      unsanitised: "A, B, C",
+    },
+  };
+
+  // Syntax
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definitionUnsanitised: "\\Gamma",
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "\\Gamma",
+    definitionUnsanitised: "{ A }",
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "A, B, C",
+    definitionUnsanitised: "x | y",
+  };
+
+  const parsedSyntax = parseSyntax([statement, context, type]).rules;
+  const parsedRule = parseInferenceRules([rule], parsedSyntax).rules[0];
+
+  expect(verify(conclusion, premises, parsedRule, parsedSyntax).ruleErrors).toHaveLength(0);
+});
+
+it("fails to verify a rule with three uncertain name assignments when no assignment combination is possible", () => {
+  const conclusion = "x, y, y";
+  const premises = ["x, x, y"];
+
+  const rule: InferenceRule = {
+    ...defaultInferenceRule,
+    premises: [
+      {
+        ...defaultInferenceRuleStatement,
+        unsanitised: "A, B, C",
+      },
+    ],
+    conclusion: {
+      ...defaultInferenceRuleStatement,
+      unsanitised: "A, B, C",
+    },
+  };
+
+  // Syntax
+  const statement: SyntaxRule = {
+    ...defaultSyntaxRule,
+    definitionUnsanitised: "\\Gamma",
+  };
+  const context: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "\\Gamma",
+    definitionUnsanitised: "{ A }",
+  };
+  const type: SyntaxRule = {
+    ...defaultSyntaxRule,
+    placeholdersUnsanitised: "A, B, C",
+    definitionUnsanitised: "x | y",
+  };
+
+  const parsedSyntax = parseSyntax([statement, context, type]).rules;
+  const parsedRule = parseInferenceRules([rule], parsedSyntax).rules[0];
+
+  expect(verify(conclusion, premises, parsedRule, parsedSyntax).ruleErrors).toContainSubstring("unify");
 });

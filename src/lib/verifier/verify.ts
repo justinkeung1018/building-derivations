@@ -90,18 +90,34 @@ function explore(
       .map(() => [] as string[]),
   };
   matchRule(conclusion, premises, rule, syntax, namesClone, unmatchedPossibilitiesClone, errors);
-  unmatchedPossibilitiesClone[nameToExplore] = possibilitiesToExplore;
-  delete namesClone[nameToExplore];
+
+  const numUnmatched = Object.keys(unmatchedPossibilitiesClone).length;
+
+  if (numUnmatched > 0 && explore(conclusion, premises, rule, syntax, namesClone, unmatchedPossibilitiesClone)) {
+    return true;
+  }
+
+  for (const [name, possibilities] of Object.entries(unmatchedPossibilities)) {
+    if (name === nameToExplore) {
+      unmatchedPossibilitiesClone[name] = possibilitiesToExplore;
+      continue;
+    }
+    unmatchedPossibilitiesClone[name] = [];
+    for (const ast of possibilities) {
+      unmatchedPossibilitiesClone[name].push(ast);
+    }
+  }
 
   if (
     errors.ruleErrors.length === 0 &&
     errors.conclusionErrors.length === 0 &&
-    errors.premisesErrors.every((x) => x.length === 0)
+    errors.premisesErrors.every((x) => x.length === 0) &&
+    numUnmatched === 0
   ) {
     return true;
   }
 
-  return explore(conclusion, premises, rule, syntax, namesClone, unmatchedPossibilitiesClone);
+  return explore(conclusion, premises, rule, syntax, names, unmatchedPossibilitiesClone);
 }
 
 function matchRule(
