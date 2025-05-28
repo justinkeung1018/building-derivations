@@ -164,38 +164,6 @@ function matchMultiset(
   }
 }
 
-function addUnmatchedNames(token: Matchable, namesToMatch: Set<string>, names: Record<string, AST>) {
-  if (token instanceof Name) {
-    if (!Object.hasOwn(names, token.name)) {
-      namesToMatch.add(token.name);
-    }
-  } else if (token instanceof MatchableNonTerminal) {
-    for (const child of token.children) {
-      addUnmatchedNames(child, namesToMatch, names);
-    }
-  } else if (token instanceof MatchableMultiset) {
-    for (const element of token.elements) {
-      if (element instanceof Name) {
-        addUnmatchedNames(element, namesToMatch, names);
-      } else {
-        for (const subToken of element.tokens) {
-          addUnmatchedNames(subToken, namesToMatch, names);
-        }
-      }
-    }
-  }
-}
-
-function hasUnmatchedNames(element: MultisetElement, names: Record<string, AST>) {
-  const namesToMatch = new Set<string>();
-
-  for (const token of element.tokens) {
-    addUnmatchedNames(token, namesToMatch, names);
-  }
-
-  return namesToMatch.size > 0;
-}
-
 function getMultisetElementMatches(
   actualElements: AST[][],
   multisetElement: MultisetElement,
@@ -214,6 +182,10 @@ function getMultisetElementMatches(
     if (actualElement.length !== multisetElement.tokens.length || matched[i]) {
       continue;
     }
+    if (matches.some((j) => _.isEqual(actualElement, actualElements[j]))) {
+      // actualElement is a duplicate unmatched element
+      continue;
+    }
     try {
       const namesClone: Record<string, AST> = {};
       for (const [name, ast] of Object.entries(names)) {
@@ -227,13 +199,6 @@ function getMultisetElementMatches(
       });
 
       matches.push(i);
-      if (!hasUnmatchedNames(multisetElement, names)) {
-        // As there are no unmatched names in the multisetElement, its actual value is fully determined.
-        // If there are multiple identical matches in the multiset, we want to only return one of them
-        // so we can try to match other multiset elements or names. It doesn't matter which one we match,
-        // but we can and must match multisetElement against one of the identical matches.
-        return matches;
-      }
     } catch {
       // actualElement failed to match with multisetElement, move on to the next actualElement
     }
