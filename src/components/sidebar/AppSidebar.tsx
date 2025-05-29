@@ -15,8 +15,6 @@ import {
 import { Download, Eye, Upload } from "lucide-react";
 import { EditorSheet } from "../editors/EditorSheet";
 import { SyntaxRule, InferenceRule } from "@/lib/types/rules";
-import { SyntaxViewer } from "./SyntaxViewer";
-import { InferenceRulesViewer } from "./InferenceRulesViewer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +26,7 @@ import {
 import { exportDerivation, importDerivation } from "@/lib/io/derivation";
 import { ArgumentInputState } from "@/lib/types/argumentinput";
 import { cn } from "@/lib/utils";
+import { RuleViewer } from "./RuleViewer";
 
 interface AppSidebarProps {
   valid: boolean;
@@ -154,10 +153,12 @@ export function AppSidebar(props: AppSidebarProps) {
         <SidebarFooter />
       </Sidebar>
       {(showSyntax || showInferenceRules) && (
-        <div className="ml-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
-          {showSyntax && <SyntaxViewer syntax={props.syntax} />}
-          {showInferenceRules && <InferenceRulesViewer inferenceRules={props.inferenceRules} />}
-        </div>
+        <RuleViewer
+          showSyntax={showSyntax}
+          showInferenceRules={showInferenceRules}
+          syntax={props.syntax}
+          inferenceRules={props.inferenceRules}
+        />
       )}
     </div>
   );
