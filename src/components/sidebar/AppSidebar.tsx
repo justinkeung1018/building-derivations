@@ -44,7 +44,7 @@ export function AppSidebar(props: AppSidebarProps) {
   const [showInferenceRules, setShowInferenceRules] = useState(false);
 
   return (
-    <div className={cn("flex mr-2", props.valid ? "bg-lime-100" : "")}>
+    <div className={cn("flex", props.valid ? "bg-lime-100" : "")}>
       <Sidebar collapsible="icon">
         <SidebarContent>
           <SidebarGroup>

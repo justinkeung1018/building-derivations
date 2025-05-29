@@ -3,7 +3,7 @@ import { ArgumentInput } from "../components/inputs/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
 import { InferenceRule, SyntaxRule } from "../lib/types/rules";
 import { verify } from "../lib/verifier/verify";
-import { defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
+import { cn, defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
 import { parseSyntax } from "../lib/parsers/syntax";
 import { parseInferenceRules } from "../lib/parsers/inference";
 import { createFileRoute } from "@tanstack/react-router";
@@ -120,21 +120,18 @@ export function DerivationBuilder() {
             setInferenceRules={setInferenceRules}
             setStates={setStates}
           />
-          <div className={valid ? "bg-lime-100" : ""}>
+          <div className={cn("flex w-full pl-2", valid ? "bg-lime-100" : "")}>
             <SidebarTrigger className="mt-2" />
-          </div>
-          <div
-            className={`px-auto w-screen h-screen flex items-center justify-center ${valid ? "bg-lime-100" : ""}`}
-            data-cy="container"
-          >
-            <ArgumentInput
-              index={0}
-              valid={valid}
-              states={states}
-              setStates={setStates}
-              inputErrors={inputErrors}
-              ruleErrors={ruleErrors}
-            />
+            <div className={`px-auto w-full h-screen flex items-center justify-center`} data-cy="container">
+              <ArgumentInput
+                index={0}
+                valid={valid}
+                states={states}
+                setStates={setStates}
+                inputErrors={inputErrors}
+                ruleErrors={ruleErrors}
+              />
+            </div>
           </div>
         </MathJaxContext>
       </TooltipProvider>
