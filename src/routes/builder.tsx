@@ -120,9 +120,9 @@ export function DerivationBuilder() {
             setInferenceRules={setInferenceRules}
             setStates={setStates}
           />
-          <div className={cn("flex w-full pl-2", valid ? "bg-lime-100" : "")}>
+          <div className={cn("flex w-full pl-2", valid ? "bg-lime-100" : "")} data-cy="container">
             <SidebarTrigger className="mt-2" />
-            <div className={`px-auto w-full h-screen flex items-center justify-center`} data-cy="container">
+            <div className={`px-auto w-full h-screen flex items-center justify-center`}>
               <ArgumentInput
                 index={0}
                 valid={valid}
