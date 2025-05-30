@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { latexify } from "@/lib/latexify";
 import { FocusingInput } from "./FocusingInput";
 import { MathJax } from "better-react-mathjax";
@@ -12,17 +12,12 @@ export interface RuleNameInputProps extends React.InputHTMLAttributes<HTMLInputE
   valid: boolean;
   state: ArgumentInputState;
   setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
+  setLocalState: React.Dispatch<React.SetStateAction<ArgumentInputState>>;
   inputErrors: MessageMap;
   ruleErrors: MessageMap;
 }
 
-export const RuleNameInput = memo(function RuleNameInput({
-  index,
-  state,
-  setStates,
-  className,
-  ruleErrors,
-}: RuleNameInputProps) {
+export function RuleNameInput({ index, state, setStates, setLocalState, className, ruleErrors }: RuleNameInputProps) {
   const showInput = state.ruleNameInputState.isEditing || state.ruleNameInputState.value.length == 0;
 
   if (showInput) {
@@ -37,12 +32,12 @@ export const RuleNameInput = memo(function RuleNameInput({
           setStates((old) => ({
             ...old,
             [index]: {
-              ...old[index],
+              ...state,
               ruleNameInputState: {
-                ...old[index].ruleNameInputState,
+                ...state.ruleNameInputState,
                 edited: true,
                 isEditing: false,
-                latex: `\\((\\mathit{${latexify(old[index].ruleNameInputState.value)}})\\)`,
+                latex: `\\((\\mathit{${latexify(state.ruleNameInputState.value)}})\\)`,
               },
             },
           }));
@@ -50,16 +45,13 @@ export const RuleNameInput = memo(function RuleNameInput({
         onFocus={() => {
           setStates((old) => ({
             ...old,
-            [index]: { ...old[index], ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true } },
+            [index]: { ...state, ruleNameInputState: { ...state.ruleNameInputState, isEditing: true } },
           }));
         }}
         onChange={(e) => {
-          setStates((old) => ({
+          setLocalState((old) => ({
             ...old,
-            [index]: {
-              ...old[index],
-              ruleNameInputState: { ...old[index].ruleNameInputState, value: e.target.value },
-            },
+            ruleNameInputState: { ...old.ruleNameInputState, value: e.target.value },
           }));
         }}
         data-cy={`tree-rule-${index}`}
@@ -75,8 +67,8 @@ export const RuleNameInput = memo(function RuleNameInput({
             setStates((old) => ({
               ...old,
               [index]: {
-                ...old[index],
-                ruleNameInputState: { ...old[index].ruleNameInputState, isEditing: true },
+                ...state,
+                ruleNameInputState: { ...state.ruleNameInputState, isEditing: true },
               },
             }));
           }}
@@ -92,4 +84,4 @@ export const RuleNameInput = memo(function RuleNameInput({
       </div>
     </div>
   );
-});
+}

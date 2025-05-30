@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { ArgumentInputState } from "@/lib/types/argumentinput";
 import { latexify } from "@/lib/latexify";
 import { MathJax } from "better-react-mathjax";
@@ -12,14 +12,16 @@ export interface ConclusionInputProps extends React.InputHTMLAttributes<HTMLInpu
   valid: boolean;
   state: ArgumentInputState;
   setStates: React.Dispatch<React.SetStateAction<Record<number, ArgumentInputState>>>;
+  setLocalState: React.Dispatch<React.SetStateAction<ArgumentInputState>>;
   inputErrors: MessageMap;
   ruleErrors: MessageMap;
 }
 
-export const ConclusionInput = memo(function ConclusionInput({
+export function ConclusionInput({
   index,
   state,
   setStates,
+  setLocalState,
   className,
   inputErrors,
 }: ConclusionInputProps) {
@@ -30,7 +32,7 @@ export const ConclusionInput = memo(function ConclusionInput({
       const value = e.target.value.trim();
 
       setStates((old) => {
-        if (!value && old[index].conclusionIndex !== null && old[index].premiseIndices.length === 0) {
+        if (!value && state.conclusionIndex !== null && state.premiseIndices.length === 0) {
           // Delete newly added input (i.e. no premises) if it is empty
           const rest: Record<number, ArgumentInputState> = {};
           for (const key in old) {
@@ -40,19 +42,19 @@ export const ConclusionInput = memo(function ConclusionInput({
           }
 
           // Remove premise from conclusion input
-          const conclusionIndex = old[index].conclusionIndex;
+          const conclusionIndex = state.conclusionIndex;
           rest[conclusionIndex].premiseIndices = rest[conclusionIndex].premiseIndices.filter((i) => i !== index);
           return rest;
         }
 
         const newState = {
-          ...old[index].conclusionInputState,
+          ...state.conclusionInputState,
           edited: true,
           isEditing: false,
           latex: `\\(${latexify(value)}\\)`,
         };
 
-        return { ...old, [index]: { ...old[index], conclusionInputState: newState } };
+        return { ...old, [index]: { ...state, conclusionInputState: newState } };
       });
     };
 
@@ -68,18 +70,15 @@ export const ConclusionInput = memo(function ConclusionInput({
           setStates((old) => ({
             ...old,
             [index]: {
-              ...old[index],
-              conclusionInputState: { ...old[index].conclusionInputState, isEditing: true },
+              ...state,
+              conclusionInputState: { ...state.conclusionInputState, isEditing: true },
             },
           }));
         }}
         onChange={(e) => {
-          setStates((old) => ({
+          setLocalState((old) => ({
             ...old,
-            [index]: {
-              ...old[index],
-              conclusionInputState: { ...old[index].conclusionInputState, value: e.target.value },
-            },
+            conclusionInputState: { ...old.conclusionInputState, value: e.target.value },
           }));
         }}
         data-cy={`tree-conclusion-${index}`}
@@ -94,8 +93,8 @@ export const ConclusionInput = memo(function ConclusionInput({
           setStates((old) => ({
             ...old,
             [index]: {
-              ...old[index],
-              conclusionInputState: { ...old[index].conclusionInputState, isEditing: true },
+              ...state,
+              conclusionInputState: { ...state.conclusionInputState, isEditing: true },
             },
           }));
         }}
@@ -110,4 +109,4 @@ export const ConclusionInput = memo(function ConclusionInput({
       )}
     </div>
   );
-});
+}
