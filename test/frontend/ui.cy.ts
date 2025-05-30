@@ -4,8 +4,8 @@ describe("Inputs", () => {
     cy.getBySel("custom").click();
     cy.getBySel("start").click();
 
-    cy.getBySel("tree-conclusion-0").type("abcde");
-    cy.getBySel("tree-rule-0").type("abcde");
+    cy.getBySel("tree-conclusion-0").type("abcde").blur();
+    cy.getBySel("tree-rule-0").type("abcde").blur();
     // We have clicked away from the conclusion
     cy.getBySel("tree-conclusion-latex-0").should("exist");
     cy.getBySel("tree-add-premise-button-0").click();
