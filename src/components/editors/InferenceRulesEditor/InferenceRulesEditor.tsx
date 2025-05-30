@@ -46,21 +46,19 @@ function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, error
             setInferenceRules={setInferenceRules}
           />
         </TableCell>
-        {editing && (
-          <>
-            <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
-              <DefinitionPreview key={`${rule.id}-definitionpreview`} rule={localRule} />
-            </TableCell>
-            <TableCell key={`${rule.id}-tablecell-deleteicon`}>
-              <DeleteIcon
-                key={`${rule.id}-deleteicon`}
-                onClick={() => {
-                  setInferenceRules((old) => old.filter((_, i) => i !== index));
-                }}
-              />
-            </TableCell>
-          </>
-        )}
+        {editing && [
+          <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
+            <DefinitionPreview key={`${rule.id}-definitionpreview`} rule={localRule} />
+          </TableCell>,
+          <TableCell key={`${rule.id}-tablecell-deleteicon`}>
+            <DeleteIcon
+              key={`${rule.id}-deleteicon`}
+              onClick={() => {
+                setInferenceRules((old) => old.filter((_, i) => i !== index));
+              }}
+            />
+          </TableCell>,
+        ]}
       </TableRow>
       <Errors key={`${rule.id}-errors`} index={index} errors={errors} />
     </TableBody>

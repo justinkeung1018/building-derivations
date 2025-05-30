@@ -39,14 +39,14 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             </TableRow>
           </TableHeader>
           {syntax.map((rule, index) => (
-            <TableBody className="group border-b last:border-0">
-              <TableRow className="group-hover:bg-muted/50 border-0">
-                <TableCell>
+            <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
+              <TableRow key={`${rule.id}-tablerow`} className="group-hover:bg-muted/50 border-0">
+                <TableCell key={`${rule.id}-tablecell-placeholder`}>
                   {index === 0 ? (
                     "Statement"
                   ) : editing ? (
                     <Input
-                      key={index}
+                      key={`${rule.id}-placeholder-input`}
                       maxLength={50}
                       className="w-24"
                       value={rule.placeholdersUnsanitised}
@@ -59,16 +59,20 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                       data-cy={`syntax-placeholders-${index}`}
                     />
                   ) : (
-                    <MathJax inline dynamic>{`\\(${latexify(rule.placeholders.join(","))}\\)`}</MathJax>
+                    <MathJax
+                      key={`${rule.id}-placeholder-latex`}
+                      inline
+                      dynamic
+                    >{`\\(${latexify(rule.placeholders.join(","))}\\)`}</MathJax>
                   )}
                 </TableCell>
-                <TableCell>
-                  <MathJax>{"\\(::=\\)"}</MathJax>
+                <TableCell key={`${rule.id}-tablecell-defines-symbol`}>
+                  <MathJax key={`${rule.id}-defines-symbol`}>{"\\(::=\\)"}</MathJax>
                 </TableCell>
-                <TableCell>
+                <TableCell key={`${rule.id}-tablecell-definition`}>
                   {editing ? (
                     <Input
-                      key={index}
+                      key={`${rule.id}-definition-input`}
                       className="w-full"
                       maxLength={200}
                       value={rule.definitionUnsanitised}
@@ -82,29 +86,33 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
                     />
                   ) : (
                     <MathJax
+                      key={`${rule.id}-definition-latex`}
                       inline
                       dynamic
                     >{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
                   )}
                 </TableCell>
-                {editing && (
-                  <>
-                    <TableCell>
-                      <MathJax inline dynamic>{`\\(${latexify(rule.definitionUnsanitised)}\\)`}</MathJax>
-                    </TableCell>
-                    <TableCell>
-                      {index > 0 && (
-                        <DeleteIcon
-                          onClick={() => {
-                            setSyntax((old) => old.filter((_, i) => i !== index));
-                          }}
-                        />
-                      )}
-                    </TableCell>
-                  </>
-                )}
+                {editing && [
+                  <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
+                    <MathJax
+                      key={`${rule.id}-tablecell-definitionpreview`}
+                      inline
+                      dynamic
+                    >{`\\(${latexify(rule.definitionUnsanitised)}\\)`}</MathJax>
+                  </TableCell>,
+                  <TableCell key={`${rule.id}-tablecell-deleteicon`}>
+                    {index > 0 && (
+                      <DeleteIcon
+                        key={`${rule.id}-deleteicon`}
+                        onClick={() => {
+                          setSyntax((old) => old.filter((_, i) => i !== index));
+                        }}
+                      />
+                    )}
+                  </TableCell>,
+                ]}
               </TableRow>
-              <Errors index={index} errors={errors} />
+              <Errors key={`${rule.id}-errors`} index={index} errors={errors} />
             </TableBody>
           ))}
         </Table>
