@@ -8,7 +8,7 @@ export function RuleNameEditor({ editing, index, rule, setLocalRule, setInferenc
   if (editing) {
     return (
       <Input
-        key={`${rule.name}-rule-name-input`}
+        key={`${rule.id}-rule-name-input`}
         className="w-24"
         maxLength={50}
         value={rule.name}
@@ -24,6 +24,6 @@ export function RuleNameEditor({ editing, index, rule, setLocalRule, setInferenc
   }
 
   return (
-    <MathJax inline dynamic key={`${rule.name}-rule-name-latex`}>{`\\((\\mathit{${latexify(rule.name)}})\\)`}</MathJax>
+    <MathJax inline dynamic key={`${rule.id}-rule-name-latex`}>{`\\((\\mathit{${latexify(rule.name)}})\\)`}</MathJax>
   );
 }

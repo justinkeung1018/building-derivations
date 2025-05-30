@@ -78,6 +78,15 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const [editing, setEditing] = useState(false);
   const [errors, setErrors] = useState(new ErrorMap());
 
+  // Used in onBlur of inputs to force the state update to happen after onFocus is called.
+  // When the user is focused on an input and clicks on another input,
+  // this ensures the same click blurs the first input and focuses the second input
+  function delayedSetInferenceRules(value: React.SetStateAction<InferenceRule[]>) {
+    requestAnimationFrame(() => {
+      setInferenceRules(value);
+    });
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -98,7 +107,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
               editing={editing}
               index={index}
               rule={rule}
-              setInferenceRules={setInferenceRules}
+              setInferenceRules={delayedSetInferenceRules}
               errors={errors}
             />
           ))}
