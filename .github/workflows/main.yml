@@ -103,6 +103,7 @@ jobs:
           path: cypress/screenshots
 
       - name: Print files
+        if: always()
         run: ls -ltrh cypress/
 
       - name: Upload videos
