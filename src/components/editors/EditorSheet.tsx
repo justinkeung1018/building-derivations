@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../s
 import { SidebarMenuButton } from "../shadcn/Sidebar";
 import { ConfigFileInput } from "../inputs/ConfigFileInput";
 import { Button } from "../shadcn/Button";
-import { InferenceRulesEditor } from "./InferenceRulesEditor";
+import { InferenceRulesEditor } from "./InferenceRulesEditor/InferenceRulesEditor";
 import { SyntaxEditor } from "./SyntaxEditor";
 import { ToggleGroup, ToggleGroupItem } from "../shadcn/ToggleGroup";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
