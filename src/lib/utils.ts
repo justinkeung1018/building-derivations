@@ -50,13 +50,16 @@ export function matchableToString(matchable: Matchable): string {
     .join(", ");
 }
 
-export const defaultSyntaxRule: SyntaxRule = {
-  placeholders: [],
-  definition: [],
-  definitionSanitised: [],
-  placeholdersUnsanitised: "",
-  definitionUnsanitised: "",
-};
+export function getDefaultSyntaxRule(): SyntaxRule {
+  return {
+    placeholders: [],
+    definition: [],
+    definitionSanitised: [],
+    placeholdersUnsanitised: "",
+    definitionUnsanitised: "",
+    id: uuidv4(),
+  };
+}
 
 export function getDefaultInferenceRuleStatement(): InferenceRuleStatement {
   return {

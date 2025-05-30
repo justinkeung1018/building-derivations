@@ -10,6 +10,7 @@ import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
+import { getDefaultSyntaxRule } from "@/lib/utils";
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
@@ -112,16 +113,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             className="w-full mt-2"
             variant="secondary"
             onClick={() => {
-              setSyntax((old) => [
-                ...old,
-                {
-                  placeholders: [],
-                  definition: [],
-                  definitionSanitised: [],
-                  placeholdersUnsanitised: "",
-                  definitionUnsanitised: "",
-                },
-              ]);
+              setSyntax((old) => [...old, getDefaultSyntaxRule()]);
             }}
             data-cy="add-syntax-button"
           >

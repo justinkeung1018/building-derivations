@@ -4,7 +4,7 @@ import { parseInferenceRules } from "../parsers/inference";
 import { parseSyntax } from "../parsers/syntax";
 import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "../types/io/rules";
 import { SyntaxRule, InferenceRule, ParseResult } from "../types/rules";
-import { defaultSyntaxRule, getDefaultInferenceRuleStatement } from "../utils";
+import { getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "../utils";
 import { downloadJSON } from "./utils";
 
 const jsonFields = {
@@ -35,7 +35,7 @@ export function importRules(text: string): ImportResult {
   // TODO: display parsing errors
   const json = schema.parse(JSON.parse(text));
   const syntax: SyntaxRule[] = json.syntax.map(({ placeholders, definition }) => ({
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders,
     placeholdersUnsanitised: placeholders.join(", "),
     definitionUnsanitised: definition,

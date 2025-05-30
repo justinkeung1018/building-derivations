@@ -9,19 +9,19 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
+import { getDefaultInferenceRule, getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "@/lib/utils";
 
 const statementCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
 };
 const contextCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["\\Gamma"],
   definition: [[new Multiset([new NonTerminal(2)])]],
 };
 const typeCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["A", "B"],
   definition: [
     [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
@@ -29,18 +29,22 @@ const typeCorrect: SyntaxRule = {
   ],
 };
 const typevarCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["\\varphi"],
   definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")], [new Terminal("4")], [new Terminal("5")]],
 };
 
 describe("Parses natural deduction rules", () => {
   it("parses syntax rules", () => {
-    const statement = { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" };
-    const context = { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{A}" };
-    const type = { ...defaultSyntaxRule, placeholdersUnsanitised: "A,B", definitionUnsanitised: "\\varphi | (A -> B)" };
+    const statement = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma |- A" };
+    const context = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{A}" };
+    const type = {
+      ...getDefaultSyntaxRule(),
+      placeholdersUnsanitised: "A,B",
+      definitionUnsanitised: "\\varphi | (A -> B)",
+    };
     const typevar = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "\\varphi",
       definitionUnsanitised: "1 | 2 | 3 | 4 | 5",
     };

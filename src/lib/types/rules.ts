@@ -8,6 +8,7 @@ export interface SyntaxRule {
   definitionSanitised: string[];
   placeholdersUnsanitised: string;
   definitionUnsanitised: string;
+  id: string; // For identifying React DOM elements
 }
 
 // Statements as part of an inference rule should not have multiple alternatives

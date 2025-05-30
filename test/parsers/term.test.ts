@@ -3,11 +3,11 @@ import { TerminalAST, NonTerminalAST, MultisetAST } from "@/lib/types/ast";
 import { Terminal, NonTerminal, Multiset, Or, Maybe } from "@/lib/types/token";
 import { ResultKind } from "parjs";
 import { SyntaxRule } from "@/lib/types/rules";
-import { defaultSyntaxRule } from "@/lib/utils";
+import { getDefaultSyntaxRule } from "@/lib/utils";
 
 it("parses terminals", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x"), new Terminal("|-"), new Terminal("y")]],
   };
   const parser = buildTermParser([statement]);
@@ -15,9 +15,9 @@ it("parses terminals", () => {
 });
 
 it("parses non-terminals", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new NonTerminal(1)]] };
+  const statement = { ...getDefaultSyntaxRule(), definition: [[new NonTerminal(1)]] };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A"],
     definition: [
       [new Terminal("x")],
@@ -37,15 +37,23 @@ it("parses non-terminals", () => {
 });
 
 it("parses multiset with one element", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const statement = { ...getDefaultSyntaxRule(), definition: [[new Multiset([new NonTerminal(1)])]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, type]);
   expect(parser.parse("a").value).toEqual([new MultisetAST([[new NonTerminalAST(1, [new TerminalAST("a")])]])]);
 });
 
 it("parses multiset with multiple elements", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const statement = { ...getDefaultSyntaxRule(), definition: [[new Multiset([new NonTerminal(1)])]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, type]);
   expect(parser.parse("a, b,a").value).toEqual([
     new MultisetAST([
@@ -57,18 +65,26 @@ it("parses multiset with multiple elements", () => {
 });
 
 it("parses empty multisets", () => {
-  const statement = { ...defaultSyntaxRule, definition: [[new Multiset([new NonTerminal(1)])]] };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const statement = { ...getDefaultSyntaxRule(), definition: [[new Multiset([new NonTerminal(1)])]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, type]);
   expect(parser.parse("\\varnothing").value).toEqual([new MultisetAST([])]);
 });
 
 it("parses multiset followed by comma", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(1)]), new Terminal(","), new Terminal("x")]],
   };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, type]);
   expect(parser.parse("a,b,a,x").value).toEqual([
     new MultisetAST([
@@ -83,37 +99,45 @@ it("parses multiset followed by comma", () => {
 
 it("parses multisets greedily without caring about the rest of the same rule", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal(";")]],
   };
   const context = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)]), new Terminal(","), new NonTerminal(1)]],
   };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, context, type]);
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
 });
 
 it("parses multisets greedily without caring about other rules", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal(","), new NonTerminal(1), new Terminal(";")]],
   };
   const context = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)])]],
   };
-  const type = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("a")], [new Terminal("b")]] };
+  const type = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A"],
+    definition: [[new Terminal("a")], [new Terminal("b")]],
+  };
   const parser = buildTermParser([statement, context, type]);
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
 });
 
 it("parses rules with Ors", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [
         new Terminal("("),
@@ -131,7 +155,7 @@ it("parses rules with Ors", () => {
 
 it("parses rules with Maybes", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("a"), new Maybe([[new Terminal("b")]])]],
   };
   const parser = buildTermParser([statement]);
@@ -141,16 +165,16 @@ it("parses rules with Maybes", () => {
 
 it("parses statements in logic", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B"],
     definition: [
       [new NonTerminal(3)],
@@ -158,7 +182,7 @@ it("parses statements in logic", () => {
     ],
   };
   const typevar = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\varphi"],
     definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")]],
   };

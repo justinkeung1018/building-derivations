@@ -1,7 +1,7 @@
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
-import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
+import { getDefaultInferenceRule, getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "@/lib/utils";
 import { verify } from "@/lib/verifier/verify";
 
 it("fails when the value assigned to a name by a premise is incompatible with the conclusion", () => {
@@ -28,16 +28,16 @@ it("fails when the value assigned to a name by a premise is incompatible with th
 
   // Syntax
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "\\Gamma |- A",
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma, \\Sigma",
     definitionUnsanitised: "{ A }",
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A, B",
     definitionUnsanitised: "x | y | z",
   };
@@ -68,16 +68,16 @@ it("verifies the CL rule in the system LK", () => {
 
   // Syntax
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "\\Gamma |- \\Delta",
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma, \\Delta",
     definitionUnsanitised: "{ A }",
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A",
     definitionUnsanitised: "x | y",
   };
@@ -108,16 +108,16 @@ it("verifies a rule with three uncertain name assignments", () => {
 
   // Syntax
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "\\Gamma",
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "{ A }",
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A, B, C",
     definitionUnsanitised: "x | y",
   };
@@ -148,16 +148,16 @@ it("fails to verify a rule with three uncertain name assignments when no assignm
 
   // Syntax
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "\\Gamma",
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "{ A }",
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A, B, C",
     definitionUnsanitised: "x | y",
   };

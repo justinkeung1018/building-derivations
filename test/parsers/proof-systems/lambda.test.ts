@@ -9,24 +9,24 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
+import { getDefaultInferenceRule, getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "@/lib/utils";
 
 const statementCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(5), new Terminal(":"), new NonTerminal(3)]],
 };
 const contextCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["\\Gamma"],
   definition: [[new Multiset([new NonTerminal(2), new Terminal(":"), new NonTerminal(3)])]],
 };
 const variableCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["var"],
   definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
 };
 const typeCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["A", "B"],
   definition: [
     [new Terminal("("), new NonTerminal(3), new Terminal("->"), new NonTerminal(3), new Terminal(")")],
@@ -34,12 +34,12 @@ const typeCorrect: SyntaxRule = {
   ],
 };
 const typevarCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["\\varphi"],
   definition: [[new Terminal("1")], [new Terminal("2")], [new Terminal("3")], [new Terminal("4")], [new Terminal("5")]],
 };
 const termCorrect: SyntaxRule = {
-  ...defaultSyntaxRule,
+  ...getDefaultSyntaxRule(),
   placeholders: ["M", "N"],
   definition: [
     [
@@ -55,29 +55,29 @@ const termCorrect: SyntaxRule = {
 
 describe("Parses lambda calculus rules", () => {
   it("parses syntax rules", () => {
-    const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- M: A" };
+    const statement: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma |- M: A" };
     const context: SyntaxRule = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "\\Gamma",
       definitionUnsanitised: "{ var: A }",
     };
     const variable: SyntaxRule = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "var",
       definitionUnsanitised: "x | y | z",
     };
     const type: SyntaxRule = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "A, B",
       definitionUnsanitised: "\\varphi | (A -> B)",
     };
     const typevar: SyntaxRule = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "\\varphi",
       definitionUnsanitised: "1 | 2 | 3 | 4 | 5",
     };
     const term: SyntaxRule = {
-      ...defaultSyntaxRule,
+      ...getDefaultSyntaxRule(),
       placeholdersUnsanitised: "M, N",
       definitionUnsanitised: "var | (\\lambda var. M) | (MN)",
     };

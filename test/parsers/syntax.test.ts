@@ -1,31 +1,31 @@
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { Maybe, Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
 import { SyntaxRule } from "@/lib/types/rules";
-import { defaultSyntaxRule } from "@/lib/utils";
+import { getDefaultSyntaxRule } from "@/lib/utils";
 
 function getDefaultStatement(): SyntaxRule {
-  return { ...defaultSyntaxRule, definitionUnsanitised: "x" };
+  return { ...getDefaultSyntaxRule(), definitionUnsanitised: "x" };
 }
 
 it("fails when no definition is provided", () => {
-  const statement = { ...defaultSyntaxRule };
+  const statement = { ...getDefaultSyntaxRule() };
   expect(parseSyntax([statement]).errors).toEmit(0, "definition");
 });
 
 it("fails when any of the definition alternatives is empty", () => {
-  const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "| a | b" };
+  const statement: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "| a | b" };
   expect(parseSyntax([statement]).errors).toEmit(0, "alternative");
 });
 
 it("fails when a non-statement rule has no placeholders", () => {
-  const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "abc" };
-  const rule: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "def" };
+  const statement: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "abc" };
+  const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "def" };
   expect(parseSyntax([statement, rule]).errors).toEmit(1, "placeholder");
 });
 
 it("parses placeholders", () => {
   const rule: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma, \\Alpha, a,b,c",
     definitionUnsanitised: "x",
   };
@@ -35,11 +35,15 @@ it("parses placeholders", () => {
 
 it("assigns non-terminals to placeholders and terminals otherwise", () => {
   const rule1: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "A |zB|y",
   };
-  const rule2: SyntaxRule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A,B, C", definitionUnsanitised: "x" };
+  const rule2: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholdersUnsanitised: "A,B, C",
+    definitionUnsanitised: "x",
+  };
   const [_stmt, parsed1, _] = parseSyntax([getDefaultStatement(), rule1, rule2]).rules;
   expect(parsed1.definition).toEqual([
     [new Terminal("z"), new NonTerminal(2)],
@@ -50,33 +54,37 @@ it("assigns non-terminals to placeholders and terminals otherwise", () => {
 
 it("parses multisets of non-terminals", () => {
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "{A}",
   };
-  const type: SyntaxRule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
+  const type: SyntaxRule = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
   const [_stmt, contextParsed, _type] = parseSyntax([getDefaultStatement(), context, type]).rules;
   expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(2)])]]);
 });
 
 it("parses multisets of non-terminals with spaces between curly braces", () => {
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "{ A }",
   };
-  const type: SyntaxRule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
+  const type: SyntaxRule = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A", definitionUnsanitised: "x" };
   const [_stmt, contextParsed, _type] = parseSyntax([getDefaultStatement(), context, type]).rules;
   expect(contextParsed.definition).toEqual([[new Multiset([new NonTerminal(2)])]]);
 });
 
 it("parses multisets consisting of a mix of terminals and non-terminals", () => {
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "\\Gamma",
     definitionUnsanitised: "{ A: B + C }",
   };
-  const type: SyntaxRule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B, C", definitionUnsanitised: "x" };
+  const type: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholdersUnsanitised: "A, B, C",
+    definitionUnsanitised: "x",
+  };
   const [_default, contextParsed, _type] = parseSyntax([getDefaultStatement(), context, type]).rules;
   expect(contextParsed.definition).toEqual([
     [new Multiset([new NonTerminal(2), new Terminal(":"), new NonTerminal(2), new Terminal("+"), new NonTerminal(2)])],
@@ -84,7 +92,7 @@ it("parses multisets consisting of a mix of terminals and non-terminals", () => 
 });
 
 it("warns when user defines multiset consisting only of terminals", () => {
-  const context = { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ abcde }" };
+  const context = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ abcde }" };
   const {
     rules: [_, contextParsed],
     warnings,
@@ -97,13 +105,13 @@ it("warns when user defines multiset consisting only of terminals", () => {
 });
 
 it("fails when there are duplicate placeholders", () => {
-  const rule1 = { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "x" };
-  const rule2 = { ...defaultSyntaxRule, placeholdersUnsanitised: "B, C", definitionUnsanitised: "y" };
+  const rule1 = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A, B", definitionUnsanitised: "x" };
+  const rule2 = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "B, C", definitionUnsanitised: "y" };
   expect(parseSyntax([getDefaultStatement(), rule1, rule2]).errors).toEmitOverall("multiple");
 });
 
 it("parses rules with alternatives beginning with the same terminal", () => {
-  const statement: SyntaxRule = { ...defaultSyntaxRule, definitionUnsanitised: "(a) | (b)" };
+  const statement: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "(a) | (b)" };
   const [statementParsed] = parseSyntax([statement]).rules;
   expect(statementParsed.definition).toEqual([
     [
@@ -118,7 +126,7 @@ it("parses rules with alternatives beginning with the same terminal", () => {
 
 it("parses rules where one alternative is a (strict) prefix of another alternative", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "a | ab",
   };
   const [statementParsed] = parseSyntax([statement]).rules;
@@ -127,7 +135,7 @@ it("parses rules where one alternative is a (strict) prefix of another alternati
 
 it("parses rules where alternatives are (strict) prefixes of each other", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "abc | abcd | abcde | abcdef",
   };
   const [statementParsed] = parseSyntax([statement]).rules;
@@ -143,7 +151,7 @@ it("parses rules where alternatives are (strict) prefixes of each other", () => 
 
 it("parses rules with multiple alternatives within a Maybe", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "a | ab | ad",
   };
   const [statementParsed] = parseSyntax([statement]).rules;
@@ -154,16 +162,16 @@ it("parses rules with multiple alternatives within a Maybe", () => {
 
 it("fails when a rule has alternatives beginning with different non-terminals that begin with the same terminal", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "A | B",
   };
   const a: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A",
     definitionUnsanitised: "(a)",
   };
   const b: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "B",
     definitionUnsanitised: "(b)",
   };
@@ -172,11 +180,11 @@ it("fails when a rule has alternatives beginning with different non-terminals th
 
 it("fails when multiple alternatives are exactly the same", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "Abc | Bbc",
   };
   const rule: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A, B",
     definitionUnsanitised: "x",
   };
@@ -185,11 +193,11 @@ it("fails when multiple alternatives are exactly the same", () => {
 
 it("fails when the rule is left-recursive", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definitionUnsanitised: "dummy",
   };
   const rule: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A",
     definitionUnsanitised: "Abc",
   };
@@ -197,7 +205,7 @@ it("fails when the rule is left-recursive", () => {
 });
 
 it("does not modify the arguments", () => {
-  const rule = { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B, C", definitionUnsanitised: "a" };
+  const rule = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A, B, C", definitionUnsanitised: "a" };
   const clone = structuredClone(rule);
   parseSyntax([rule]);
   expect(rule).toEqual(clone);

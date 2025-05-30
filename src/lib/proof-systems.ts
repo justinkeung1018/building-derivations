@@ -1,13 +1,13 @@
 import { parseInferenceRules } from "./parsers/inference";
 import { parseSyntax } from "./parsers/syntax";
 import { SyntaxRule, InferenceRule } from "./types/rules";
-import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "./utils";
+import { getDefaultInferenceRule, getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "./utils";
 
 export const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "var | (A -> B)" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
+  { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma |- A" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ A }" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A, B", definitionUnsanitised: "var | (A -> B)" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
 ];
 
 export const NATURAL_DEDUCTION_INFERENCE_RULES: InferenceRule[] = [
@@ -34,12 +34,16 @@ export const NATURAL_DEDUCTION_INFERENCE_RULES: InferenceRule[] = [
 ];
 
 export const LAMBDA_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- M: A" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ var: A }" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "1 | 2 | 3" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "M, N", definitionUnsanitised: "var | (\\lambda var. M) | (MN)" },
+  { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma |- M: A" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "\\Gamma", definitionUnsanitised: "{ var: A }" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A, B", definitionUnsanitised: "\\varphi | (A -> B)" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "\\varphi", definitionUnsanitised: "1 | 2 | 3" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
+  {
+    ...getDefaultSyntaxRule(),
+    placeholdersUnsanitised: "M, N",
+    definitionUnsanitised: "var | (\\lambda var. M) | (MN)",
+  },
 ];
 
 export const LAMBDA_INFERENCE_RULES: InferenceRule[] = [
@@ -66,14 +70,18 @@ export const LAMBDA_INFERENCE_RULES: InferenceRule[] = [
 ];
 
 export const SEQUENT_SYNTAX: SyntaxRule[] = [
-  { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- \\Delta" },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "\\Gamma, \\Delta, \\Sigma, \\Pi", definitionUnsanitised: "{ A }" },
+  { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma |- \\Delta" },
   {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
+    placeholdersUnsanitised: "\\Gamma, \\Delta, \\Sigma, \\Pi",
+    definitionUnsanitised: "{ A }",
+  },
+  {
+    ...getDefaultSyntaxRule(),
     placeholdersUnsanitised: "A, B",
     definitionUnsanitised: "var | (A \\to B) | (A \\land B) | (A \\lor B) | (\\lnot A)",
   },
-  { ...defaultSyntaxRule, placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
+  { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "var", definitionUnsanitised: "x | y | z" },
 ];
 
 export const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
@@ -191,7 +199,7 @@ export function getParsedSystem(system: string) {
     syntaxUnsanitised = SEQUENT_SYNTAX;
     inferenceRulesUnsanitised = SEQUENT_INFERENCE_RULES;
   } else if (system === "") {
-    syntaxUnsanitised = [{ ...defaultSyntaxRule }];
+    syntaxUnsanitised = [{ ...getDefaultSyntaxRule() }];
     inferenceRulesUnsanitised = [];
   }
 

@@ -8,11 +8,11 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
+import { getDefaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
 
 it("fails when empty rule name is supplied", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
@@ -24,11 +24,11 @@ it("fails when empty rule name is supplied", () => {
 
 it("parses placeholders consisting of one character", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A"],
     definition: [[new Terminal("x")]],
   };
@@ -45,11 +45,11 @@ it("parses placeholders consisting of one character", () => {
 
 it("parses placeholders consisting of multiple characters", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["var"],
     definition: [[new Terminal("x")]],
   };
@@ -66,11 +66,11 @@ it("parses placeholders consisting of multiple characters", () => {
 
 it("parses statements with multiple tokens", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B"],
     definition: [[new Terminal("x")]],
   };
@@ -87,11 +87,11 @@ it("parses statements with multiple tokens", () => {
 
 it("parses non-terminals where a placeholder name is same as the stringified definition", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B", "(A;B"],
     definition: [[new Terminal("x")], [new Terminal("("), new NonTerminal(1), new Terminal(";"), new NonTerminal(1)]],
   };
@@ -115,16 +115,16 @@ it("parses non-terminals where a placeholder name is same as the stringified def
 
 it("parses multisets where each element consists of one non-terminal", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A"],
     definition: [[new Terminal("x")]],
   };
@@ -145,16 +145,16 @@ it("parses multisets where each element consists of one non-terminal", () => {
 
 it("parses rules consisting of a non-terminal representing a multiset, followed by something else", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal(";")]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A"],
     definition: [[new Terminal("x")]],
   };
@@ -176,16 +176,16 @@ it("parses rules consisting of a non-terminal representing a multiset, followed 
 
 describe("multisets where each element consists of multiple tokens", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2), new Terminal(";"), new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B"],
     definition: [[new Terminal("x")]],
   };
@@ -231,7 +231,7 @@ describe("multisets where each element consists of multiple tokens", () => {
 
 it("fails when the conclusion is empty", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
@@ -246,7 +246,7 @@ it("fails when the conclusion is empty", () => {
 
 it("fails when the conclusion is not a valid statement", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
@@ -261,7 +261,7 @@ it("fails when the conclusion is not a valid statement", () => {
 
 it("fails when any of the premises is empty, and throws an error for every empty premise", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
@@ -292,7 +292,7 @@ it("fails when any of the premises is empty, and throws an error for every empty
 
 it("fails when any of the premises is not a valid statement, and throws an error for every invalid premise", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
@@ -323,7 +323,7 @@ it("fails when any of the premises is not a valid statement, and throws an error
 
 it("parses rules with Or in the syntax", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [
         new Terminal("x"),
@@ -363,7 +363,7 @@ it("parses rules with Or in the syntax", () => {
 
 it("parses rules with Maybe in the syntax", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [
         new Terminal("x"),
@@ -411,11 +411,11 @@ it("parses rules with Maybe in the syntax", () => {
 
 it("does not modify the arguments", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B"],
     definition: [[new Terminal("a")]],
   };

@@ -4,7 +4,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { v4 as uuidv4 } from "uuid";
 import { InferenceRule, SyntaxRule } from "../lib/types/rules";
 import { verify } from "../lib/verifier/verify";
-import { cn, defaultSyntaxRule, getDefaultInferenceRuleStatement } from "../lib/utils";
+import { cn, getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "../lib/utils";
 import { parseSyntax } from "../lib/parsers/syntax";
 import { parseInferenceRules } from "../lib/parsers/inference";
 import { createFileRoute } from "@tanstack/react-router";
@@ -36,7 +36,7 @@ export function DerivationBuilder() {
     inputErrors: new MessageMap(),
     ruleErrors: new MessageMap(),
   });
-  const [syntax, setSyntax] = useState<SyntaxRule[]>([{ ...defaultSyntaxRule }]);
+  const [syntax, setSyntax] = useState<SyntaxRule[]>([getDefaultSyntaxRule()]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
   function verifyInput(index: number, inputErrors: MessageMap, ruleErrors: MessageMap): Errors {
@@ -86,7 +86,7 @@ export function DerivationBuilder() {
   useEffect(() => {
     if (search.mode === "json") {
       const syntax: SyntaxRule[] = search.syntax.map(({ placeholders, definition }) => ({
-        ...defaultSyntaxRule,
+        ...getDefaultSyntaxRule(),
         placeholders,
         placeholdersUnsanitised: placeholders.join(", "),
         definitionUnsanitised: definition,
