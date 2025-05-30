@@ -6,10 +6,10 @@ beforeEach(() => {
 });
 
 it("warns users about left-recursive rules", () => {
-  cy.getBySel("syntax-def-0").type("abcdef").should("have.value", "abcdef").blur();
+  cy.getBySel("syntax-def-0").click().focus().type("abcdef").should("have.value", "abcdef").blur();
   cy.getBySel("add-syntax-button").click();
-  cy.getBySel("syntax-placeholders-1").type("A").should("have.value", "A").blur();
-  cy.getBySel("syntax-def-1").type("Abcd").should("have.value", "Abcd").blur();
+  cy.getBySel("syntax-placeholders-1").click().focus().type("A").should("have.value", "A").blur();
+  cy.getBySel("syntax-def-1").click().focus().type("Abcd").should("have.value", "Abcd").blur();
   cy.getBySel("apply-syntax-button").click();
   cy.contains("Left-recursive");
   cy.getBySel("apply-syntax-button").should("exist");
@@ -20,11 +20,13 @@ it("lets me add multiple rules", () => {
     if (i > 0) {
       cy.getBySel("add-syntax-button").click();
       cy.getBySel(`syntax-placeholders-${i}`)
+        .click()
+        .focus()
         .type("a" + String(i))
         .should("have.value", "a" + String(i))
         .blur();
     }
-    cy.getBySel(`syntax-def-${i}`).type(String(i)).should("have.value", String(i)).blur();
+    cy.getBySel(`syntax-def-${i}`).click().focus().type(String(i)).should("have.value", String(i)).blur();
   }
   cy.getBySel("apply-syntax-button").click();
   cy.getBySel("apply-syntax-button").should("not.exist");
