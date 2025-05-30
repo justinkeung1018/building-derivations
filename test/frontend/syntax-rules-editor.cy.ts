@@ -23,9 +23,9 @@ it("lets me add multiple rules", () => {
         .type("a" + String(i))
         .should("have.value", "a" + String(i))
         .blur()
-        .wait(100);
+        .wait(300);
     }
-    cy.getBySel(`syntax-def-${i}`).type(String(i)).should("have.value", String(i)).blur().wait(100);
+    cy.getBySel(`syntax-def-${i}`).type(String(i)).should("have.value", String(i)).blur().wait(300);
   }
   cy.getBySel("apply-syntax-button").click();
   cy.getBySel("apply-syntax-button").should("not.exist");
