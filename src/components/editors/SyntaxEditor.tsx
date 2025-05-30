@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MathJax } from "better-react-mathjax";
 import { Button } from "../shadcn/Button";
 import { Input } from "../shadcn/Input";
@@ -22,6 +22,10 @@ interface SyntaxEditorRowProps {
 
 function SyntaxEditorRow({ rule, index, editing, errors, setSyntax }: SyntaxEditorRowProps) {
   const [localRule, setLocalRule] = useState(rule);
+
+  useEffect(() => {
+    setLocalRule(rule);
+  }, [rule]);
 
   // Used in onBlur of inputs to force the state update to happen after onFocus is called.
   // When the user is focused on an input and clicks on another input,

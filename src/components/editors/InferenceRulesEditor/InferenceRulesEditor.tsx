@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../shadcn/Button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../shadcn/Table";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
@@ -22,6 +22,10 @@ interface InferenceRuleEditorRowProps {
 
 function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, errors }: InferenceRuleEditorRowProps) {
   const [localRule, setLocalRule] = useState(rule);
+
+  useEffect(() => {
+    setLocalRule(rule);
+  }, [rule]);
 
   return (
     <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
