@@ -9,15 +9,15 @@ import {
 } from "@/lib/types/matchable";
 import { SyntaxRule } from "@/lib/types/rules";
 import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
-import { defaultSyntaxRule } from "@/lib/utils";
+import { getDefaultSyntaxRule } from "@/lib/utils";
 import { match } from "@/lib/verifier/match";
 
 it("matches basic statements", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
   };
-  const type: SyntaxRule = { ...defaultSyntaxRule, placeholders: ["A"], definition: [[new Terminal("x")]] };
+  const type: SyntaxRule = { ...getDefaultSyntaxRule(), placeholders: ["A"], definition: [[new Terminal("x")]] };
 
   const input = "x |- x";
   const structure: Matchable[] = [new Name(1, "A"), new MatchableTerminal("|-"), new Name(1, "A")];
@@ -32,7 +32,7 @@ it("matches basic statements", () => {
 
 it("fails when the input is nonsense", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
   };
 
@@ -46,11 +46,11 @@ it("fails when the input is nonsense", () => {
 
 it("fails when the existing value for a name mapping to a non-terminal is not compatible with the input", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A"],
     definition: [[new Terminal("x")], [new Terminal("y")]],
   };
@@ -65,16 +65,16 @@ it("fails when the existing value for a name mapping to a non-terminal is not co
 
 describe("fails to match a multiset to an existing value in the mapping", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2)])]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["A", "B"],
     definition: [[new Terminal("a")], [new Terminal("b")]],
   };
@@ -121,11 +121,11 @@ describe("fails to match a multiset to an existing value in the mapping", () => 
 
 it("matches arrows", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(1)]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
@@ -158,16 +158,16 @@ it("matches arrows", () => {
 
 it("matches when there is only one multiset element to match and one actual element in the given multiset", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A"],
   };
@@ -190,16 +190,16 @@ it("matches when there is only one multiset element to match and one actual elem
 
 it("fails when there is only one multiset element to match and one actual element in the given multiset, but the element is incompatible with the given names", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A"],
   };
@@ -218,16 +218,16 @@ it("fails when there is only one multiset element to match and one actual elemen
 
 it("matches multisets with unique elements that do not need to be inferred", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A"],
   };
@@ -249,16 +249,16 @@ it("matches multisets with unique elements that do not need to be inferred", () 
 
 it("matches multisets with duplicate elements that do not need to be inferred", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A"],
   };
@@ -284,16 +284,16 @@ it("matches multisets with duplicate elements that do not need to be inferred", 
 
 it("matches multisets with unique elements that need to be inferred from the rest of the statement", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")]],
     placeholders: ["A", "B"],
   };
@@ -318,16 +318,16 @@ it("matches multisets with unique elements that need to be inferred from the res
 
 it("matches multisets that need to be inferred from the names", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A", "B"],
   };
@@ -355,16 +355,16 @@ it("matches multisets that need to be inferred from the names", () => {
 
 it("fails to match multisets that need to be inferred from the names but are incompatible with the names", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A", "B"],
   };
@@ -391,16 +391,16 @@ it("fails to match multisets that need to be inferred from the names but are inc
 
 it("leaves uninferrable multisets alone", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")], [new Terminal("y")], [new Terminal("z")]],
     placeholders: ["A", "B"],
   };
@@ -424,16 +424,16 @@ it("leaves uninferrable multisets alone", () => {
 
 it("matches multisets with duplicate elements that need to be inferred from the rest of the statement", () => {
   const statement = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2)]],
   };
   const context = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Terminal("x")]],
     placeholders: ["A", "B"],
   };
@@ -461,21 +461,21 @@ it("matches multisets with duplicate elements that need to be inferred from the 
 
 it("matches multisets where each element consists of multiple tokens", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1), new Terminal("|-"), new NonTerminal(2), new Terminal(":"), new NonTerminal(3)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\Gamma"],
     definition: [[new Multiset([new NonTerminal(2), new Terminal(":"), new NonTerminal(3)])]],
   };
   const variable: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["var"],
     definition: [[new Terminal("x")], [new Terminal("y")]],
   };
   const type: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     placeholders: ["\\varphi"],
     definition: [[new Terminal("1")], [new Terminal("2")]],
   };
@@ -512,11 +512,11 @@ it("matches multisets where each element consists of multiple tokens", () => {
 
 it("matches multiset elements that are expanded forms of the multiset definition", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(1)])]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
@@ -551,11 +551,11 @@ it("matches multiset elements that are expanded forms of the multiset definition
 
 it("matches when the same name appears multiple times in a multiset element", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(1)])]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
@@ -589,11 +589,11 @@ it("matches when the same name appears multiple times in a multiset element", ()
 
 it("fails when the same name appears multiple times in a multiset element, but the actual element is incompatible", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(1)])]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
@@ -624,16 +624,16 @@ it("fails when the same name appears multiple times in a multiset element, but t
 
 it("matches when the same name appears multiple times in a multiset element, and there are multiple actual elements", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new NonTerminal(1)]],
   };
   const context: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(2)])]],
     placeholders: ["\\Gamma"],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
@@ -681,11 +681,11 @@ it("matches when the same name appears multiple times in a multiset element, and
 
 it("returns a map of names to ASTs when some names cannot be matched immediately", () => {
   const statement: SyntaxRule = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [[new Multiset([new NonTerminal(1)])]],
   };
   const type = {
-    ...defaultSyntaxRule,
+    ...getDefaultSyntaxRule(),
     definition: [
       [new Terminal("x")],
       [new Terminal("y")],
