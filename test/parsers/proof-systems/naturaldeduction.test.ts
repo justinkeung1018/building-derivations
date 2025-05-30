@@ -9,7 +9,7 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "@/lib/utils";
+import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
 
 const statementCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
@@ -62,21 +62,21 @@ describe("Parses natural deduction rules", () => {
   it("parses inference rules", () => {
     const syntax = [statementCorrect, contextCorrect, typeCorrect, typevarCorrect];
     const action = {
-      ...defaultInferenceRule,
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- A" },
+      ...getDefaultInferenceRule(),
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- A" },
     };
     const arrowIntroduction = {
-      ...defaultInferenceRule,
-      premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B" }],
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
+      ...getDefaultInferenceRule(),
+      premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- B" }],
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A -> B)" },
     };
     const arrowElimination = {
-      ...defaultInferenceRule,
+      ...getDefaultInferenceRule(),
       premises: [
-        { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
-        { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A" },
+        { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A -> B)" },
+        { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A" },
       ],
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B" },
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- B" },
     };
     const [actionParsed, arrowIntroductionParsed, arrowEliminationParsed] = parseInferenceRules(
       [action, arrowIntroduction, arrowElimination],

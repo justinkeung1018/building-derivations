@@ -9,7 +9,7 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultSyntaxRule, defaultInferenceRule, defaultInferenceRuleStatement } from "@/lib/utils";
+import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
 
 const statementCorrect: SyntaxRule = {
   ...defaultSyntaxRule,
@@ -101,21 +101,21 @@ describe("Parses lambda calculus rules", () => {
   it("parses inference rules", () => {
     const syntax = [statementCorrect, contextCorrect, variableCorrect, typeCorrect, typevarCorrect, termCorrect];
     const action = {
-      ...defaultInferenceRule,
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- var: A" },
+      ...getDefaultInferenceRule(),
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, var: A |- var: A" },
     };
     const arrowIntroduction = {
-      ...defaultInferenceRule,
-      premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- M: B" }],
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
+      ...getDefaultInferenceRule(),
+      premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, var: A |- M: B" }],
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
     };
     const arrowElimination = {
-      ...defaultInferenceRule,
+      ...getDefaultInferenceRule(),
       premises: [
-        { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- M: (A -> B)" },
-        { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: A" },
+        { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- M: (A -> B)" },
+        { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- N: A" },
       ],
-      conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (MN): B" },
+      conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (MN): B" },
     };
     const [actionParsed, arrowIntroductionParsed, arrowEliminationParsed] = parseInferenceRules(
       [action, arrowIntroduction, arrowElimination],

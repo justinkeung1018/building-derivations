@@ -8,7 +8,7 @@ import {
   MultisetElement,
   Name,
 } from "@/lib/types/matchable";
-import { defaultSyntaxRule, defaultInferenceRule, defaultInferenceRuleStatement } from "@/lib/utils";
+import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
 
 it("fails when empty rule name is supplied", () => {
   const statement: SyntaxRule = {
@@ -16,7 +16,7 @@ it("fails when empty rule name is supplied", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "    ",
   };
   expect(parseInferenceRules([rule], [statement]).errors).toEmit(0, "name");
@@ -33,9 +33,9 @@ it("parses placeholders consisting of one character", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "A",
     },
   };
@@ -54,9 +54,9 @@ it("parses placeholders consisting of multiple characters", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "var",
     },
   };
@@ -75,9 +75,9 @@ it("parses statements with multiple tokens", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "A |- B",
     },
   };
@@ -96,9 +96,9 @@ it("parses non-terminals where a placeholder name is same as the stringified def
     definition: [[new Terminal("x")], [new Terminal("("), new NonTerminal(1), new Terminal(";"), new NonTerminal(1)]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "(A;B",
     },
   };
@@ -129,9 +129,9 @@ it("parses multisets where each element consists of one non-terminal", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "\\Gamma, A",
     },
   };
@@ -159,9 +159,9 @@ it("parses rules consisting of a non-terminal representing a multiset, followed 
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "\\Gamma, A;",
     },
   };
@@ -192,9 +192,9 @@ describe("multisets where each element consists of multiple tokens", () => {
 
   it("parses when the placeholder comes before elements", () => {
     const rule: InferenceRule = {
-      ...defaultInferenceRule,
+      ...getDefaultInferenceRule(),
       conclusion: {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "\\Gamma, A;B",
       },
     };
@@ -211,9 +211,9 @@ describe("multisets where each element consists of multiple tokens", () => {
 
   it("parses when the placeholder comes after elements", () => {
     const rule: InferenceRule = {
-      ...defaultInferenceRule,
+      ...getDefaultInferenceRule(),
       conclusion: {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "A;B, \\Gamma",
       },
     };
@@ -235,9 +235,9 @@ it("fails when the conclusion is empty", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "   ",
     },
   };
@@ -250,9 +250,9 @@ it("fails when the conclusion is not a valid statement", () => {
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "y",
     },
   };
@@ -265,22 +265,22 @@ it("fails when any of the premises is empty, and throws an error for every empty
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "x",
     },
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "x",
       },
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "",
       },
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "    ",
       },
     ],
@@ -296,22 +296,22 @@ it("fails when any of the premises is not a valid statement, and throws an error
     definition: [[new Terminal("x")]],
   };
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "x",
     },
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "x",
       },
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "y",
       },
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "z",
       },
     ],
@@ -335,16 +335,16 @@ it("parses rules with Or in the syntax", () => {
     ],
   };
   const rule1: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "xyy",
     },
   };
   const rule2: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "xzz",
     },
   };
@@ -375,23 +375,23 @@ it("parses rules with Maybe in the syntax", () => {
     ],
   };
   const rule1: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "x",
     },
   };
   const rule2: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "xyy",
     },
   };
   const rule3: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "xzz",
     },
   };
@@ -420,9 +420,9 @@ it("does not modify the arguments", () => {
     definition: [[new Terminal("a")]],
   };
   const inferenceRule: InferenceRule = {
-    ...defaultInferenceRule,
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "A" }],
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "B" },
+    ...getDefaultInferenceRule(),
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "A" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "B" },
   };
   const statementClone = structuredClone(statement);
   const typeClone = structuredClone(type);

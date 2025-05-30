@@ -1,7 +1,7 @@
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "@/lib/utils";
+import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "@/lib/utils";
 import { verify } from "@/lib/verifier/verify";
 
 it("fails when the value assigned to a name by a premise is incompatible with the conclusion", () => {
@@ -9,19 +9,19 @@ it("fails when the value assigned to a name by a premise is incompatible with th
   const premises = ["x |- x", "z |- z"];
 
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "\\Gamma |- A",
       },
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "\\Sigma |- B",
       },
     ],
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "\\Gamma, \\Sigma, A |- B",
     },
   };
@@ -53,15 +53,15 @@ it("verifies the CL rule in the system LK", () => {
   const premises = ["x, y, y |- y"];
 
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "\\Gamma, A, A |- \\Delta",
       },
     ],
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "\\Gamma, A |- \\Delta",
     },
   };
@@ -93,15 +93,15 @@ it("verifies a rule with three uncertain name assignments", () => {
   const premises = ["x, x, y"];
 
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "A, B, C",
       },
     ],
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "A, B, C",
     },
   };
@@ -133,15 +133,15 @@ it("fails to verify a rule with three uncertain name assignments when no assignm
   const premises = ["x, x, y"];
 
   const rule: InferenceRule = {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     premises: [
       {
-        ...defaultInferenceRuleStatement,
+        ...getDefaultInferenceRuleStatement(),
         unsanitised: "A, B, C",
       },
     ],
     conclusion: {
-      ...defaultInferenceRuleStatement,
+      ...getDefaultInferenceRuleStatement(),
       unsanitised: "A, B, C",
     },
   };
