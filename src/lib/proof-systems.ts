@@ -1,7 +1,7 @@
 import { parseInferenceRules } from "./parsers/inference";
 import { parseSyntax } from "./parsers/syntax";
 import { SyntaxRule, InferenceRule } from "./types/rules";
-import { defaultInferenceRule, defaultInferenceRuleStatement, defaultSyntaxRule } from "./utils";
+import { defaultSyntaxRule, getDefaultInferenceRule, getDefaultInferenceRuleStatement } from "./utils";
 
 export const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
   { ...defaultSyntaxRule, definitionUnsanitised: "\\Gamma |- A" },
@@ -12,23 +12,23 @@ export const NATURAL_DEDUCTION_SYNTAX: SyntaxRule[] = [
 
 export const NATURAL_DEDUCTION_INFERENCE_RULES: InferenceRule[] = [
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- A" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- A" },
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to I",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A -> B)" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- B" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to E",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- B" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A -> B)" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A -> B)" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A" },
     ],
   },
 ];
@@ -44,23 +44,23 @@ export const LAMBDA_SYNTAX: SyntaxRule[] = [
 
 export const LAMBDA_INFERENCE_RULES: InferenceRule[] = [
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- var: A" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, var: A |- var: A" },
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to I",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, var: A |- M: B" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (\\lambda var. M): (A -> B)" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, var: A |- M: B" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to E",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (MN): B" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (MN): B" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- M: (A -> B)" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- N: A" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- M: (A -> B)" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- N: A" },
     ],
   },
 ];
@@ -78,102 +78,102 @@ export const SEQUENT_SYNTAX: SyntaxRule[] = [
 
 export const SEQUENT_INFERENCE_RULES: InferenceRule[] = [
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "Ax",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta, A" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta, A" },
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\land L_1",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\land L_2",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, (A \\land B) |- \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, B |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\lor L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (A \\lor B) |- \\Delta" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, (A \\lor B) |- \\Delta" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, B |- \\Delta" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, B |- \\Delta" },
     ],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, \\Sigma, (A \\to B) |- \\Delta, \\Pi" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, \\Sigma, (A \\to B) |- \\Delta, \\Pi" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Sigma, B |- \\Pi" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Sigma, B |- \\Pi" },
     ],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\lnot L",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, (\\lnot A) |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, (\\lnot A) |- \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\lor R_1",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\lor R_2",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A \\lor B), \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- B, \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\land R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\land B), \\Delta" },
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A \\land B), \\Delta" },
     premises: [
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
-      { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- B, \\Delta" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" },
+      { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- B, \\Delta" },
     ],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\to R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (A \\to B), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- B, \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (A \\to B), \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- B, \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "\\lnot R",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- (\\lnot A), \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- (\\lnot A), \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "WL",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "CL",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A |- \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma, A, A |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A |- \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma, A, A |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "WR",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- \\Delta" }],
   },
   {
-    ...defaultInferenceRule,
+    ...getDefaultInferenceRule(),
     name: "CR",
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, \\Delta" },
-    premises: [{ ...defaultInferenceRuleStatement, unsanitised: "\\Gamma |- A, A, \\Delta" }],
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, \\Delta" },
+    premises: [{ ...getDefaultInferenceRuleStatement(), unsanitised: "\\Gamma |- A, A, \\Delta" }],
   },
 ];
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { ArgumentInput } from "../components/inputs/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
+import { v4 as uuidv4 } from "uuid";
 import { InferenceRule, SyntaxRule } from "../lib/types/rules";
 import { verify } from "../lib/verifier/verify";
-import { cn, defaultInferenceRuleStatement, defaultSyntaxRule } from "../lib/utils";
+import { cn, defaultSyntaxRule, getDefaultInferenceRuleStatement } from "../lib/utils";
 import { parseSyntax } from "../lib/parsers/syntax";
 import { parseInferenceRules } from "../lib/parsers/inference";
 import { createFileRoute } from "@tanstack/react-router";
@@ -93,8 +94,9 @@ export function DerivationBuilder() {
 
       const inferenceRules: InferenceRule[] = search.inferenceRules.map(({ name, premises, conclusion }) => ({
         name,
-        premises: premises.map((unsanitised) => ({ ...defaultInferenceRuleStatement, unsanitised })),
-        conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
+        premises: premises.map((unsanitised) => ({ ...getDefaultInferenceRuleStatement(), unsanitised })),
+        conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: conclusion },
+        id: uuidv4(),
       }));
 
       const parsedSyntax = parseSyntax(syntax).rules;

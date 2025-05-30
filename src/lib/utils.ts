@@ -5,6 +5,7 @@ import { twMerge } from "tailwind-merge";
 import { AST, TerminalAST, NonTerminalAST } from "./types/ast";
 import { Matchable, MatchableNonTerminal, MatchableTerminal, MultisetElement, Name } from "./types/matchable";
 import { SyntaxRule, InferenceRuleStatement, InferenceRule } from "./types/rules";
+import { v4 as uuidv4 } from "uuid";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -57,18 +58,25 @@ export const defaultSyntaxRule: SyntaxRule = {
   definitionUnsanitised: "",
 };
 
-export const defaultInferenceRuleStatement: InferenceRuleStatement = {
-  structure: [],
-  sanitised: "",
-  unsanitised: "",
-};
-
-export const defaultInferenceRule: InferenceRule = {
-  name: "dummy",
-  premises: [],
-  conclusion: {
+export function getDefaultInferenceRuleStatement(): InferenceRuleStatement {
+  return {
     structure: [],
     sanitised: "",
     unsanitised: "",
-  },
-};
+    id: uuidv4(),
+  };
+}
+
+export function getDefaultInferenceRule(): InferenceRule {
+  return {
+    name: "dummy",
+    premises: [],
+    conclusion: {
+      structure: [],
+      sanitised: "",
+      unsanitised: "",
+      id: uuidv4(),
+    },
+    id: uuidv4(),
+  };
+}

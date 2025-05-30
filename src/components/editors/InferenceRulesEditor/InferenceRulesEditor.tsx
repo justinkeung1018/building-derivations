@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../shad
 import { RuleNameEditor } from "./RuleNameEditor";
 import { DefinitionEditor } from "./DefinitionEditor";
 import { DefinitionPreview } from "./DefinitionPreview";
+import { v4 as uuidv4 } from "uuid";
 
 interface InferenceRuleEditorRowProps {
   editing: boolean;
@@ -23,10 +24,11 @@ function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, error
   const [localRule, setLocalRule] = useState(rule);
 
   return (
-    <TableBody className="group border-b last:border-0">
-      <TableRow className="group-hover:bg-muted/50 border-0">
-        <TableCell>
+    <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
+      <TableRow key={`${rule.id}-tablerow`} className="group-hover:bg-muted/50 border-0">
+        <TableCell key={`${rule.id}-tablecell-rulenameeditor`}>
           <RuleNameEditor
+            key={`${rule.id}-rulenameeditor`}
             editing={editing}
             rule={localRule}
             index={index}
@@ -34,8 +36,9 @@ function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, error
             setInferenceRules={setInferenceRules}
           />
         </TableCell>
-        <TableCell>
+        <TableCell key={`${rule.id}-tablecell-definitioneditor`}>
           <DefinitionEditor
+            key={`${rule.id}-definitioneditor`}
             editing={editing}
             rule={localRule}
             index={index}
@@ -45,11 +48,12 @@ function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, error
         </TableCell>
         {editing && (
           <>
-            <TableCell>
-              <DefinitionPreview rule={localRule} />
+            <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
+              <DefinitionPreview key={`${rule.id}-definitionpreview`} rule={localRule} />
             </TableCell>
-            <TableCell>
+            <TableCell key={`${rule.id}-tablecell-deleteicon`}>
               <DeleteIcon
+                key={`${rule.id}-deleteicon`}
                 onClick={() => {
                   setInferenceRules((old) => old.filter((_, i) => i !== index));
                 }}
@@ -58,7 +62,7 @@ function InferenceRuleEditorRow({ editing, index, rule, setInferenceRules, error
           </>
         )}
       </TableRow>
-      <Errors index={index} errors={errors} />
+      <Errors key={`${rule.id}-errors`} index={index} errors={errors} />
     </TableBody>
   );
 }
@@ -90,6 +94,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           </TableHeader>
           {inferenceRules.map((rule, index) => (
             <InferenceRuleEditorRow
+              key={`${rule.id}-inferenceruleeditorrow`}
               editing={editing}
               index={index}
               rule={rule}
@@ -112,7 +117,9 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
                     structure: [],
                     sanitised: "",
                     unsanitised: "",
+                    id: uuidv4(),
                   },
+                  id: uuidv4(),
                 },
               ]);
             }}

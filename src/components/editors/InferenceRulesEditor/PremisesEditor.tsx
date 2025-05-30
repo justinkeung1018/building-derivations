@@ -5,12 +5,14 @@ import { InferenceRuleStatement } from "@/lib/types/rules";
 import { Plus } from "lucide-react";
 import { DefinitionEditorProps } from "./DefinitionEditor";
 import { DeleteIcon } from "../DeleteIcon";
+import { v4 as uuidv4 } from "uuid";
 
 export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }: DefinitionEditorProps) {
   if (rule.premises.length === 0) {
     return (
-      <div className="flex justify-center">
+      <div key={`${rule.id}-add-premise-button-container`} className="flex justify-center">
         <Button
+          key={`${rule.id}-add-premise-button`}
           variant="outline"
           onClick={() => {
             setLocalRule((old) => {
@@ -18,6 +20,7 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
                 structure: [],
                 sanitised: "",
                 unsanitised: "",
+                id: uuidv4(),
               };
               return { ...old, premises: [newPremise] };
             });
@@ -31,11 +34,11 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
   }
 
   return (
-    <div className="flex justify-center space-x-4">
+    <div key={`${rule.id}-premises-container`} className="flex justify-center space-x-4">
       {rule.premises.map((premise, premiseIndex) => (
-        <div className="relative">
+        <div key={`${premise.id}-input-container`} className="relative">
           <Input
-            key={`${index.toString()}-${premiseIndex.toString()}-premise`}
+            key={`${premise.id}-input`}
             className="w-48 pr-8"
             maxLength={200}
             value={premise.unsanitised}
@@ -59,8 +62,9 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
             }}
             data-cy={`premise-${index}-${premiseIndex}`}
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+          <div key={`${premise.id}-delete-container`} className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <DeleteIcon
+              key={`${premise.id}-delete`}
               onClick={() => {
                 setLocalRule((old) => ({
                   ...old,
@@ -72,6 +76,7 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
         </div>
       ))}
       <Button
+        key={`${rule.id}-add-premise-button-multiple`}
         variant="secondary"
         onClick={() => {
           setLocalRule((old) => {
@@ -79,6 +84,7 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
               structure: [],
               sanitised: "",
               unsanitised: "",
+              id: uuidv4(),
             };
             return {
               ...old,

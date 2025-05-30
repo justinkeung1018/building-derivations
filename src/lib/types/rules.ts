@@ -15,12 +15,14 @@ export interface InferenceRuleStatement {
   structure: Matchable[];
   sanitised: string;
   unsanitised: string;
+  id: string; // For identifying React DOM elements
 }
 
 export interface InferenceRule {
   name: string;
   premises: InferenceRuleStatement[];
   conclusion: InferenceRuleStatement;
+  id: string; // For identifying React DOM elements
 }
 
 export interface ParseResult<RuleType> {

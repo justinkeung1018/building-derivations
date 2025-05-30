@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 import { parseInferenceRules } from "../parsers/inference";
 import { parseSyntax } from "../parsers/syntax";
 import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "../types/io/rules";
 import { SyntaxRule, InferenceRule, ParseResult } from "../types/rules";
-import { defaultSyntaxRule, defaultInferenceRuleStatement } from "../utils";
+import { defaultSyntaxRule, getDefaultInferenceRuleStatement } from "../utils";
 import { downloadJSON } from "./utils";
 
 const jsonFields = {
@@ -41,8 +42,9 @@ export function importRules(text: string): ImportResult {
   }));
   const inferenceRules: InferenceRule[] = json.inferenceRules.map(({ name, premises, conclusion }) => ({
     name,
-    premises: premises.map((unsanitised) => ({ ...defaultInferenceRuleStatement, unsanitised })),
-    conclusion: { ...defaultInferenceRuleStatement, unsanitised: conclusion },
+    premises: premises.map((unsanitised) => ({ ...getDefaultInferenceRuleStatement(), unsanitised })),
+    conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: conclusion },
+    id: uuidv4(),
   }));
   // TODO: display parsing errors
   const parsedSyntax = parseSyntax(syntax);
