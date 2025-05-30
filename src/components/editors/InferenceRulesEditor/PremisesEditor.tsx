@@ -54,9 +54,6 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
                 };
               });
             }}
-            onFocus={() => {
-              console.log("onFocus!");
-            }}
             onBlur={() => {
               setInferenceRules((old) => old.map((r, i) => (i === index ? rule : r)));
             }}
