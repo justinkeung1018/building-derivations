@@ -12,6 +12,105 @@ import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
 import { getDefaultSyntaxRule } from "@/lib/utils";
 
+interface SyntaxEditorRowProps {
+  rule: SyntaxRule;
+  index: number;
+  editing: boolean;
+  errors: ErrorMap;
+  setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
+}
+
+function SyntaxEditorRow({ rule, index, editing, errors, setSyntax }: SyntaxEditorRowProps) {
+  const [localRule, setLocalRule] = useState(rule);
+
+  // Used in onBlur of inputs to force the state update to happen after onFocus is called.
+  // When the user is focused on an input and clicks on another input,
+  // this ensures the same click blurs the first input and focuses the second input
+  function delayedSetSyntax(value: React.SetStateAction<SyntaxRule[]>) {
+    requestAnimationFrame(() => {
+      setSyntax(value);
+    });
+  }
+
+  return (
+    <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
+      <TableRow key={`${rule.id}-tablerow`} className="group-hover:bg-muted/50 border-0">
+        <TableCell key={`${rule.id}-tablecell-placeholder`}>
+          {index === 0 ? (
+            "Statement"
+          ) : editing ? (
+            <Input
+              key={`${rule.id}-placeholder-input`}
+              maxLength={50}
+              className="w-24"
+              value={localRule.placeholdersUnsanitised}
+              onChange={(e) => {
+                setLocalRule((old) => ({ ...old, placeholdersUnsanitised: e.target.value }));
+              }}
+              onBlur={() => {
+                delayedSetSyntax((old) => old.map((r, i) => (i === index ? localRule : r)));
+              }}
+              data-cy={`syntax-placeholders-${index}`}
+            />
+          ) : (
+            <MathJax
+              key={`${rule.id}-placeholder-latex`}
+              inline
+              dynamic
+            >{`\\(${latexify(localRule.placeholders.join(","))}\\)`}</MathJax>
+          )}
+        </TableCell>
+        <TableCell key={`${rule.id}-tablecell-defines-symbol`}>
+          <MathJax key={`${rule.id}-defines-symbol`}>{"\\(::=\\)"}</MathJax>
+        </TableCell>
+        <TableCell key={`${rule.id}-tablecell-definition`}>
+          {editing ? (
+            <Input
+              key={`${rule.id}-definition-input`}
+              className="w-full"
+              maxLength={200}
+              value={localRule.definitionUnsanitised}
+              onChange={(e) => {
+                setLocalRule((old) => ({ ...old, definitionUnsanitised: e.target.value }));
+              }}
+              onBlur={() => {
+                delayedSetSyntax((old) => old.map((r, i) => (i === index ? localRule : r)));
+              }}
+              data-cy={`syntax-def-${index}`}
+            />
+          ) : (
+            <MathJax
+              key={`${rule.id}-definition-latex`}
+              inline
+              dynamic
+            >{`\\(${localRule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
+          )}
+        </TableCell>
+        {editing && [
+          <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
+            <MathJax
+              key={`${rule.id}-tablecell-definitionpreview`}
+              inline
+              dynamic
+            >{`\\(${latexify(localRule.definitionUnsanitised)}\\)`}</MathJax>
+          </TableCell>,
+          <TableCell key={`${rule.id}-tablecell-deleteicon`}>
+            {index > 0 && (
+              <DeleteIcon
+                key={`${rule.id}-deleteicon`}
+                onClick={() => {
+                  setSyntax((old) => old.filter((_, i) => i !== index));
+                }}
+              />
+            )}
+          </TableCell>,
+        ]}
+      </TableRow>
+      <Errors key={`${rule.id}-errors`} index={index} errors={errors} />
+    </TableBody>
+  );
+}
+
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
   setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
@@ -39,81 +138,14 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
             </TableRow>
           </TableHeader>
           {syntax.map((rule, index) => (
-            <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
-              <TableRow key={`${rule.id}-tablerow`} className="group-hover:bg-muted/50 border-0">
-                <TableCell key={`${rule.id}-tablecell-placeholder`}>
-                  {index === 0 ? (
-                    "Statement"
-                  ) : editing ? (
-                    <Input
-                      key={`${rule.id}-placeholder-input`}
-                      maxLength={50}
-                      className="w-24"
-                      value={rule.placeholdersUnsanitised}
-                      onChange={(e) => {
-                        setSyntax((old) => {
-                          const newRule = { ...rule, placeholdersUnsanitised: e.target.value };
-                          return old.map((r, i) => (i === index ? newRule : r));
-                        });
-                      }}
-                      data-cy={`syntax-placeholders-${index}`}
-                    />
-                  ) : (
-                    <MathJax
-                      key={`${rule.id}-placeholder-latex`}
-                      inline
-                      dynamic
-                    >{`\\(${latexify(rule.placeholders.join(","))}\\)`}</MathJax>
-                  )}
-                </TableCell>
-                <TableCell key={`${rule.id}-tablecell-defines-symbol`}>
-                  <MathJax key={`${rule.id}-defines-symbol`}>{"\\(::=\\)"}</MathJax>
-                </TableCell>
-                <TableCell key={`${rule.id}-tablecell-definition`}>
-                  {editing ? (
-                    <Input
-                      key={`${rule.id}-definition-input`}
-                      className="w-full"
-                      maxLength={200}
-                      value={rule.definitionUnsanitised}
-                      onChange={(e) => {
-                        setSyntax((old) => {
-                          const newRule = { ...rule, definitionUnsanitised: e.target.value };
-                          return old.map((r, i) => (i === index ? newRule : r));
-                        });
-                      }}
-                      data-cy={`syntax-def-${index}`}
-                    />
-                  ) : (
-                    <MathJax
-                      key={`${rule.id}-definition-latex`}
-                      inline
-                      dynamic
-                    >{`\\(${rule.definitionSanitised.map(latexify).join("\\ |\\ ")}\\)`}</MathJax>
-                  )}
-                </TableCell>
-                {editing && [
-                  <TableCell key={`${rule.id}-tablecell-definitionpreview`}>
-                    <MathJax
-                      key={`${rule.id}-tablecell-definitionpreview`}
-                      inline
-                      dynamic
-                    >{`\\(${latexify(rule.definitionUnsanitised)}\\)`}</MathJax>
-                  </TableCell>,
-                  <TableCell key={`${rule.id}-tablecell-deleteicon`}>
-                    {index > 0 && (
-                      <DeleteIcon
-                        key={`${rule.id}-deleteicon`}
-                        onClick={() => {
-                          setSyntax((old) => old.filter((_, i) => i !== index));
-                        }}
-                      />
-                    )}
-                  </TableCell>,
-                ]}
-              </TableRow>
-              <Errors key={`${rule.id}-errors`} index={index} errors={errors} />
-            </TableBody>
+            <SyntaxEditorRow
+              key={`${rule.id}-syntaxeditorrow`}
+              rule={rule}
+              index={index}
+              editing={editing}
+              errors={errors}
+              setSyntax={setSyntax}
+            />
           ))}
         </Table>
         {editing && (
