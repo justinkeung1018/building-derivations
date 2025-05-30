@@ -10,6 +10,7 @@ export default defineConfig({
     specPattern: "test/frontend/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "test/frontend/support/e2e.{js,jsx,ts,tsx}",
     viewportWidth: 1080,
+    video: true,
   },
   env: {
     codeCoverage: {
