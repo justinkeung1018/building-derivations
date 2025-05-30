@@ -14,3 +14,20 @@ it("warns users about left-recursive rules", () => {
   cy.contains("Left-recursive");
   cy.getBySel("apply-syntax-button").should("exist");
 });
+
+it("lets me add multiple rules: ", () => {
+  for (let i = 0; i < 10; i++) {
+    if (i > 0) {
+      cy.getBySel("add-syntax-button").click();
+      cy.getBySel(`syntax-placeholders-${i}`)
+        .type("a" + String(i))
+        .should("have.value", "a" + String(i))
+        .blur()
+        .wait(100);
+    }
+    cy.getBySel(`syntax-def-${i}`).type(String(i)).blur().wait(100);
+  }
+  cy.getBySel("syntax-placeholders-1").click().blur(); // Click on something random to force the last definition to blur
+  cy.getBySel("apply-syntax-button").click();
+  cy.getBySel("apply-syntax-button").should("not.exist");
+});
