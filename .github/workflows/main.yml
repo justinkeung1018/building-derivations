@@ -102,10 +102,6 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
 
-      - name: Print files
-        if: always()
-        run: ls -ltrh cypress/
-
       - name: Upload videos
         uses: actions/upload-artifact@v4
         if: always()
