@@ -11,6 +11,8 @@ import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
 import { getDefaultSyntaxRule } from "@/lib/utils";
+import { CircleHelp } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../shadcn/HoverCard";
 
 interface SyntaxEditorRowProps {
   rule: SyntaxRule;
@@ -127,7 +129,38 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Syntax rules</CardTitle>
+        <div className="flex justify-between">
+          <CardTitle>Syntax rules</CardTitle>
+          <HoverCard>
+            <HoverCardTrigger>
+              <CircleHelp size={20} />
+            </HoverCardTrigger>
+            <HoverCardContent>
+              <CardHeader className="p-0 flex flex-row justify-start items-center gap-x-2 space-y-0 mb-3">
+                <CircleHelp size={15} />
+                <CardTitle>Syntax guide</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ul className="list-disc list-outside ml-4 text-sm space-y-2">
+                  <li>Use {"{}"} to represent multisets.</li>
+                  <li>
+                    Use | to separate alternative definitions. If a definition uses | as a character, type the character
+                    in the definition using \vert instead.
+                  </li>
+                  <li>
+                    |- and \vdash both represent <MathJax inline>{"\\(\\vdash\\)"}</MathJax>.
+                  </li>
+                  <li>
+                    {"->"}, \rightarrow, \to, and {"\\to{}"} all represent <MathJax inline>{"\\(\\to\\)"}</MathJax>.
+                  </li>
+                  <li>
+                    Everything else is done in <MathJax inline>{"\\(\\LaTeX\\)"}</MathJax>.
+                  </li>
+                </ul>
+              </CardContent>
+            </HoverCardContent>
+          </HoverCard>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
