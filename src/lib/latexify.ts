@@ -1,6 +1,6 @@
 export function normalise(text: string): string {
   // Ensures all LaTeX commands (which take no arguments) are followed by exactly one space
-  text = text.replace(/\\([A-Za-z]+)\s*/g, "\\$1 ");
+  text = text.replace(/\\([^\s]+)\s*/g, "\\$1 ");
 
   const aliasMap: Record<string, string[]> = {
     "->": ["\\to\\{\\}", "\\to", "→", "\\rightarrow"],

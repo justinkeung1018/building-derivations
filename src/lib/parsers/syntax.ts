@@ -1,5 +1,5 @@
-import { anyChar, letter, Parjser, string, whitespace } from "parjs";
-import { between, many, many1, manyBetween, map, or, then } from "parjs/combinators";
+import { anyChar, eof, Parjser, regexp, space, string, whitespace } from "parjs";
+import { between, many, manyBetween, manyTill, map, or, then } from "parjs/combinators";
 import { NonTerminal, Multiset, Token, Terminal, Or, Maybe } from "../types/token";
 import { ParseResult, SyntaxRule } from "../types/rules";
 import { ErrorMap, MessageMap } from "../types/messagemap";
@@ -52,8 +52,8 @@ function buildSyntaxRuleParser(syntax: SyntaxRule[]): Parjser<Token[]> {
   // Match a backslash followed by one or more letters
   const command = string("\\").pipe(
     then(
-      letter().pipe(
-        many1(),
+      regexp(/[^\s]/).pipe(
+        manyTill(space().pipe(or(eof()))),
         map((x) => x.join("")),
       ),
     ),

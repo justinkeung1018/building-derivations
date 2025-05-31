@@ -210,3 +210,22 @@ it("does not modify the arguments", () => {
   parseSyntax([rule]);
   expect(rule).toEqual(clone);
 });
+
+it("parses a LaTeX command on its own", () => {
+  const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma" };
+  const [ruleParsed] = parseSyntax([rule]).rules;
+  console.log(parseSyntax([rule]));
+  expect(ruleParsed.definition).toEqual([[new Terminal("\\Gamma")]]);
+});
+
+it("parses a LaTeX command with arguments on its own", () => {
+  const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\mathbb{R}" };
+  const [ruleParsed] = parseSyntax([rule]).rules;
+  expect(ruleParsed.definition).toEqual([[new Terminal("\\mathbb{R}")]]);
+});
+
+it("parses a LaTeX command with arguments followed by something else", () => {
+  const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\mathbb{R} \\lambda" };
+  const [ruleParsed] = parseSyntax([rule]).rules;
+  expect(ruleParsed.definition).toEqual([[new Terminal("\\mathbb{R}"), new Terminal("\\lambda")]]);
+});
