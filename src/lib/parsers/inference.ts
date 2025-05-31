@@ -8,8 +8,8 @@ import {
   Name,
 } from "../types/matchable";
 import { InferenceRule, ParseResult, SyntaxRule } from "../types/rules";
-import { Multiset, NonTerminal, Or, Terminal, Token } from "../types/token";
-import { between, flatten, later, manySepBy, map, maybe, or, recover, then, thenq } from "parjs/combinators";
+import { NonTerminal, Terminal, Token } from "../types/token";
+import { between, flatten, later, manySepBy, map, or, recover, then, thenq } from "parjs/combinators";
 import { ors } from "../utils";
 import { ErrorMap, MessageMap } from "../types/messagemap";
 import { normalise } from "../latexify";
@@ -52,68 +52,33 @@ function getTokenParser(
     );
   }
 
-  if (token instanceof Multiset) {
-    // Multiset
-    let termArrayParser = getTokenParser(token.tokens[0], index, syntax, parsers).pipe(map((x) => [x]));
-    for (const subToken of token.tokens.slice(1)) {
-      termArrayParser = termArrayParser.pipe(
-        then(getTokenParser(subToken, index, syntax, parsers)),
-        map(([x, y]) => [...x, y]),
-      );
-    }
-
-    // TODO: perhaps verify whether the rule has at least one alternative that only consists of one multiset token?
-    // e.g. given a rule A ::= { B } c, the formulation A, c should not be allowed
-    const term = termArrayParser.pipe(
-      flatten(),
-      map((x) => new MultisetElement(x)),
-      or(placeholderParser),
-      between(whitespace()),
-    );
-    const nonempty = term.pipe(
-      manySepBy(string(",").pipe(between(whitespace()))),
-      map((x) => new MatchableMultiset(index, [...x])), // We need to spread to remove the intersection type for tests to pass
-    );
-    const empty = string("\\varnothing").pipe(map(() => new MatchableMultiset(index, [])));
-    return empty.pipe(
-      or(nonempty),
-      map((x) => [x]),
-      between(whitespace()),
+  // Multiset
+  let termArrayParser = getTokenParser(token.tokens[0], index, syntax, parsers).pipe(map((x) => [x]));
+  for (const subToken of token.tokens.slice(1)) {
+    termArrayParser = termArrayParser.pipe(
+      then(getTokenParser(subToken, index, syntax, parsers)),
+      map(([x, y]) => [...x, y]),
     );
   }
 
-  if (token instanceof Or) {
-    const alternativeParsers = token.alternatives.map((x) => getAlternativeParser(x, index, syntax, parsers));
-    let parser = alternativeParsers[0];
-    for (const alternativeParser of alternativeParsers.slice(1)) {
-      parser = parser.pipe(or(alternativeParser));
-    }
-    return parser;
-  }
-
-  // Maybe
-  const alternativeParsers = token.alternatives.map((x) => getAlternativeParser(x, index, syntax, parsers));
-  let parser = alternativeParsers[0];
-  for (const alternativeParser of alternativeParsers.slice(1)) {
-    parser = parser.pipe(or(alternativeParser));
-  }
-  return parser.pipe(maybe([]));
-}
-
-function getAlternativeParser(
-  tokens: Token[],
-  index: number,
-  syntax: SyntaxRule[],
-  parsers: Parjser<Matchable[]>[],
-): Parjser<Matchable[]> {
-  let parser = getTokenParser(tokens[0], index, syntax, parsers);
-  for (const token of tokens.slice(1)) {
-    parser = parser.pipe(
-      then(getTokenParser(token, index, syntax, parsers)),
-      map(([x, y]) => [...x, ...y]),
-    );
-  }
-  return parser;
+  // TODO: perhaps verify whether the rule has at least one alternative that only consists of one multiset token?
+  // e.g. given a rule A ::= { B } c, the formulation A, c should not be allowed
+  const term = termArrayParser.pipe(
+    flatten(),
+    map((x) => new MultisetElement(x)),
+    or(placeholderParser),
+    between(whitespace()),
+  );
+  const nonempty = term.pipe(
+    manySepBy(string(",").pipe(between(whitespace()))),
+    map((x) => new MatchableMultiset(index, [...x])), // We need to spread to remove the intersection type for tests to pass
+  );
+  const empty = string("\\varnothing").pipe(map(() => new MatchableMultiset(index, [])));
+  return empty.pipe(
+    or(nonempty),
+    map((x) => [x]),
+    between(whitespace()),
+  );
 }
 
 function buildInferenceRuleStatementParser(syntax: SyntaxRule[]): Parjser<Matchable[]> {

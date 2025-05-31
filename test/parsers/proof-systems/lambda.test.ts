@@ -1,4 +1,4 @@
-import { Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
+import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
 import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { parseInferenceRules } from "@/lib/parsers/inference";
@@ -29,8 +29,8 @@ const typeCorrect: SyntaxRule = {
   ...getDefaultSyntaxRule(),
   placeholders: ["A", "B"],
   definition: [
-    [new Terminal("("), new NonTerminal(3), new Terminal("->"), new NonTerminal(3), new Terminal(")")],
     [new NonTerminal(4)],
+    [new Terminal("("), new NonTerminal(3), new Terminal("->"), new NonTerminal(3), new Terminal(")")],
   ],
 };
 const typevarCorrect: SyntaxRule = {
@@ -42,14 +42,16 @@ const termCorrect: SyntaxRule = {
   ...getDefaultSyntaxRule(),
   placeholders: ["M", "N"],
   definition: [
+    [new NonTerminal(2)],
     [
       new Terminal("("),
-      new Or([
-        [new Terminal("\\lambda"), new NonTerminal(2), new Terminal("."), new NonTerminal(5), new Terminal(")")],
-        [new NonTerminal(5), new NonTerminal(5), new Terminal(")")],
-      ]),
+      new Terminal("\\lambda"),
+      new NonTerminal(2),
+      new Terminal("."),
+      new NonTerminal(5),
+      new Terminal(")"),
     ],
-    [new NonTerminal(2)],
+    [new Terminal("("), new NonTerminal(5), new NonTerminal(5), new Terminal(")")],
   ],
 };
 

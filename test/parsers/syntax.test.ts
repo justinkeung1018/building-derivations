@@ -1,5 +1,5 @@
 import { parseSyntax } from "@/lib/parsers/syntax";
-import { Maybe, Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
+import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
 import { SyntaxRule } from "@/lib/types/rules";
 import { getDefaultSyntaxRule } from "@/lib/utils";
 
@@ -46,9 +46,9 @@ it("assigns non-terminals to placeholders and terminals otherwise", () => {
   };
   const [_stmt, parsed1, _] = parseSyntax([getDefaultStatement(), rule1, rule2]).rules;
   expect(parsed1.definition).toEqual([
+    [new NonTerminal(2)],
     [new Terminal("z"), new NonTerminal(2)],
     [new Terminal("y")],
-    [new NonTerminal(2)],
   ]);
 });
 
@@ -108,87 +108,6 @@ it("fails when there are duplicate placeholders", () => {
   const rule1 = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "A, B", definitionUnsanitised: "x" };
   const rule2 = { ...getDefaultSyntaxRule(), placeholdersUnsanitised: "B, C", definitionUnsanitised: "y" };
   expect(parseSyntax([getDefaultStatement(), rule1, rule2]).errors).toEmitOverall("multiple");
-});
-
-it("parses rules with alternatives beginning with the same terminal", () => {
-  const statement: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "(a) | (b)" };
-  const [statementParsed] = parseSyntax([statement]).rules;
-  expect(statementParsed.definition).toEqual([
-    [
-      new Terminal("("),
-      new Or([
-        [new Terminal("a"), new Terminal(")")],
-        [new Terminal("b"), new Terminal(")")],
-      ]),
-    ],
-  ]);
-});
-
-it("parses rules where one alternative is a (strict) prefix of another alternative", () => {
-  const statement: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    definitionUnsanitised: "a | ab",
-  };
-  const [statementParsed] = parseSyntax([statement]).rules;
-  expect(statementParsed.definition).toEqual([[new Terminal("a"), new Maybe([[new Terminal("b")]])]]);
-});
-
-it("parses rules where alternatives are (strict) prefixes of each other", () => {
-  const statement: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    definitionUnsanitised: "abc | abcd | abcde | abcdef",
-  };
-  const [statementParsed] = parseSyntax([statement]).rules;
-  expect(statementParsed.definition).toEqual([
-    [
-      new Terminal("a"),
-      new Terminal("b"),
-      new Terminal("c"),
-      new Maybe([[new Terminal("d"), new Maybe([[new Terminal("e"), new Maybe([[new Terminal("f")]])]])]]),
-    ],
-  ]);
-});
-
-it("parses rules with multiple alternatives within a Maybe", () => {
-  const statement: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    definitionUnsanitised: "a | ab | ad",
-  };
-  const [statementParsed] = parseSyntax([statement]).rules;
-  expect(statementParsed.definition).toEqual([
-    [new Terminal("a"), new Maybe([[new Terminal("b")], [new Terminal("d")]])],
-  ]);
-});
-
-it("fails when a rule has alternatives beginning with different non-terminals that begin with the same terminal", () => {
-  const statement: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    definitionUnsanitised: "A | B",
-  };
-  const a: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    placeholdersUnsanitised: "A",
-    definitionUnsanitised: "(a)",
-  };
-  const b: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    placeholdersUnsanitised: "B",
-    definitionUnsanitised: "(b)",
-  };
-  expect(parseSyntax([statement, a, b]).errors).toEmitOverall("first set");
-});
-
-it("fails when multiple alternatives are exactly the same", () => {
-  const statement: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    definitionUnsanitised: "Abc | Bbc",
-  };
-  const rule: SyntaxRule = {
-    ...getDefaultSyntaxRule(),
-    placeholdersUnsanitised: "A, B",
-    definitionUnsanitised: "x",
-  };
-  expect(parseSyntax([statement, rule]).errors).toEmit(0, "duplicate");
 });
 
 it("fails when the rule is left-recursive", () => {

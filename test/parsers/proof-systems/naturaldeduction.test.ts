@@ -24,8 +24,8 @@ const typeCorrect: SyntaxRule = {
   ...getDefaultSyntaxRule(),
   placeholders: ["A", "B"],
   definition: [
-    [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
     [new NonTerminal(3)],
+    [new Terminal("("), new NonTerminal(2), new Terminal("->"), new NonTerminal(2), new Terminal(")")],
   ],
 };
 const typevarCorrect: SyntaxRule = {

@@ -1,5 +1,5 @@
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
-import { Maybe, Multiset, NonTerminal, Or, Terminal } from "@/lib/types/token";
+import { Multiset, NonTerminal, Terminal } from "@/lib/types/token";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import {
   MatchableMultiset,
@@ -321,17 +321,12 @@ it("fails when any of the premises is not a valid statement, and throws an error
   expect(errors).toEmit(0, "Premise 3");
 });
 
-it("parses rules with Or in the syntax", () => {
+it("parses rules where two alternatives share the same leading terminal", () => {
   const statement: SyntaxRule = {
     ...getDefaultSyntaxRule(),
     definition: [
-      [
-        new Terminal("x"),
-        new Or([
-          [new Terminal("y"), new Terminal("y")],
-          [new Terminal("z"), new Terminal("z")],
-        ]),
-      ],
+      [new Terminal("x"), new Terminal("y"), new Terminal("y")],
+      [new Terminal("x"), new Terminal("z"), new Terminal("z")],
     ],
   };
   const rule1: InferenceRule = {
@@ -365,13 +360,9 @@ it("parses rules with Maybe in the syntax", () => {
   const statement: SyntaxRule = {
     ...getDefaultSyntaxRule(),
     definition: [
-      [
-        new Terminal("x"),
-        new Maybe([
-          [new Terminal("y"), new Terminal("y")],
-          [new Terminal("z"), new Terminal("z")],
-        ]),
-      ],
+      [new Terminal("x")],
+      [new Terminal("x"), new Terminal("y"), new Terminal("y")],
+      [new Terminal("x"), new Terminal("z"), new Terminal("z")],
     ],
   };
   const rule1: InferenceRule = {

@@ -1,6 +1,6 @@
 import { buildTermParser } from "@/lib/parsers/term";
 import { TerminalAST, NonTerminalAST, MultisetAST } from "@/lib/types/ast";
-import { Terminal, NonTerminal, Multiset, Or, Maybe } from "@/lib/types/token";
+import { Terminal, NonTerminal, Multiset } from "@/lib/types/token";
 import { ResultKind } from "parjs";
 import { SyntaxRule } from "@/lib/types/rules";
 import { getDefaultSyntaxRule } from "@/lib/utils";
@@ -135,17 +135,12 @@ it("parses multisets greedily without caring about other rules", () => {
   expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.SoftFail);
 });
 
-it("parses rules with Ors", () => {
+it("parses rules where two alternatives share the same leading terminal", () => {
   const statement: SyntaxRule = {
     ...getDefaultSyntaxRule(),
     definition: [
-      [
-        new Terminal("("),
-        new Or([
-          [new Terminal("a"), new Terminal(")")],
-          [new Terminal("b"), new Terminal(")")],
-        ]),
-      ],
+      [new Terminal("("), new Terminal("a"), new Terminal(")")],
+      [new Terminal("("), new Terminal("b"), new Terminal(")")],
     ],
   };
   const parser = buildTermParser([statement]);
@@ -153,10 +148,10 @@ it("parses rules with Ors", () => {
   expect(parser.parse("(b)").value).toEqual([new TerminalAST("("), new TerminalAST("b"), new TerminalAST(")")]);
 });
 
-it("parses rules with Maybes", () => {
+it("parses rules where one alternative is a strict prefix of another alternative", () => {
   const statement: SyntaxRule = {
     ...getDefaultSyntaxRule(),
-    definition: [[new Terminal("a"), new Maybe([[new Terminal("b")]])]],
+    definition: [[new Terminal("a")], [new Terminal("a"), new Terminal("b")]],
   };
   const parser = buildTermParser([statement]);
   expect(parser.parse("a").value).toEqual([new TerminalAST("a")]);

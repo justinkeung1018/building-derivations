@@ -1,6 +1,6 @@
 import { anyChar, eof, Parjser, regexp, space, string, whitespace } from "parjs";
 import { between, many, manyBetween, manyTill, map, or, then } from "parjs/combinators";
-import { NonTerminal, Multiset, Token, Terminal, Or, Maybe } from "../types/token";
+import { NonTerminal, Multiset, Token, Terminal } from "../types/token";
 import { ParseResult, SyntaxRule } from "../types/rules";
 import { ErrorMap, MessageMap } from "../types/messagemap";
 import { normalise } from "../latexify";
@@ -98,15 +98,10 @@ function addAlternativeFirstSet(firstSet: Set<string>, index: number, alternativ
     for (const token of getFirstSet(alternative[0].index, syntax)) {
       firstSet.add(token);
     }
-  } else if (alternative[0] instanceof Multiset) {
+  } else {
+    // Multiset
     firstSet.add("\\varnothing");
     addAlternativeFirstSet(firstSet, index, alternative[0].tokens, syntax);
-  } else if (alternative[0] instanceof Or) {
-    for (const alt of alternative[0].alternatives) {
-      addAlternativeFirstSet(firstSet, index, alt, syntax);
-    }
-  } else {
-    throw new Error("Rule definitions should be non-empty and never begin with a Maybe token");
   }
 }
 
@@ -116,79 +111,6 @@ function getFirstSet(index: number, syntax: SyntaxRule[]): Set<string> {
     addAlternativeFirstSet(firstSet, index, alternative, syntax);
   }
   return firstSet;
-}
-
-function addToPartition(
-  terminals: Record<string, number[]>,
-  nonTerminals: Record<number, number[]>,
-  token: Token,
-  index: number,
-) {
-  if (token instanceof Terminal) {
-    const key = token.value;
-    if (!(key in terminals)) {
-      terminals[key] = [];
-    }
-    terminals[key].push(index);
-  } else if (token instanceof NonTerminal) {
-    const key = token.index;
-    if (!(key in nonTerminals)) {
-      nonTerminals[key] = [];
-    }
-    nonTerminals[key].push(index);
-  }
-}
-
-function partition(alternatives: Token[][]): [Record<string, number[]>, Record<number, number[]>] {
-  const terminals: Record<string, number[]> = {};
-  const nonTerminals: Record<number, number[]> = {};
-
-  const firstTokens = alternatives.map((x) => x[0]);
-  firstTokens.forEach((token, index) => {
-    addToPartition(terminals, nonTerminals, token, index);
-  });
-
-  return [terminals, nonTerminals];
-}
-
-function recurse(alternatives: Token[][], prefix: Token, indices: number[]): Token[] {
-  if (indices.length === 1) {
-    return alternatives[indices[0]];
-  }
-
-  const suffixes = indices.map((i) => alternatives[i].slice(1));
-  const nonempty = suffixes.filter((x) => x.length !== 0);
-
-  const numEmpty = suffixes.length - nonempty.length;
-  if (numEmpty >= 2) {
-    throw new Error("The rule has duplicate alternatives");
-  } else if (numEmpty === 1) {
-    return [prefix, new Maybe(factorise(nonempty))];
-  }
-
-  const rest = factorise(nonempty);
-  if (rest.length === 1) {
-    // There is only one alternative
-    return [prefix, ...rest[0]];
-  }
-
-  return [prefix, new Or(factorise(nonempty))];
-}
-
-export function factorise(alternatives: Token[][]): Token[][] {
-  // When factorise is called, there should be no Or or Maybe tokens in alternatives
-  const factorised: Token[][] = [];
-  const [terminals, nonTerminals] = partition(alternatives);
-
-  Object.entries(terminals).forEach(([value, indices]) => {
-    factorised.push(recurse(alternatives, new Terminal(value), indices));
-  });
-  Object.entries(nonTerminals).forEach(([index, indices]) => {
-    factorised.push(recurse(alternatives, new NonTerminal(Number(index)), indices));
-  });
-
-  const multisets = alternatives.filter((x) => x[0] instanceof Multiset);
-  return [...factorised, ...multisets];
 }
 
 export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
@@ -237,41 +159,18 @@ export function parseSyntax(syntax: SyntaxRule[]): ParseResult<SyntaxRule> {
 
         rule.definition.push(tokens);
       }
-
-      rule.definition = factorise(rule.definition);
     } catch (error) {
       errors.pushError(index, error);
     }
   });
 
-  const firstSets: Set<string>[] = syntax.map((_, index) => {
+  syntax.forEach((_, index) => {
     try {
-      return getFirstSet(index, syntax);
-    } catch (error) {
-      errors.pushError(index, error);
-      return new Set();
+      getFirstSet(index, syntax);
+    } catch {
+      errors.pushError(index, new Error("Left-recursive rules are not allowed"));
     }
   });
-
-  for (const rule of syntax) {
-    // We can handle different alternatives beginning with the same terminal
-    // and different alternatives beginnning with the same non-terminal (i.e. they refer to the same rule)
-    const firstTokens = rule.definition.map((x) => x[0]);
-    const firstNonTerminalIndices = [
-      ...new Set(firstTokens.filter((x) => x instanceof NonTerminal).map((x) => x.index)),
-    ];
-    const relevantFirstSets = firstNonTerminalIndices.map((x) => firstSets[x]);
-
-    const unique = new Set();
-    for (const firstSet of relevantFirstSets) {
-      for (const token of firstSet) {
-        if (unique.has(token)) {
-          errors.pushOverall("Alternatives beginning with different non-terminals have the same first set");
-        }
-        unique.add(token);
-      }
-    }
-  }
 
   return { rules: syntax, warnings, errors };
 }

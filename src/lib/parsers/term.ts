@@ -1,8 +1,8 @@
 import { eof, Parjser, string, whitespace } from "parjs";
-import { between, map, then, manySepBy, or, later, flatten, maybe, recover, thenq } from "parjs/combinators";
+import { between, map, then, manySepBy, or, later, flatten, recover, thenq } from "parjs/combinators";
 import { AST, TerminalAST, NonTerminalAST, MultisetAST } from "../types/ast";
 import { SyntaxRule } from "../types/rules";
-import { Token, NonTerminal, Terminal, Or, Multiset } from "../types/token";
+import { Token, NonTerminal, Terminal } from "../types/token";
 import _ from "lodash";
 
 function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST[]> {
@@ -17,42 +17,24 @@ function getTokenParser(token: Token, parsers: Parjser<AST[]>[]): Parjser<AST[]>
     return parsers[token.index].pipe(map((x) => [new NonTerminalAST(token.index, x)]));
   }
 
-  if (token instanceof Multiset) {
-    let term = getTokenParser(token.tokens[0], parsers).pipe(map((x) => [x]));
-    for (const subToken of token.tokens.slice(1)) {
-      term = term.pipe(
-        then(getTokenParser(subToken, parsers)),
-        map(([x, y]) => [...x, y]),
-      );
-    }
-    const nonempty = term.pipe(
-      flatten(),
-      manySepBy(string(",").pipe(between(whitespace()))),
-      map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
-    );
-    const empty = string("\\varnothing").pipe(map(() => new MultisetAST([])));
-    return empty.pipe(
-      or(nonempty),
-      map((x) => [x]),
+  // Multiset
+  let term = getTokenParser(token.tokens[0], parsers).pipe(map((x) => [x]));
+  for (const subToken of token.tokens.slice(1)) {
+    term = term.pipe(
+      then(getTokenParser(subToken, parsers)),
+      map(([x, y]) => [...x, y]),
     );
   }
-
-  if (token instanceof Or) {
-    const alternativeParsers = token.alternatives.map((x) => getAlternativeParser(x, parsers));
-    let parser = alternativeParsers[0];
-    for (const alternativeParser of alternativeParsers.slice(1)) {
-      parser = parser.pipe(or(alternativeParser));
-    }
-    return parser;
-  }
-
-  // Maybe
-  const alternativeParsers = token.alternatives.map((x) => getAlternativeParser(x, parsers));
-  let parser = alternativeParsers[0];
-  for (const alternativeParser of alternativeParsers.slice(1)) {
-    parser = parser.pipe(or(alternativeParser));
-  }
-  return parser.pipe(maybe([]));
+  const nonempty = term.pipe(
+    flatten(),
+    manySepBy(string(",").pipe(between(whitespace()))),
+    map((x) => new MultisetAST([...x])), // We need to spread to remove the intersection type for tests to pass
+  );
+  const empty = string("\\varnothing").pipe(map(() => new MultisetAST([])));
+  return empty.pipe(
+    or(nonempty),
+    map((x) => [x]),
+  );
 }
 
 function getAlternativeParser(tokens: Token[], parsers: Parjser<AST[]>[]): Parjser<AST[]> {
