@@ -81,7 +81,7 @@ export function DerivationBuilder() {
     const errors = verifyInput(0, new MessageMap(), new MessageMap());
     setErrors(errors);
     setValid(errors.inputErrors.size === 0 && errors.ruleErrors.size === 0);
-  }, [states]);
+  }, [states, syntax, inferenceRules]);
 
   useEffect(() => {
     if (search.mode === "json") {
