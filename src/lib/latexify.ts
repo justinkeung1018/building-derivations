@@ -37,8 +37,9 @@ export function normalise(text: string): string {
 export function latexify(text: string): string {
   return normalise(text)
     .replaceAll("|-", "\\vdash")
-    .replaceAll("->", "\\to\\{\\}")
-    .replaceAll("{", "\\{")
-    .replaceAll("}", "\\}")
+    .replaceAll("->", "\\to{}")
+    .replaceAll(/(?<!\\[^\s]+)[{}]/g, (match) => {
+      return match === "{" ? "\\{" : "\\}";
+    })
     .replaceAll("|", "\\ |\\ ");
 }
