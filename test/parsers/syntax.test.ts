@@ -214,7 +214,6 @@ it("does not modify the arguments", () => {
 it("parses a LaTeX command on its own", () => {
   const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\Gamma" };
   const [ruleParsed] = parseSyntax([rule]).rules;
-  console.log(parseSyntax([rule]));
   expect(ruleParsed.definition).toEqual([[new Terminal("\\Gamma")]]);
 });
 
