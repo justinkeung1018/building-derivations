@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/shadcn/Button";
 import { Input } from "@/components/shadcn/Input";
-import { InferenceRuleStatement } from "@/lib/types/rules";
+import { InferenceRule, InferenceRuleStatement } from "@/lib/types/rules";
 import { Plus } from "lucide-react";
 import { DefinitionEditorProps } from "./DefinitionEditor";
 import { DeleteIcon } from "../DeleteIcon";
@@ -63,10 +63,13 @@ export function PremisesEditor({ rule, index, setLocalRule, setInferenceRules }:
             <DeleteIcon
               key={`${premise.id}-delete`}
               onClick={() => {
-                setLocalRule((old) => ({
-                  ...old,
-                  premises: rule.premises.filter((_, i) => i !== premiseIndex),
-                }));
+                setInferenceRules((old) => {
+                  const newRule: InferenceRule = {
+                    ...rule,
+                    premises: rule.premises.filter((_, i) => i !== premiseIndex),
+                  };
+                  return old.map((r, i) => (i === index ? newRule : r));
+                });
               }}
             />
           </div>
