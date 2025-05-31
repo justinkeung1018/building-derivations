@@ -432,3 +432,75 @@ it("does not modify the arguments", () => {
   expect(type).toEqual(typeClone);
   expect(inferenceRule).toEqual(inferenceRuleClone);
 });
+
+it("parses statements with alternative definitions where a leading multiset and a leading nonterminal coincide", () => {
+  const statement1: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [
+      [new NonTerminal(1), new Terminal("!")],
+      [new NonTerminal(2), new Terminal("*")],
+    ],
+  };
+  const statement2: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [
+      [new NonTerminal(2), new Terminal("*")],
+      [new NonTerminal(1), new Terminal("!")],
+    ],
+  };
+  const context: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2)])]],
+  };
+  const type: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A", "B"],
+    definition: [[new Terminal("x")]],
+  };
+  const rule: InferenceRule = {
+    ...getDefaultInferenceRule(),
+    conclusion: {
+      ...getDefaultInferenceRuleStatement(),
+      unsanitised: "A, \\Gamma!",
+    },
+  };
+  const [ruleParsed1] = parseInferenceRules([rule], [statement1, context, type]).rules;
+  const [ruleParsed2] = parseInferenceRules([rule], [statement2, context, type]).rules;
+  expect(ruleParsed1.conclusion.structure.length).toBeGreaterThan(0);
+  expect(ruleParsed2.conclusion.structure.length).toBeGreaterThan(0);
+  expect(ruleParsed1.conclusion.structure).toEqual(ruleParsed2.conclusion.structure);
+});
+
+it("parses statements with alternative definitions where one alternative is a prefix of another beginning with a multiset", () => {
+  const statement1: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [[new NonTerminal(1), new Terminal("!")], [new NonTerminal(2)]],
+  };
+  const statement2: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [[new NonTerminal(2)], [new NonTerminal(1), new Terminal("!")]],
+  };
+  const context: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2)])]],
+  };
+  const type: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A", "B"],
+    definition: [[new Terminal("x")]],
+  };
+  const rule: InferenceRule = {
+    ...getDefaultInferenceRule(),
+    conclusion: {
+      ...getDefaultInferenceRuleStatement(),
+      unsanitised: "A, \\Gamma!",
+    },
+  };
+  const [ruleParsed1] = parseInferenceRules([rule], [statement1, context, type]).rules;
+  const [ruleParsed2] = parseInferenceRules([rule], [statement2, context, type]).rules;
+  expect(ruleParsed1.conclusion.structure.length).toBeGreaterThan(0);
+  expect(ruleParsed2.conclusion.structure.length).toBeGreaterThan(0);
+  expect(ruleParsed1.conclusion.structure).toEqual(ruleParsed2.conclusion.structure);
+});

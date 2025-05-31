@@ -1,4 +1,4 @@
-import { nope, Parjser, string, whitespace } from "parjs";
+import { eof, nope, Parjser, string, whitespace } from "parjs";
 import {
   Matchable,
   MatchableMultiset,
@@ -9,7 +9,7 @@ import {
 } from "../types/matchable";
 import { InferenceRule, ParseResult, SyntaxRule } from "../types/rules";
 import { Multiset, NonTerminal, Or, Terminal, Token } from "../types/token";
-import { between, flatten, later, manySepBy, map, maybe, or, then } from "parjs/combinators";
+import { between, flatten, later, manySepBy, map, maybe, or, recover, then, thenq } from "parjs/combinators";
 import { ors } from "../utils";
 import { ErrorMap, MessageMap } from "../types/messagemap";
 import { normalise } from "../latexify";
@@ -128,7 +128,13 @@ function buildInferenceRuleStatementParser(syntax: SyntaxRule[]): Parjser<Matcha
           map(([x, y]) => [...x, ...y]),
         );
       }
-      alternativeParsers.push(parser);
+      if (i === 0) {
+        // The rule defines a statement
+        parser = parser.pipe(thenq(eof()));
+      }
+      parser = parser.pipe(recover(() => ({ kind: "Soft" })));
+
+      alternativeParsers.push(parser.pipe(recover(() => ({ kind: "Soft" }))));
     }
 
     let parser = alternativeParsers[0];
