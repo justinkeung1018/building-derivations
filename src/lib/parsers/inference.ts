@@ -134,7 +134,7 @@ function buildInferenceRuleStatementParser(syntax: SyntaxRule[]): Parjser<Matcha
       }
       parser = parser.pipe(recover(() => ({ kind: "Soft" })));
 
-      alternativeParsers.push(parser.pipe(recover(() => ({ kind: "Soft" }))));
+      alternativeParsers.push(parser);
     }
 
     let parser = alternativeParsers[0];
