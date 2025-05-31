@@ -25,7 +25,7 @@ const jsonFields = {
 
 const schema: z.ZodType<JSONFormat> = z.object(jsonFields);
 
-interface ImportResult {
+export interface ImportResult {
   json: JSONFormat;
   parsedSyntax: ParseResult<SyntaxRule>;
   parsedInferenceRules: ParseResult<InferenceRule>;

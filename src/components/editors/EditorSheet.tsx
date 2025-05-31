@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { SquarePen } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../shadcn/Sheet";
 import { SidebarMenuButton } from "../shadcn/Sidebar";
@@ -19,6 +19,8 @@ interface EditorSheetProps {
 }
 
 export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRules }: EditorSheetProps) {
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -54,7 +56,14 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
             </ToggleGroupItem>
           </ToggleGroup>
           <div>or load a configuration:</div>
-          <ConfigFileInput setSyntax={setSyntax} setInferenceRules={setInferenceRules} />
+          <ConfigFileInput
+            setFileName={setFileName}
+            callback={({ parsedSyntax, parsedInferenceRules }) => {
+              setSyntax(parsedSyntax.rules);
+              setInferenceRules(parsedInferenceRules.rules);
+            }}
+          />
+          {fileName !== undefined && <span>{fileName} uploaded.</span>}
         </div>
         <h1>or define your own:</h1>
         <div>

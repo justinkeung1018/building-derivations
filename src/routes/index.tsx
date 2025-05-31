@@ -12,6 +12,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [search, setSearch] = useState<SearchParams>({ mode: "none" });
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-12">
@@ -55,8 +56,18 @@ function Landing() {
           <CardHeader>
             <CardTitle>Upload a JSON</CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow flex items-center justify-center">
-            <ConfigFileInput setSearch={setSearch} />
+          <CardContent className="flex-grow flex flex-col items-center justify-center gap-y-2">
+            <ConfigFileInput
+              setFileName={setFileName}
+              callback={({ json, parsedSyntax, parsedInferenceRules }) => {
+                if (parsedSyntax.errors.size === 0 && parsedInferenceRules.errors.size === 0) {
+                  setSearch({ mode: "json", ...json });
+                } else {
+                  setSearch({ mode: "none" });
+                }
+              }}
+            />
+            {fileName !== undefined && <div className="text-center">{fileName} uploaded.</div>}
           </CardContent>
         </Card>
         <Card
