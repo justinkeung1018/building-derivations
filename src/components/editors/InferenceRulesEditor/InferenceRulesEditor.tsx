@@ -89,6 +89,21 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
     });
   }
 
+  function update() {
+    setInferenceRules((old) => {
+      const parseResult = parseInferenceRules(old, syntax);
+      setErrors(parseResult.errors);
+      if (parseResult.errors.size === 0) {
+        setEditing(false);
+      }
+      return parseResult.rules;
+    });
+  }
+
+  useEffect(() => {
+    update();
+  }, [syntax]);
+
   return (
     <Card>
       <CardHeader>
@@ -145,14 +160,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setInferenceRules((old) => {
-                const parseResult = parseInferenceRules(old, syntax);
-                setErrors(parseResult.errors);
-                if (parseResult.errors.size === 0) {
-                  setEditing(false);
-                }
-                return parseResult.rules;
-              });
+              update();
             }}
             data-cy="apply-inference-button"
           >
