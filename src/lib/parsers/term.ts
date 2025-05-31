@@ -1,5 +1,5 @@
-import { Parjser, string, whitespace } from "parjs";
-import { between, map, then, manySepBy, or, later, flatten, maybe } from "parjs/combinators";
+import { eof, Parjser, string, whitespace } from "parjs";
+import { between, map, then, manySepBy, or, later, flatten, maybe, recover, thenq } from "parjs/combinators";
 import { AST, TerminalAST, NonTerminalAST, MultisetAST } from "../types/ast";
 import { SyntaxRule } from "../types/rules";
 import { Token, NonTerminal, Terminal, Or, Multiset } from "../types/token";
@@ -70,7 +70,13 @@ export function buildTermParser(syntax: SyntaxRule[]): Parjser<AST[]> {
   const parsers = [...Array(syntax.length).keys()].map(() => later<AST[]>());
 
   syntax.forEach((rule, index) => {
-    const alternativeParsers = rule.definition.map((x) => getAlternativeParser(x, parsers));
+    let alternativeParsers = rule.definition.map((x) => getAlternativeParser(x, parsers));
+    if (index === 0) {
+      // The rule defines a statement
+      alternativeParsers = alternativeParsers.map((x) => x.pipe(thenq(eof())));
+    }
+    alternativeParsers = alternativeParsers.map((x) => x.pipe(recover(() => ({ kind: "Soft" }))));
+
     let parser = alternativeParsers[0];
     for (const alternativeParser of alternativeParsers.slice(1)) {
       parser = parser.pipe(or(alternativeParser));

@@ -113,7 +113,7 @@ it("parses multisets greedily without caring about the rest of the same rule", (
     definition: [[new Terminal("a")], [new Terminal("b")]],
   };
   const parser = buildTermParser([statement, context, type]);
-  expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
+  expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.SoftFail);
 });
 
 it("parses multisets greedily without caring about other rules", () => {
@@ -132,7 +132,7 @@ it("parses multisets greedily without caring about other rules", () => {
     definition: [[new Terminal("a")], [new Terminal("b")]],
   };
   const parser = buildTermParser([statement, context, type]);
-  expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.HardFail);
+  expect(parser.parse("a,b,a,b;").kind).toEqual(ResultKind.SoftFail);
 });
 
 it("parses rules with Ors", () => {
@@ -216,4 +216,60 @@ it("parses statements in logic", () => {
       new TerminalAST(")"),
     ]),
   ]);
+});
+
+it("parses statements with alternative definitions where a leading multiset and a leading nonterminal coincide", () => {
+  const statement1: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [
+      [new NonTerminal(1), new Terminal("!")],
+      [new NonTerminal(2), new Terminal("*")],
+    ],
+  };
+  const statement2: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [
+      [new NonTerminal(2), new Terminal("*")],
+      [new NonTerminal(1), new Terminal("!")],
+    ],
+  };
+  const context: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2)])]],
+  };
+  const type: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A", "B"],
+    definition: [[new Terminal("x")]],
+  };
+  const parser1 = buildTermParser([statement1, context, type]);
+  const parser2 = buildTermParser([statement2, context, type]);
+  const term = "x!";
+  expect(parser1.parse(term).value).toEqual(parser2.parse(term).value);
+});
+
+it("parses statements with alternative definitions where one alternative is a prefix of another beginning with a multiset", () => {
+  const statement1: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [[new NonTerminal(1), new Terminal("!")], [new NonTerminal(2)]],
+  };
+  const statement2: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    definition: [[new NonTerminal(2)], [new NonTerminal(1), new Terminal("!")]],
+  };
+  const context: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["\\Gamma"],
+    definition: [[new Multiset([new NonTerminal(2)])]],
+  };
+  const type: SyntaxRule = {
+    ...getDefaultSyntaxRule(),
+    placeholders: ["A", "B"],
+    definition: [[new Terminal("x")]],
+  };
+  const parser1 = buildTermParser([statement1, context, type]);
+  const parser2 = buildTermParser([statement2, context, type]);
+  const term = "x!";
+  expect(parser1.parse(term).value).toEqual(parser2.parse(term).value);
 });
