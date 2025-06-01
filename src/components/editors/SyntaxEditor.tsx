@@ -3,7 +3,7 @@ import { MathJax } from "better-react-mathjax";
 import { Button } from "../shadcn/Button";
 import { Input } from "../shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../shadcn/Table";
-import { ParseResult, SyntaxRule } from "@/lib/types/rules";
+import { SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
@@ -127,21 +127,21 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   const [errors, setErrors] = useState(new ErrorMap());
   const [editing, setEditing] = useState(false);
 
-  const [parseResult, setParseResult] = useState<ParseResult<SyntaxRule> | undefined>(undefined);
-
-  useEffect(() => {
-    if (parseResult !== undefined) {
-      setErrors(parseResult.errors);
-      if (parseResult.errors.size === 0) {
-        setEditing(false);
-      }
-      setSyntax(parseResult.rules);
+  const parse = useCallback((isLastChange: boolean, syntax: SyntaxRule[]) => {
+    const parseResult = parseSyntax(syntax);
+    setErrors(parseResult.errors);
+    if (parseResult.errors.size === 0 && isLastChange) {
+      setEditing(false);
     }
-  }, [parseResult]);
+    setSyntax(parseResult.rules);
+  }, []);
 
   const deleteRule = useCallback(
     (index: number) => {
-      setParseResult(parseSyntax(syntax.filter((_, i) => i !== index)));
+      parse(
+        false,
+        syntax.filter((_, i) => i !== index),
+      );
     },
     [syntax],
   );
@@ -224,7 +224,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setParseResult(parseSyntax(syntax));
+              parse(true, syntax);
             }}
             data-cy="apply-syntax-button"
           >
