@@ -142,8 +142,16 @@ it("parses a LaTeX command with arguments on its own", () => {
   expect(ruleParsed.definition).toEqual([[new Terminal("\\mathbb{R}")]]);
 });
 
-it("parses a LaTeX command with arguments followed by something else", () => {
+it("parses a LaTeX command with arguments followed by a space, then something else", () => {
   const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\mathbb{R} \\lambda" };
   const [ruleParsed] = parseSyntax([rule]).rules;
   expect(ruleParsed.definition).toEqual([[new Terminal("\\mathbb{R}"), new Terminal("\\lambda")]]);
+});
+
+it("parses a LaTeX command with arguments followed by something else without whitespace separating them", () => {
+  const rule: SyntaxRule = { ...getDefaultSyntaxRule(), definitionUnsanitised: "\\textsf{left}(M)" };
+  const [ruleParsed] = parseSyntax([rule]).rules;
+  expect(ruleParsed.definition).toEqual([
+    [new Terminal("\\textsf{left}"), new Terminal("("), new Terminal("M"), new Terminal(")")],
+  ]);
 });
