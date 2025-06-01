@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "../../shadcn/Button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../shadcn/Table";
 import { InferenceRule, ParseResult, SyntaxRule } from "@/lib/types/rules";
@@ -84,11 +84,11 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   // Used in onBlur of inputs to force the state update to happen after onFocus is called.
   // When the user is focused on an input and clicks on another input,
   // this ensures the same click blurs the first input and focuses the second input
-  function delayedSetInferenceRules(value: React.SetStateAction<InferenceRule[]>) {
+  const delayedSetInferenceRules = useCallback((value: React.SetStateAction<InferenceRule[]>) => {
     requestAnimationFrame(() => {
       setInferenceRules(value);
     });
-  }
+  }, []);
 
   useEffect(() => {
     if (parseResult !== undefined) {

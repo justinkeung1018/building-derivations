@@ -33,11 +33,11 @@ function SyntaxEditorRow({ rule, index, editing, errors, setSyntax, deleteRule }
   // Used in onBlur of inputs to force the state update to happen after onFocus is called.
   // When the user is focused on an input and clicks on another input,
   // this ensures the same click blurs the first input and focuses the second input
-  function delayedSetSyntax(value: React.SetStateAction<SyntaxRule[]>) {
+  const delayedSetSyntax = useCallback((value: React.SetStateAction<SyntaxRule[]>) => {
     requestAnimationFrame(() => {
       setSyntax(value);
     });
-  }
+  }, []);
 
   return (
     <TableBody key={`${rule.id}-tablebody`} className="group border-b last:border-0">
