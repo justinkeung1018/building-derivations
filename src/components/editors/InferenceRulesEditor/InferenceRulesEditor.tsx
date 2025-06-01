@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../shadcn/Button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../shadcn/Table";
-import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
+import { InferenceRule, ParseResult, SyntaxRule } from "@/lib/types/rules";
 import { parseInferenceRules } from "@/lib/parsers/inference";
 import { ErrorMap } from "@/lib/types/messagemap";
 import { Errors } from "../Errors";
@@ -77,6 +77,7 @@ interface InferenceRulesEditorProps {
 
 export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const { syntax, inferenceRules, setInferenceRules } = props;
+  const [parseResult, setParseResult] = useState<ParseResult<InferenceRule> | undefined>(undefined);
   const [editing, setEditing] = useState(false);
   const [errors, setErrors] = useState(new ErrorMap());
 
@@ -89,19 +90,18 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
     });
   }
 
-  function update() {
-    setInferenceRules((old) => {
-      const parseResult = parseInferenceRules(old, syntax);
+  useEffect(() => {
+    if (parseResult !== undefined) {
       setErrors(parseResult.errors);
       if (parseResult.errors.size === 0) {
         setEditing(false);
       }
-      return parseResult.rules;
-    });
-  }
+      setInferenceRules(parseResult.rules);
+    }
+  }, [parseResult]);
 
   useEffect(() => {
-    update();
+    setParseResult(parseInferenceRules(inferenceRules, syntax));
   }, [syntax]);
 
   return (
@@ -160,7 +160,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              update();
+              setParseResult(parseInferenceRules(inferenceRules, syntax));
             }}
             data-cy="apply-inference-button"
           >

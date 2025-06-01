@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MathJax } from "better-react-mathjax";
 import { Button } from "../shadcn/Button";
 import { Input } from "../shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../shadcn/Table";
-import { SyntaxRule } from "@/lib/types/rules";
+import { ParseResult, SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
@@ -20,9 +20,10 @@ interface SyntaxEditorRowProps {
   editing: boolean;
   errors: ErrorMap;
   setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
+  deleteRule: (index: number) => void;
 }
 
-function SyntaxEditorRow({ rule, index, editing, errors, setSyntax }: SyntaxEditorRowProps) {
+function SyntaxEditorRow({ rule, index, editing, errors, setSyntax, deleteRule }: SyntaxEditorRowProps) {
   const [localRule, setLocalRule] = useState(rule);
 
   useEffect(() => {
@@ -105,7 +106,7 @@ function SyntaxEditorRow({ rule, index, editing, errors, setSyntax }: SyntaxEdit
               <DeleteIcon
                 key={`${rule.id}-deleteicon`}
                 onClick={() => {
-                  setSyntax((old) => old.filter((_, i) => i !== index));
+                  deleteRule(index);
                 }}
               />
             )}
@@ -125,6 +126,25 @@ interface SyntaxEditorProps {
 export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   const [errors, setErrors] = useState(new ErrorMap());
   const [editing, setEditing] = useState(false);
+
+  const [parseResult, setParseResult] = useState<ParseResult<SyntaxRule> | undefined>(undefined);
+
+  useEffect(() => {
+    if (parseResult !== undefined) {
+      setErrors(parseResult.errors);
+      if (parseResult.errors.size === 0) {
+        setEditing(false);
+      }
+      setSyntax(parseResult.rules);
+    }
+  }, [parseResult]);
+
+  const deleteRule = useCallback(
+    (index: number) => {
+      setParseResult(parseSyntax(syntax.filter((_, i) => i !== index)));
+    },
+    [syntax],
+  );
 
   return (
     <Card>
@@ -182,6 +202,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
               editing={editing}
               errors={errors}
               setSyntax={setSyntax}
+              deleteRule={deleteRule}
             />
           ))}
         </Table>
@@ -203,14 +224,7 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
           <Button
             className="bg-green-500 hover:bg-green-500/80"
             onClick={() => {
-              setSyntax((old) => {
-                const parseResult = parseSyntax(old);
-                setErrors(parseResult.errors);
-                if (parseResult.errors.size === 0) {
-                  setEditing(false);
-                }
-                return parseResult.rules;
-              });
+              setParseResult(parseSyntax(syntax));
             }}
             data-cy="apply-syntax-button"
           >
