@@ -46,9 +46,12 @@ export function RuleViewer({ showSyntax, showInferenceRules, syntax, inferenceRu
   }
 
   if (showSyntax) {
-    <div className="ml-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
-      <SyntaxViewer syntax={syntax} />
-    </div>;
+    console.log("showing syntax!");
+    return (
+      <div className="ml-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
+        <SyntaxViewer syntax={syntax} />
+      </div>
+    );
   }
 
   return (
