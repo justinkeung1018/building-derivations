@@ -1,5 +1,5 @@
 import React from "react";
-import { latexify } from "@/lib/latexify";
+import { latexifyRuleName } from "@/lib/latexify";
 import { FocusingInput } from "./FocusingInput";
 import { MathJax } from "better-react-mathjax";
 import { ErrorsTooltip } from "./ErrorsTooltip";
@@ -37,7 +37,7 @@ export function RuleNameInput({ index, state, setStates, setLocalState, classNam
                 ...state.ruleNameInputState,
                 edited: true,
                 isEditing: false,
-                latex: `\\((\\mathit{${latexify(state.ruleNameInputState.value)}})\\)`,
+                latex: `\\((\\mathit{${latexifyRuleName(state.ruleNameInputState.value)}})\\)`,
               },
             },
           }));

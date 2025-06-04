@@ -43,3 +43,7 @@ export function latexify(text: string): string {
     })
     .replaceAll("|", "\\ |\\ ");
 }
+
+export function latexifyRuleName(ruleName: string): string {
+  return latexify(ruleName).replaceAll("\\to{}", "\\mathord{\\to}");
+}

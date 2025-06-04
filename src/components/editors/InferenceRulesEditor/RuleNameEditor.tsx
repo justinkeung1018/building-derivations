@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "@/components/shadcn/Input";
-import { latexify } from "@/lib/latexify";
+import { latexifyRuleName } from "@/lib/latexify";
 import { MathJax } from "better-react-mathjax";
 import { DefinitionEditorProps } from "./DefinitionEditor";
 
@@ -24,6 +24,10 @@ export function RuleNameEditor({ editing, index, rule, setLocalRule, setInferenc
   }
 
   return (
-    <MathJax inline dynamic key={`${rule.id}-rule-name-latex`}>{`\\((\\mathit{${latexify(rule.name)}})\\)`}</MathJax>
+    <MathJax
+      inline
+      dynamic
+      key={`${rule.id}-rule-name-latex`}
+    >{`\\((\\mathit{${latexifyRuleName(rule.name)}})\\)`}</MathJax>
   );
 }
