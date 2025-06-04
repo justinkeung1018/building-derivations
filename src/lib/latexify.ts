@@ -45,5 +45,5 @@ export function latexify(text: string): string {
 }
 
 export function latexifyRuleName(ruleName: string): string {
-  return latexify(ruleName).replaceAll("\\to{}", "\\mathord{\\to}");
+  return `(${latexify(ruleName).replaceAll("\\to{}", "\\mathord{\\to}")})`;
 }

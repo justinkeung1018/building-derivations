@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/Card";
 import { InferenceRule } from "@/lib/types/rules";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../shadcn/Table";
-import { latexify } from "@/lib/latexify";
+import { latexify, latexifyRuleName } from "@/lib/latexify";
 import { MathJax } from "better-react-mathjax";
 
 interface InferenceRulesViewerProps {
@@ -26,7 +26,7 @@ const InferenceRulesTable = memo(function InferenceRulesTable({ inferenceRules }
           <TableBody className="group border-b last:border-0" key={index}>
             <TableRow className="group-hover:bg-muted/50 border-0">
               <TableCell>
-                <MathJax inline dynamic>{`\\((\\mathit{${latexify(rule.name)}})\\)`}</MathJax>
+                <MathJax inline dynamic>{`\\(${latexifyRuleName(rule.name)}\\)`}</MathJax>
               </TableCell>
               <TableCell>
                 <MathJax inline dynamic>{`\\[\\frac{${premisesLaTeX}}{${conclusionLaTeX}}\\]`}</MathJax>

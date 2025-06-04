@@ -37,7 +37,7 @@ export function RuleNameInput({ index, state, setStates, setLocalState, classNam
                 ...state.ruleNameInputState,
                 edited: true,
                 isEditing: false,
-                latex: `\\((\\mathit{${latexifyRuleName(state.ruleNameInputState.value)}})\\)`,
+                latex: `\\(${latexifyRuleName(state.ruleNameInputState.value)}\\)`,
               },
             },
           }));

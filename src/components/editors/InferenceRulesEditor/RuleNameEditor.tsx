@@ -23,11 +23,5 @@ export function RuleNameEditor({ editing, index, rule, setLocalRule, setInferenc
     );
   }
 
-  return (
-    <MathJax
-      inline
-      dynamic
-      key={`${rule.id}-rule-name-latex`}
-    >{`\\((\\mathit{${latexifyRuleName(rule.name)}})\\)`}</MathJax>
-  );
+  return <MathJax inline dynamic key={`${rule.id}-rule-name-latex`}>{`\\(${latexifyRuleName(rule.name)}\\)`}</MathJax>;
 }
