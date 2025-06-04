@@ -9,7 +9,7 @@ interface SyntaxViewerProps {
   syntax: SyntaxRule[];
 }
 
-export const SyntaxTable = memo(function SyntaxTable({ syntax }: SyntaxViewerProps) {
+const SyntaxTable = memo(function SyntaxTable({ syntax }: SyntaxViewerProps) {
   return (
     <Table>
       <TableHeader>
@@ -46,7 +46,8 @@ export const SyntaxTable = memo(function SyntaxTable({ syntax }: SyntaxViewerPro
 
 export const SyntaxViewer = memo(function SyntaxViewer({ syntax }: SyntaxViewerProps) {
   return (
-    <Card className="h-fit max-h-full overflow-y-auto">
+    // 12px since 4px (half the gap between the two viewers) + 8px (padding of the container)
+    <Card className="h-fit max-h-[50%-12px] overflow-y-auto">
       <CardHeader>
         <CardTitle>Syntax rules</CardTitle>
       </CardHeader>

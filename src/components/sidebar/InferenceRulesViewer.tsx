@@ -9,7 +9,7 @@ interface InferenceRulesViewerProps {
   inferenceRules: InferenceRule[];
 }
 
-export const InferenceRulesTable = memo(function InferenceRulesTable({ inferenceRules }: InferenceRulesViewerProps) {
+const InferenceRulesTable = memo(function InferenceRulesTable({ inferenceRules }: InferenceRulesViewerProps) {
   return (
     <Table>
       <TableHeader>
@@ -41,7 +41,8 @@ export const InferenceRulesTable = memo(function InferenceRulesTable({ inference
 
 export const InferenceRulesViewer = memo(function InferenceRulesViewer({ inferenceRules }: InferenceRulesViewerProps) {
   return (
-    <Card className="h-fit max-h-full overflow-y-auto">
+    // 12px since 4px (half the gap between the two viewers) + 8px (padding of the container)
+    <Card className="h-fit max-h-[50%-12px] overflow-y-auto">
       <CardHeader>
         <CardTitle>Inference rules</CardTitle>
       </CardHeader>
