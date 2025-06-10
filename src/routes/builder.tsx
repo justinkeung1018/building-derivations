@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ArgumentInput } from "../components/inputs/ArgumentInput";
 import { MathJaxContext } from "better-react-mathjax";
 import { v4 as uuidv4 } from "uuid";
@@ -10,12 +10,13 @@ import { parseInferenceRules } from "../lib/parsers/inference";
 import { createFileRoute } from "@tanstack/react-router";
 import { searchSchema } from "@/lib/schemas";
 import { MessageMap } from "@/lib/types/messagemap";
-import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
+import { ArgumentInputState, getDefaultState, InputState } from "@/lib/types/argumentinput";
 import { normalise } from "@/lib/latexify";
 import { TooltipProvider } from "@/components/shadcn/Tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/shadcn/Sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { getParsedSystem } from "@/lib/proof-systems";
+import { z } from "zod";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -27,11 +28,37 @@ interface Errors {
   ruleErrors: MessageMap;
 }
 
+const inputStateSchema: z.ZodType<InputState> = z.object({
+  isEditing: z.boolean(),
+  edited: z.boolean(),
+  value: z.string(),
+  latex: z.string(),
+});
+
+const argumentInputStateSchema: z.ZodType<ArgumentInputState> = z.object({
+  index: z.number(),
+  autofocus: z.boolean(),
+  conclusionInputState: inputStateSchema,
+  ruleNameInputState: inputStateSchema,
+  conclusionIndex: z.number().or(z.null()),
+  premiseIndices: z.array(z.number()),
+});
+
+// JSON stores the numerical keys as strings so we want to accept numerical strings instead of numbers
+const schema: z.ZodType<Record<number, ArgumentInputState>> = z.record(z.coerce.number(), argumentInputStateSchema);
+
 export function DerivationBuilder() {
   const search = Route.useSearch();
 
   const [valid, setValid] = useState<boolean>(false);
-  const [states, setStates] = useState<Record<number, ArgumentInputState>>({ 0: getDefaultState(0, null) });
+  const [states, setStates] = useState<Record<number, ArgumentInputState>>(() => {
+    const persistedStates = localStorage.getItem("states");
+    if (persistedStates === null) {
+      return { 0: getDefaultState(0, null) };
+    }
+    return schema.parse(JSON.parse(persistedStates));
+  });
+
   const [{ inputErrors, ruleErrors }, setErrors] = useState({
     inputErrors: new MessageMap(),
     ruleErrors: new MessageMap(),
@@ -39,7 +66,7 @@ export function DerivationBuilder() {
   const [syntax, setSyntax] = useState<SyntaxRule[]>([getDefaultSyntaxRule()]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
-  function verifyInput(index: number, inputErrors: MessageMap, ruleErrors: MessageMap): Errors {
+  const verifyInput = useCallback((index: number, inputErrors: MessageMap, ruleErrors: MessageMap): Errors => {
     for (const premiseIndex of states[index].premiseIndices) {
       verifyInput(premiseIndex, inputErrors, ruleErrors);
     }
@@ -75,7 +102,24 @@ export function DerivationBuilder() {
     }
 
     return { inputErrors, ruleErrors };
-  }
+  }, []);
+
+  const setPersistentStates = useCallback(
+    (valueOrCallback: React.SetStateAction<Record<number, ArgumentInputState>>) => {
+      setStates((old) => {
+        const newStates = typeof valueOrCallback === "function" ? valueOrCallback(old) : valueOrCallback;
+
+        try {
+          localStorage.setItem("states", JSON.stringify(newStates));
+        } catch (error) {
+          console.warn(`Error writing to localStorage with key "states":`, error);
+        }
+
+        return newStates;
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     const errors = verifyInput(0, new MessageMap(), new MessageMap());
@@ -126,7 +170,7 @@ export function DerivationBuilder() {
             states={states}
             setSyntax={setSyntax}
             setInferenceRules={setInferenceRules}
-            setStates={setStates}
+            setStates={setPersistentStates}
           />
           <div className={cn("flex w-full min-w-fit pl-2", valid ? "bg-lime-100" : "")} data-cy="container">
             <SidebarTrigger className="mt-2" />
@@ -135,7 +179,7 @@ export function DerivationBuilder() {
                 index={0}
                 valid={valid}
                 states={states}
-                setStates={setStates}
+                setStates={setPersistentStates}
                 inputErrors={inputErrors}
                 ruleErrors={ruleErrors}
               />

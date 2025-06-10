@@ -1,4 +1,4 @@
-interface InputState {
+export interface InputState {
   isEditing: boolean;
   edited: boolean; // Focus input when we try to edit from the second time onwards
   value: string;
