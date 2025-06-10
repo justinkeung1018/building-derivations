@@ -11,6 +11,7 @@ import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
 import { getParsedSystem } from "@/lib/proof-systems";
 import { exportRules } from "@/lib/io/rules";
 import { downloadJSON } from "@/lib/io/utils";
+import { useNavigate } from "@tanstack/react-router";
 
 interface EditorSheetProps {
   syntax: SyntaxRule[];
@@ -21,6 +22,7 @@ interface EditorSheetProps {
 
 export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRules }: EditorSheetProps) {
   const [fileName, setFileName] = useState<string | undefined>(undefined);
+  const navigate = useNavigate();
 
   return (
     <Sheet>
@@ -44,6 +46,11 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
               const { syntax, inferenceRules } = getParsedSystem(value);
               setSyntax(syntax);
               setInferenceRules(inferenceRules);
+              if (value === "natural-deduction" || value === "lambda" || value === "sequent") {
+                navigate({ to: "/builder", search: { mode: "predefined", system: value } }).catch((error: unknown) => {
+                  console.error(error);
+                });
+              }
             }}
           >
             <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">

@@ -11,7 +11,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { searchSchema } from "@/lib/schemas";
 import { MessageMap } from "@/lib/types/messagemap";
 import { ArgumentInputState, getDefaultState, InputState } from "@/lib/types/argumentinput";
-import { normalise } from "@/lib/latexify";
+import { latexifyRuleName, normalise } from "@/lib/latexify";
 import { TooltipProvider } from "@/components/shadcn/Tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/shadcn/Sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
@@ -66,7 +66,7 @@ export function DerivationBuilder() {
   const [syntax, setSyntax] = useState<SyntaxRule[]>([getDefaultSyntaxRule()]);
   const [inferenceRules, setInferenceRules] = useState<InferenceRule[]>([]);
 
-  const verifyInput = useCallback((index: number, inputErrors: MessageMap, ruleErrors: MessageMap): Errors => {
+  function verifyInput(index: number, inputErrors: MessageMap, ruleErrors: MessageMap): Errors {
     for (const premiseIndex of states[index].premiseIndices) {
       verifyInput(premiseIndex, inputErrors, ruleErrors);
     }
@@ -86,23 +86,23 @@ export function DerivationBuilder() {
       } = verify(conclusion, premises, rule, syntax);
 
       for (const message of conclusionErrors) {
-        inputErrors.push(index, message);
+        inputErrors.push(index, `${message} [rule ${latexifyRuleName(rule.name)}]`);
       }
 
       premisesErrors.forEach((messages, i) => {
         const premiseIndex = states[index].premiseIndices[i];
         for (const message of messages) {
-          inputErrors.push(premiseIndex, message);
+          inputErrors.push(premiseIndex, `${message} [rule ${latexifyRuleName(rule.name)}]`);
         }
       });
 
       for (const message of ruleErrorsList) {
-        ruleErrors.push(index, message);
+        ruleErrors.push(index, `${message} [rule ${latexifyRuleName(rule.name)}]`);
       }
     }
 
     return { inputErrors, ruleErrors };
-  }, []);
+  }
 
   const setPersistentStates = useCallback(
     (valueOrCallback: React.SetStateAction<Record<number, ArgumentInputState>>) => {
