@@ -23,7 +23,7 @@ export function RuleNameInput({ index, state, setStates, setLocalState, classNam
   if (showInput) {
     return (
       <FocusingInput
-        placeholder={index === 0 ? "Rule" : ""}
+        placeholder="Rule"
         className={cn("w-20", className)}
         value={state.ruleNameInputState.value}
         edited={state.ruleNameInputState.edited}

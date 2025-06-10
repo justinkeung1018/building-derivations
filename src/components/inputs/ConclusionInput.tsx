@@ -61,7 +61,7 @@ export function ConclusionInput({
     return (
       <FocusingInput
         className={className}
-        placeholder={index === 0 ? "Type the conclusion you want to prove" : ""}
+        placeholder={index === 0 ? "Type the conclusion you want to prove" : "Conclusion"}
         value={state.conclusionInputState.value}
         edited={state.conclusionInputState.edited}
         autoFocus={state.autofocus}
