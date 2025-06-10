@@ -17,6 +17,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/shadcn/Sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { getParsedSystem } from "@/lib/proof-systems";
 import { z } from "zod";
+import { buildTermParser } from "@/lib/parsers/term";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -78,6 +79,15 @@ export function DerivationBuilder() {
 
     if (rule === undefined) {
       ruleErrors.push(index, "Undefined rule");
+      if (syntax[0].definition.length > 0) {
+        // TODO: find more elegant solution
+        // Parse the statement only if syntax is initialised
+        const parser = buildTermParser(syntax);
+        const parseResult = parser.parse(conclusion);
+        if (!parseResult.isOk) {
+          inputErrors.push(index, "Input is not a valid statement");
+        }
+      }
     } else {
       const {
         conclusionErrors,
