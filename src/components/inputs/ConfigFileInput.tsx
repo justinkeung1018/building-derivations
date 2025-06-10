@@ -15,7 +15,7 @@ const ConfigFileInput = React.forwardRef<HTMLInputElement, ConfigFileInputProps>
           <label
             htmlFor="config-file-input"
             className={cn(
-              "flex items-center h-9 px-2 rounded-md text-sm font-medium cursor-pointer transition-colors border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+              "flex items-center h-9 px-2 rounded-md text-xs lg:text-sm font-medium cursor-pointer transition-colors border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
               className,
             )}
           >

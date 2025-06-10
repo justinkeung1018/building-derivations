@@ -32,7 +32,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
           <span>Edit syntax and inference rules</span>
         </SidebarMenuButton>
       </SheetTrigger>
-      <SheetContent side="left" className="overflow-auto">
+      <SheetContent side="left" className="max-w-full overflow-auto">
         <SheetHeader>
           <SheetTitle>Edit syntax and inference rules</SheetTitle>
         </SheetHeader>
@@ -53,13 +53,17 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
               }
             }}
           >
-            <ToggleGroupItem value="natural-deduction" data-cy="predefined-natural-deduction">
+            <ToggleGroupItem
+              className="text-xs lg:text-sm"
+              value="natural-deduction"
+              data-cy="predefined-natural-deduction"
+            >
               Natural deduction
             </ToggleGroupItem>
-            <ToggleGroupItem value="lambda" data-cy="predefined-lambda">
+            <ToggleGroupItem className="text-xs lg:text-sm" value="lambda" data-cy="predefined-lambda">
               Lambda calculus
             </ToggleGroupItem>
-            <ToggleGroupItem value="sequent" data-cy="predefined-sequent">
+            <ToggleGroupItem className="text-xs lg:text-sm" value="sequent" data-cy="predefined-sequent">
               Sequent calculus
             </ToggleGroupItem>
           </ToggleGroup>
@@ -82,7 +86,10 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
         </div>
         <h1>or define your own:</h1>
         <div>
-          <div className="flex items-start mt-4 space-x-6" data-cy="editor">
+          <div
+            className="flex flex-col lg:flex-row items-start mt-4 space-y-6 lg:space-y-0 lg:space-x-6"
+            data-cy="editor"
+          >
             <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
             <InferenceRulesEditor
               syntax={syntax}
