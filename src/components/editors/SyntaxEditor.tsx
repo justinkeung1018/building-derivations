@@ -11,7 +11,7 @@ import { Errors } from "./Errors";
 import { DeleteIcon } from "./DeleteIcon";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/Card";
 import { getDefaultSyntaxRule } from "@/lib/utils";
-import { CircleHelp } from "lucide-react";
+import { Info } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../shadcn/HoverCard";
 
 interface SyntaxEditorRowProps {
@@ -153,11 +153,11 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
           <CardTitle>Syntax rules</CardTitle>
           <HoverCard>
             <HoverCardTrigger>
-              <CircleHelp size={20} />
+              <Info size={20} />
             </HoverCardTrigger>
             <HoverCardContent>
               <CardHeader className="p-0 flex flex-row justify-start items-center gap-x-2 space-y-0 mb-3">
-                <CircleHelp size={15} />
+                <Info size={15} />
                 <CardTitle>Syntax guide</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
