@@ -41,8 +41,7 @@ const InferenceRulesTable = memo(function InferenceRulesTable({ inferenceRules }
 
 export const InferenceRulesViewer = memo(function InferenceRulesViewer({ inferenceRules }: InferenceRulesViewerProps) {
   return (
-    // 12px since 4px (half the gap between the two viewers) + 8px (padding of the container)
-    <Card className="h-fit max-h-[50%-12px] overflow-y-auto">
+    <Card className="h-fit max-h-1/2 overflow-y-auto">
       <CardHeader>
         <CardTitle>Inference rules</CardTitle>
       </CardHeader>

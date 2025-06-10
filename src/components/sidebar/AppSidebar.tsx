@@ -28,6 +28,7 @@ import { ArgumentInputState } from "@/lib/types/argumentinput";
 import { cn } from "@/lib/utils";
 import { SyntaxViewer } from "./SyntaxViewer";
 import { InferenceRulesViewer } from "./InferenceRulesViewer";
+import { SyntaxGuideViewer } from "./SyntaxGuideViewer";
 
 interface AppSidebarProps {
   valid: boolean;
@@ -42,6 +43,7 @@ interface AppSidebarProps {
 export function AppSidebar(props: AppSidebarProps) {
   const [showSyntax, setShowSyntax] = useState(false);
   const [showInferenceRules, setShowInferenceRules] = useState(false);
+  const [showSyntaxGuide, setShowSyntaxGuide] = useState(false);
 
   return (
     <div className={cn("flex", props.valid ? "bg-lime-100" : "")}>
@@ -148,15 +150,28 @@ export function AppSidebar(props: AppSidebarProps) {
                   <span>Show inference rules</span>
                 </SidebarMenuToggle>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuToggle
+                  isActive={showSyntaxGuide}
+                  onPressedChange={(pressed) => {
+                    setShowSyntaxGuide(pressed);
+                  }}
+                  tooltip="Show syntax guide"
+                >
+                  <Eye />
+                  <span>Show syntax guide</span>
+                </SidebarMenuToggle>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter />
       </Sidebar>
-      {(showSyntax || showInferenceRules) && (
+      {(showSyntax || showInferenceRules || showSyntaxGuide) && (
         <div className="ml-2 py-2 flex flex-col gap-y-2 max-h-screen items-stretch">
           {showSyntax && <SyntaxViewer syntax={props.syntax} />}
           {showInferenceRules && <InferenceRulesViewer inferenceRules={props.inferenceRules} />}
+          {showSyntaxGuide && <SyntaxGuideViewer />}
         </div>
       )}
     </div>
