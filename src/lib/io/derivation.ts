@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { ArgumentInputState, getDefaultState } from "../types/argumentinput";
 import { JSONArgumentInputState } from "../types/io/derivation";
-import { downloadJSON } from "./utils";
 import { latexify } from "../latexify";
 
 const schema: z.ZodType<Record<number, JSONArgumentInputState>> = z.record(
@@ -46,7 +45,7 @@ export function importDerivation(text: string): Record<number, ArgumentInputStat
   return states;
 }
 
-export function exportDerivation(states: Record<number, ArgumentInputState>) {
+export function exportDerivation(states: Record<number, ArgumentInputState>): Record<number, JSONArgumentInputState> {
   const json: Record<number, JSONArgumentInputState> = {};
 
   for (const [index, state] of Object.entries(states)) {
@@ -58,5 +57,5 @@ export function exportDerivation(states: Record<number, ArgumentInputState>) {
     json[Number(index)] = jsonState;
   }
 
-  downloadJSON(json, "derivation");
+  return json;
 }

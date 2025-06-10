@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { SyntaxViewer } from "./SyntaxViewer";
 import { InferenceRulesViewer } from "./InferenceRulesViewer";
 import { SyntaxGuideViewer } from "./SyntaxGuideViewer";
+import { downloadJSON } from "@/lib/io/utils";
 
 interface AppSidebarProps {
   valid: boolean;
@@ -105,7 +106,7 @@ export function AppSidebar(props: AppSidebarProps) {
                       <DropdownMenuItem>LaTeX</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
-                          exportDerivation(props.states);
+                          downloadJSON(exportDerivation(props.states), "derivation.json");
                         }}
                       >
                         JSON

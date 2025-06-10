@@ -29,6 +29,23 @@ const jsonSearchSchema: z.ZodType<JSONSearchParams> = z.object({
 
 const customSearchSchema: z.ZodType<CustomSearchParams> = z.object({
   mode: z.literal("custom"),
+  syntax: z.optional(
+    z.array(
+      z.object({
+        placeholders: z.array(z.string()),
+        definition: z.string(),
+      }),
+    ),
+  ),
+  inferenceRules: z.optional(
+    z.array(
+      z.object({
+        name: z.string(),
+        premises: z.array(z.string()),
+        conclusion: z.string(),
+      }),
+    ),
+  ),
 });
 
 export const searchSchema: z.ZodType<SearchParams> = z.union([

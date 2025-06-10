@@ -13,6 +13,8 @@ export interface JSONSearchParams {
 
 export interface CustomSearchParams {
   mode: "custom";
+  syntax?: JSONSyntaxRule[];
+  inferenceRules?: JSONInferenceRule[];
 }
 
 export interface NoneSearchParams {

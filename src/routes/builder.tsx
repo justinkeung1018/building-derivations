@@ -84,24 +84,30 @@ export function DerivationBuilder() {
   }, [states, syntax, inferenceRules]);
 
   useEffect(() => {
-    if (search.mode === "json") {
-      const syntax: SyntaxRule[] = search.syntax.map(({ placeholders, definition }) => ({
-        ...getDefaultSyntaxRule(),
-        placeholders,
-        placeholdersUnsanitised: placeholders.join(", "),
-        definitionUnsanitised: definition,
-      }));
+    if (search.mode === "json" || search.mode === "custom") {
+      if (search.syntax !== undefined) {
+        const syntax: SyntaxRule[] = search.syntax.map(({ placeholders, definition }) => ({
+          ...getDefaultSyntaxRule(),
+          placeholders,
+          placeholdersUnsanitised: placeholders.join(", "),
+          definitionUnsanitised: definition,
+        }));
 
-      const inferenceRules: InferenceRule[] = search.inferenceRules.map(({ name, premises, conclusion }) => ({
-        name,
-        premises: premises.map((unsanitised) => ({ ...getDefaultInferenceRuleStatement(), unsanitised })),
-        conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: conclusion },
-        id: uuidv4(),
-      }));
+        // TODO: display errors when mode === "custom"
+        const parsedSyntax = parseSyntax(syntax).rules;
+        setSyntax(parsedSyntax);
 
-      const parsedSyntax = parseSyntax(syntax).rules;
-      setSyntax(parsedSyntax);
-      setInferenceRules(parseInferenceRules(inferenceRules, parsedSyntax).rules);
+        if (search.inferenceRules !== undefined) {
+          const inferenceRules: InferenceRule[] = search.inferenceRules.map(({ name, premises, conclusion }) => ({
+            name,
+            premises: premises.map((unsanitised) => ({ ...getDefaultInferenceRuleStatement(), unsanitised })),
+            conclusion: { ...getDefaultInferenceRuleStatement(), unsanitised: conclusion },
+            id: uuidv4(),
+          }));
+          // TODO: display errors when mode === "custom"
+          setInferenceRules(parseInferenceRules(inferenceRules, parsedSyntax).rules);
+        }
+      }
     } else if (search.mode === "predefined") {
       const { syntax, inferenceRules } = getParsedSystem(search.system);
       setSyntax(syntax);

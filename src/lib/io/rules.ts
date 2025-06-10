@@ -5,7 +5,6 @@ import { parseSyntax } from "../parsers/syntax";
 import { JSONSyntaxRule, JSONInferenceRule, JSONFormat } from "../types/io/rules";
 import { SyntaxRule, InferenceRule, ParseResult } from "../types/rules";
 import { getDefaultInferenceRuleStatement, getDefaultSyntaxRule } from "../utils";
-import { downloadJSON } from "./utils";
 
 const jsonFields = {
   syntax: z.array(
@@ -52,16 +51,21 @@ export function importRules(text: string): ImportResult {
   return { json, parsedSyntax, parsedInferenceRules };
 }
 
-export function exportRules(syntax: SyntaxRule[], inferenceRules: InferenceRule[]) {
-  const jsonSyntax: JSONSyntaxRule[] = syntax.map(({ placeholders, definitionUnsanitised }) => ({
+export function exportSyntaxRules(syntax: SyntaxRule[]): JSONSyntaxRule[] {
+  return syntax.map(({ placeholders, definitionUnsanitised }) => ({
     placeholders,
     definition: definitionUnsanitised,
   }));
-  const jsonInferenceRules: JSONInferenceRule[] = inferenceRules.map(({ name, premises, conclusion }) => ({
+}
+
+export function exportInferenceRules(inferenceRules: InferenceRule[]): JSONInferenceRule[] {
+  return inferenceRules.map(({ name, premises, conclusion }) => ({
     name,
     premises: premises.map(({ unsanitised }) => unsanitised),
     conclusion: conclusion.unsanitised,
   }));
-  const json: JSONFormat = { syntax: jsonSyntax, inferenceRules: jsonInferenceRules };
-  downloadJSON(json, "rules.json");
+}
+
+export function exportRules(syntax: SyntaxRule[], inferenceRules: InferenceRule[]): JSONFormat {
+  return { syntax: exportSyntaxRules(syntax), inferenceRules: exportInferenceRules(inferenceRules) };
 }

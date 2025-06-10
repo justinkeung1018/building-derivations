@@ -13,6 +13,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/
 import { getDefaultSyntaxRule } from "@/lib/utils";
 import { Info } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../shadcn/HoverCard";
+import { exportSyntaxRules } from "@/lib/io/rules";
+import { useNavigate } from "@tanstack/react-router";
 
 interface SyntaxEditorRowProps {
   rule: SyntaxRule;
@@ -126,6 +128,7 @@ interface SyntaxEditorProps {
 export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
   const [errors, setErrors] = useState(new ErrorMap());
   const [editing, setEditing] = useState(false);
+  const navigate = useNavigate();
 
   const parse = useCallback((isLastChange: boolean, syntax: SyntaxRule[]) => {
     const parseResult = parseSyntax(syntax);
@@ -134,6 +137,12 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
       setEditing(false);
     }
     setSyntax(parseResult.rules);
+    navigate({
+      to: "/builder",
+      search: (prev) => ({ mode: "custom", syntax: exportSyntaxRules(syntax), inferenceRules: prev.inferenceRules }),
+    }).catch((error: unknown) => {
+      console.error(error);
+    });
   }, []);
 
   const deleteRule = useCallback(

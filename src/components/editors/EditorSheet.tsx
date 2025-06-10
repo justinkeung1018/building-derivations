@@ -10,6 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from "../shadcn/ToggleGroup";
 import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
 import { getParsedSystem } from "@/lib/proof-systems";
 import { exportRules } from "@/lib/io/rules";
+import { downloadJSON } from "@/lib/io/utils";
 
 interface EditorSheetProps {
   syntax: SyntaxRule[];
@@ -79,7 +80,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
             <Button
               variant="secondary"
               onClick={() => {
-                exportRules(syntax, inferenceRules);
+                downloadJSON(exportRules(syntax, inferenceRules), "rules.json");
               }}
             >
               Export as JSON
