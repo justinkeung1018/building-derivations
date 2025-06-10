@@ -69,6 +69,13 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
             callback={({ parsedSyntax, parsedInferenceRules }) => {
               setSyntax(parsedSyntax.rules);
               setInferenceRules(parsedInferenceRules.rules);
+              const json = exportRules(parsedSyntax.rules, parsedInferenceRules.rules);
+              navigate({
+                to: "/builder",
+                search: { mode: "json", syntax: json.syntax, inferenceRules: json.inferenceRules },
+              }).catch((error: unknown) => {
+                console.error(error);
+              });
             }}
           />
           {fileName !== undefined && <span>{fileName} uploaded.</span>}
