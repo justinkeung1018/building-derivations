@@ -83,7 +83,7 @@ export function DerivationBuilder() {
         // TODO: find more elegant solution
         // Parse the statement only if syntax is initialised
         const parser = buildTermParser(syntax);
-        const parseResult = parser.parse(conclusion);
+        const parseResult = parser.parse(normalise(conclusion));
         if (!parseResult.isOk) {
           inputErrors.push(index, "Input is not a valid statement");
         }
