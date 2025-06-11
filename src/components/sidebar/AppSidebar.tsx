@@ -30,6 +30,7 @@ import { SyntaxViewer } from "./SyntaxViewer";
 import { InferenceRulesViewer } from "./InferenceRulesViewer";
 import { SyntaxGuideViewer } from "./SyntaxGuideViewer";
 import { downloadJSON } from "@/lib/io/utils";
+import { exportRules } from "@/lib/io/rules";
 
 interface AppSidebarProps {
   valid: boolean;
@@ -115,7 +116,12 @@ export function AppSidebar(props: AppSidebarProps) {
                   </DropdownMenu>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton tooltip="Export rule definitions">
+                  <SidebarMenuButton
+                    tooltip="Export rule definitions"
+                    onClick={() => {
+                      downloadJSON(exportRules(props.syntax, props.inferenceRules), "rules.json");
+                    }}
+                  >
                     <Download />
                     <span>Export rule definitions</span>
                   </SidebarMenuButton>
