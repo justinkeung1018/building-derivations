@@ -16,7 +16,7 @@ function Landing() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-12">
-      <h1 className="text-3xl font-bold mb-10">Welcome to derivation builder!</h1>
+      <h1 className="text-3xl font-bold mb-10">Welcome to Embla!</h1>
       <h2 className="mb-4">Choose an option below:</h2>
       <div className="flex justify-center gap-x-4 mb-10 w-1/2">
         <Card
