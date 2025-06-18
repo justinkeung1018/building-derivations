@@ -135,15 +135,17 @@ export function DerivationBuilder() {
   useEffect(() => {
     const errors = verifyInput(0, new MessageMap(), new MessageMap());
     setErrors(errors);
-    const newIsValid = errors.inputErrors.size === 0 && errors.ruleErrors.size === 0;
-    setValid(newIsValid);
+    setValid(errors.inputErrors.size === 0 && errors.ruleErrors.size === 0);
+  }, [states, syntax, inferenceRules]);
+
+  useEffect(() => {
     if (
-      newIsValid &&
+      valid &&
       Object.values(states).every((x) => !x.conclusionInputState.isEditing && !x.ruleNameInputState.isEditing)
     ) {
       toast.success("Derivation is correct!");
     }
-  }, [states, syntax, inferenceRules]);
+  }, [valid, states]);
 
   useEffect(() => {
     if (search.mode === "json" || search.mode === "custom") {
