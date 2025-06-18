@@ -18,6 +18,7 @@ import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { getParsedSystem } from "@/lib/proof-systems";
 import { z } from "zod";
 import { buildTermParser } from "@/lib/parsers/term";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/builder")({
   component: DerivationBuilder,
@@ -134,7 +135,14 @@ export function DerivationBuilder() {
   useEffect(() => {
     const errors = verifyInput(0, new MessageMap(), new MessageMap());
     setErrors(errors);
-    setValid(errors.inputErrors.size === 0 && errors.ruleErrors.size === 0);
+    const newIsValid = errors.inputErrors.size === 0 && errors.ruleErrors.size === 0;
+    setValid(newIsValid);
+    if (
+      newIsValid &&
+      Object.values(states).every((x) => !x.conclusionInputState.isEditing && !x.ruleNameInputState.isEditing)
+    ) {
+      toast.success("Derivation is correct!");
+    }
   }, [states, syntax, inferenceRules]);
 
   useEffect(() => {

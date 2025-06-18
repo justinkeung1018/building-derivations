@@ -12,7 +12,7 @@ import {
   SidebarMenuToggle,
   SidebarSeparator,
 } from "../shadcn/Sidebar";
-import { Download, Eye, Upload } from "lucide-react";
+import { Download, Eye, Trash2, Upload } from "lucide-react";
 import { EditorSheet } from "../editors/EditorSheet";
 import { SyntaxRule, InferenceRule } from "@/lib/types/rules";
 import {
@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "../shadcn/DropdownMenu";
 import { exportDerivation, importDerivation } from "@/lib/io/derivation";
-import { ArgumentInputState } from "@/lib/types/argumentinput";
+import { ArgumentInputState, getDefaultState } from "@/lib/types/argumentinput";
 import { cn } from "@/lib/utils";
 import { SyntaxViewer } from "./SyntaxViewer";
 import { InferenceRulesViewer } from "./InferenceRulesViewer";
@@ -124,6 +124,17 @@ export function AppSidebar(props: AppSidebarProps) {
                   >
                     <Download />
                     <span>Export rule definitions</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip="Clear derivation"
+                    onClick={() => {
+                      props.setStates({ 0: getDefaultState(0, null) });
+                    }}
+                  >
+                    <Trash2 />
+                    <span>Clear derivation</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
