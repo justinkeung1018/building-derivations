@@ -11,6 +11,8 @@ import { RuleNameEditor } from "./RuleNameEditor";
 import { DefinitionEditor } from "./DefinitionEditor";
 import { DefinitionPreview } from "./DefinitionPreview";
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "@tanstack/react-router";
+import { exportInferenceRules, exportSyntaxRules } from "@/lib/io/rules";
 
 interface InferenceRuleEditorRowProps {
   editing: boolean;
@@ -80,6 +82,7 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
   const [parseResult, setParseResult] = useState<ParseResult<InferenceRule> | undefined>(undefined);
   const [editing, setEditing] = useState(false);
   const [errors, setErrors] = useState(new ErrorMap());
+  const navigate = useNavigate();
 
   // Used in onBlur of inputs to force the state update to happen after onFocus is called.
   // When the user is focused on an input and clicks on another input,
@@ -97,6 +100,16 @@ export function InferenceRulesEditor(props: InferenceRulesEditorProps) {
         setEditing(false);
       }
       setInferenceRules(parseResult.rules);
+      navigate({
+        to: "/builder",
+        search: (prev) => ({
+          mode: "json",
+          syntax: prev.syntax ?? exportSyntaxRules(syntax),
+          inferenceRules: exportInferenceRules(parseResult.rules),
+        }),
+      }).catch((error: unknown) => {
+        console.error(error);
+      });
     }
   }, [parseResult]);
 

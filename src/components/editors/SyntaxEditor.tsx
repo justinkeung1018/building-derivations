@@ -3,7 +3,7 @@ import { MathJax } from "better-react-mathjax";
 import { Button } from "../shadcn/Button";
 import { Input } from "../shadcn/Input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../shadcn/Table";
-import { SyntaxRule } from "@/lib/types/rules";
+import { InferenceRule, SyntaxRule } from "@/lib/types/rules";
 import { parseSyntax } from "@/lib/parsers/syntax";
 import { latexify } from "@/lib/latexify";
 import { ErrorMap } from "@/lib/types/messagemap";
@@ -13,7 +13,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../shadcn/
 import { getDefaultSyntaxRule } from "@/lib/utils";
 import { Info } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../shadcn/HoverCard";
-import { exportSyntaxRules } from "@/lib/io/rules";
+import { exportInferenceRules, exportSyntaxRules } from "@/lib/io/rules";
 import { useNavigate } from "@tanstack/react-router";
 
 interface SyntaxEditorRowProps {
@@ -122,10 +122,11 @@ function SyntaxEditorRow({ rule, index, editing, errors, setSyntax, deleteRule }
 
 interface SyntaxEditorProps {
   syntax: SyntaxRule[];
+  inferenceRules: InferenceRule[];
   setSyntax: React.Dispatch<React.SetStateAction<SyntaxRule[]>>;
 }
 
-export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
+export function SyntaxEditor({ syntax, inferenceRules, setSyntax }: SyntaxEditorProps) {
   const [errors, setErrors] = useState(new ErrorMap());
   const [editing, setEditing] = useState(false);
   const navigate = useNavigate();
@@ -139,7 +140,11 @@ export function SyntaxEditor({ syntax, setSyntax }: SyntaxEditorProps) {
     setSyntax(parseResult.rules);
     navigate({
       to: "/builder",
-      search: (prev) => ({ mode: "custom", syntax: exportSyntaxRules(syntax), inferenceRules: prev.inferenceRules }),
+      search: (prev) => ({
+        mode: "json",
+        syntax: exportSyntaxRules(parseResult.rules),
+        inferenceRules: prev.inferenceRules ?? exportInferenceRules(inferenceRules),
+      }),
     }).catch((error: unknown) => {
       console.error(error);
     });

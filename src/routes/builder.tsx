@@ -139,13 +139,10 @@ export function DerivationBuilder() {
   }, [states, syntax, inferenceRules]);
 
   useEffect(() => {
-    if (
-      valid &&
-      Object.values(states).every((x) => !x.conclusionInputState.isEditing && !x.ruleNameInputState.isEditing)
-    ) {
+    if (valid) {
       toast.success("Derivation is correct!");
     }
-  }, [valid, states]);
+  }, [valid]);
 
   useEffect(() => {
     if (search.mode === "json" || search.mode === "custom") {
