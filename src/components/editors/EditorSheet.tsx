@@ -90,7 +90,7 @@ export function EditorSheet({ syntax, inferenceRules, setSyntax, setInferenceRul
             className="flex flex-col lg:flex-row items-start mt-4 space-y-6 lg:space-y-0 lg:space-x-6"
             data-cy="editor"
           >
-            <SyntaxEditor syntax={syntax} setSyntax={setSyntax} />
+            <SyntaxEditor syntax={syntax} inferenceRules={inferenceRules} setSyntax={setSyntax} />
             <InferenceRulesEditor
               syntax={syntax}
               inferenceRules={inferenceRules}
